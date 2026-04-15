@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
-const Chatbot = ({ isOpen, onClose }) => {
+const Chatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const [messages, setMessages] = useState([{ role:"assistant", content:"안녕하세요! 양순민의 포트폴리오 AI 어시스턴트입니다. 경력, 프로젝트, 스킬 등 궁금한 점을 물어보세요 😊" }]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const msgEnd = useRef(null);
-  const inputRef = useRef(null);
+  const msgEnd = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => { msgEnd.current?.scrollIntoView({ behavior:"smooth" }); }, [messages]);
   useEffect(() => { if (isOpen) setTimeout(() => inputRef.current?.focus(), 300); }, [isOpen]);
 
@@ -87,13 +87,13 @@ const Chatbot = ({ isOpen, onClose }) => {
       </div>
       {messages.length<=1 && <div style={{ padding:"0 16px 8px", display:"flex", flexWrap:"wrap", gap:6 }}>
         {["경력을 요약해주세요","핵심 강점은?","어떤 프로젝트를 했나요?","사용 가능한 도구는?"].map((q,i)=>(
-          <div key={i} onClick={()=>{setInput(q);}} style={{ padding:"6px 12px", background:"#1A1A1A", border:"1px solid #2A2A2A", borderRadius:20, fontSize:12, color:"#10B981", cursor:"pointer", transition:"all .3s", whiteSpace:"nowrap" }}
-            onMouseEnter={e=>{e.target.style.background="rgba(16,185,129,.1)";e.target.style.borderColor="#10B981"}}
-            onMouseLeave={e=>{e.target.style.background="#1A1A1A";e.target.style.borderColor="#2A2A2A"}}>{q}</div>
+          <div key={i} onClick={()=>{ setInput(q); }} style={{ padding:"6px 12px", background:"#1A1A1A", border:"1px solid #2A2A2A", borderRadius:20, fontSize:12, color:"#10B981", cursor:"pointer", transition:"all .3s", whiteSpace:"nowrap" }}
+            onMouseEnter={e=>{ (e.target as HTMLElement).style.background="rgba(16,185,129,.1)";(e.target as HTMLElement).style.borderColor="#10B981" }}
+            onMouseLeave={e=>{ (e.target as HTMLElement).style.background="#1A1A1A";(e.target as HTMLElement).style.borderColor="#2A2A2A" }}>{q}</div>
         ))}
       </div>}
       <div style={{ padding:"12px 16px", borderTop:"1px solid #1A1A1A", display:"flex", gap:8, flexShrink:0, background:"#0D0D0D" }}>
-        <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="질문을 입력하세요..." style={{ flex:1, padding:"10px 14px", background:"#1A1A1A", border:"1px solid #2A2A2A", borderRadius:10, color:"#fff", fontSize:13, outline:"none" }} onFocus={e=>e.target.style.borderColor="#10B981"} onBlur={e=>e.target.style.borderColor="#2A2A2A"}/>
+        <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="질문을 입력하세요..." style={{ flex:1, padding:"10px 14px", background:"#1A1A1A", border:"1px solid #2A2A2A", borderRadius:10, color:"#fff", fontSize:13, outline:"none" }} onFocus={e=>(e.target as HTMLInputElement).style.borderColor="#10B981"} onBlur={e=>(e.target as HTMLInputElement).style.borderColor="#2A2A2A"}/>
         <button onClick={send} disabled={loading||!input.trim()} style={{ padding:"10px 16px", background:input.trim()?"linear-gradient(135deg,#10B981,#059669)":"#1A1A1A", border:"none", borderRadius:10, color:"#fff", fontSize:16, cursor:input.trim()?"pointer":"default", opacity:input.trim()?1:.4 }}>↑</button>
       </div>
     </div>
@@ -104,18 +104,18 @@ const Portfolio = () => {
   const [scrollY, setScrollY] = useState(0);
   const [activeSection, setActiveSection] = useState("hero");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [visibleSections, setVisibleSections] = useState(new Set());
+  const [visibleSections, setVisibleSections] = useState(new Set<string>());
   const [mousePos, setMousePos] = useState({ x:0, y:0 });
-  const [counts, setCounts] = useState({ exp:0, sites:0, projects:0, delay:0 });
+  const [counts, setCounts] = useState({ exp:0, sites:0, projects:0 });
   const [countsStarted, setCountsStarted] = useState(false);
   const [typedText, setTypedText] = useState("");
   const [cursorVisible, setCursorVisible] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
-  const canvasRef = useRef(null);
-  const particlesRef = useRef([]);
-  const animFrameRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const particlesRef = useRef<{x:number;y:number;vx:number;vy:number;r:number;o:number}[]>([]);
+  const animFrameRef = useRef<number>(0);
 
-  const fullText = "프로젝트를 성공으로 이끄는 PM";
+  const fullText = "안 되는 건 없다. 방법이 다를 뿐.";
 
   useEffect(() => {
     let i=0;
@@ -125,7 +125,7 @@ const Portfolio = () => {
   }, []);
 
   useEffect(() => {
-    const c=canvasRef.current;if(!c)return;const ctx=c.getContext("2d");
+    const c=canvasRef.current;if(!c)return;const ctx=c.getContext("2d");if(!ctx)return;
     const resize=()=>{c.width=window.innerWidth;c.height=window.innerHeight};resize();window.addEventListener("resize",resize);
     if(!particlesRef.current.length){for(let i=0;i<60;i++)particlesRef.current.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,r:Math.random()*2+.5,o:Math.random()*.4+.1})}
     const draw=()=>{ctx.clearRect(0,0,c.width,c.height);const pts=particlesRef.current;pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=c.width;if(p.x>c.width)p.x=0;if(p.y<0)p.y=c.height;if(p.y>c.height)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(16,185,129,${p.o})`;ctx.fill()});for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const d=Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y);if(d<120){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(16,185,129,${.06*(1-d/120)})`;ctx.stroke()}}animFrameRef.current=requestAnimationFrame(draw)};draw();
@@ -135,22 +135,22 @@ const Portfolio = () => {
   useEffect(()=>{const h=()=>setScrollY(window.scrollY);window.addEventListener("scroll",h,{passive:true});return()=>window.removeEventListener("scroll",h)},[]);
 
   useEffect(()=>{
-    const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){setVisibleSections(p=>new Set([...p,e.target.id]));if(e.target.dataset.nav)setActiveSection(e.target.dataset.nav);if(e.target.id==="stats-bar"&&!countsStarted)setCountsStarted(true)}}),{threshold:.15});
+    const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){setVisibleSections(p=>new Set([...p,e.target.id]));if((e.target as HTMLElement).dataset.nav)setActiveSection((e.target as HTMLElement).dataset.nav!);if(e.target.id==="stats-bar"&&!countsStarted)setCountsStarted(true)}}),{threshold:.15});
     document.querySelectorAll("[data-animate],[data-nav]").forEach(el=>obs.observe(el));return()=>obs.disconnect();
   },[countsStarted]);
 
   useEffect(()=>{
-    if(!countsStarted)return;const tgt={exp:3,sites:60,projects:15,delay:0};const start=performance.now();
-    const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
-    const tick=now=>{const p=Math.min((now-start)/2000,1),ep=ease(p);setCounts({exp:Math.round(ep*tgt.exp),sites:Math.round(ep*tgt.sites),projects:Math.round(ep*tgt.projects),delay:Math.round(ep*tgt.delay)});if(p<1)requestAnimationFrame(tick)};
+    if(!countsStarted)return;const tgt={exp:3,sites:60,projects:18};const start=performance.now();
+    const ease=(t:number)=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+    const tick=(now:number)=>{const p=Math.min((now-start)/2000,1),ep=ease(p);setCounts({exp:Math.round(ep*tgt.exp),sites:Math.round(ep*tgt.sites),projects:Math.round(ep*tgt.projects)});if(p<1)requestAnimationFrame(tick)};
     requestAnimationFrame(tick);
   },[countsStarted]);
 
-  const handleMouse=useCallback(e=>setMousePos({x:e.clientX,y:e.clientY}),[]);
+  const handleMouse=useCallback((e:MouseEvent)=>setMousePos({x:e.clientX,y:e.clientY}),[]);
   useEffect(()=>{window.addEventListener("mousemove",handleMouse);return()=>window.removeEventListener("mousemove",handleMouse)},[handleMouse]);
 
-  const vis=id=>visibleSections.has(id);
-  const scrollTo=id=>{document.getElementById(id)?.scrollIntoView({behavior:"smooth"});setMenuOpen(false)};
+  const vis=(id:string)=>visibleSections.has(id);
+  const scrollTo=(id:string)=>{document.getElementById(id)?.scrollIntoView({behavior:"smooth"});setMenuOpen(false)};
 
   const navItems=[{id:"about",label:"About"},{id:"competency",label:"Competency"},{id:"experience",label:"Experience"},{id:"projects",label:"Projects"},{id:"skills",label:"Skills"},{id:"contact",label:"Contact"}];
 
@@ -250,11 +250,16 @@ const Portfolio = () => {
       <section id="hero" data-nav="hero" style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", position:"relative", padding:"0 24px" }}>
         <canvas ref={canvasRef} style={{ position:"absolute", inset:0, zIndex:0 }}/>
         <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 30% 20%,rgba(16,185,129,.08) 0%,transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(59,130,246,.06) 0%,transparent 60%)", zIndex:1 }}/>
-        <div style={{ textAlign:"center", position:"relative", zIndex:2, transform:`translateY(${-scrollY*.06}px)` }}>
-          <p style={{ fontSize:14, letterSpacing:5, color:"#10B981", marginBottom:28, textTransform:"uppercase", fontWeight:600 }}>Product Manager & Product Owner</p>
-          <h1 className="hero-title" style={{ fontSize:"clamp(44px,9vw,80px)", fontWeight:900, color:"#fff", lineHeight:1.05, marginBottom:28 }}>양순민</h1>
-          <div style={{ fontSize:"clamp(16px,2.5vw,22px)", color:"#888", maxWidth:600, margin:"0 auto 20px", lineHeight:1.7 }}>체계적인 문서화와 유연한 리더십으로</div>
-          <div style={{ fontSize:"clamp(16px,2.5vw,22px)", color:"#CCC", maxWidth:600, margin:"0 auto 52px", lineHeight:1.7, minHeight:36 }}>{typedText}<span style={{ color:"#10B981", opacity:cursorVisible?1:0 }}>|</span></div>
+        <div style={{ textAlign:"center", position:"relative", zIndex:2, transform:`translateY(${-scrollY*.06}px)`, maxWidth:800, margin:"0 auto" }}>
+          <p style={{ fontSize:13, letterSpacing:6, color:"#10B981", marginBottom:32, textTransform:"uppercase", fontWeight:600, opacity:.85 }}>Product Manager & Product Owner</p>
+          <h1 className="hero-title" style={{ fontSize:"clamp(52px,10vw,88px)", fontWeight:900, color:"#fff", lineHeight:1.0, marginBottom:20, letterSpacing:-2 }}>양순민</h1>
+          <div style={{ width:60, height:3, background:"linear-gradient(90deg,#10B981,#3B82F6)", margin:"0 auto 32px", borderRadius:2 }} />
+          <div style={{ fontSize:"clamp(22px,4vw,36px)", fontWeight:800, color:"#fff", lineHeight:1.3, marginBottom:12 }}>
+            {typedText}<span style={{ color:"#10B981", opacity:cursorVisible?1:0, fontWeight:400 }}>|</span>
+          </div>
+          <p style={{ fontSize:"clamp(14px,2vw,17px)", color:"#666", maxWidth:480, margin:"0 auto 44px", lineHeight:1.8 }}>
+            체계적인 문서화와 유연한 리더십으로<br/>프로젝트를 이끄는 PM
+          </p>
           <div style={{ display:"flex", gap:16, justifyContent:"center", flexWrap:"wrap" }}>
             <button className="mag-btn" onClick={()=>scrollTo("experience")} style={{ padding:"16px 36px", background:"linear-gradient(135deg,#10B981,#059669)", color:"#fff", border:"none", borderRadius:12, fontSize:15, fontWeight:700, cursor:"pointer" }}>Experience ↓</button>
             <button className="mag-btn" onClick={()=>scrollTo("contact")} style={{ padding:"16px 36px", background:"transparent", color:"#fff", border:"1px solid #333", borderRadius:12, fontSize:15, fontWeight:700, cursor:"pointer" }}>Contact</button>
@@ -270,7 +275,7 @@ const Portfolio = () => {
       {/* Stats */}
       <div id="stats-bar" data-animate style={{ borderTop:"1px solid #1A1A1A", borderBottom:"1px solid #1A1A1A", padding:"56px 24px" }}>
         <div style={{ maxWidth:1100, margin:"0 auto", display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))", gap:32, textAlign:"center" }}>
-          {[{num:counts.exp,unit:"년+",label:"PM/PO 경력"},{num:counts.sites,unit:"개+",label:"관리 사이트"},{num:counts.projects,unit:"건+",label:"PM 프로젝트"},{num:counts.delay,unit:"건",label:"일정 연기"}].map((s,i)=>(
+          {[{num:counts.exp,unit:"년+",label:"PM/PO 경력"},{num:counts.sites,unit:"개+",label:"관리 사이트"},{num:counts.projects,unit:"건",label:"수행 프로젝트"}].map((s,i)=>(
             <div key={i}><div className="stat-number">{s.num}<span style={{ fontSize:24 }}>{s.unit}</span></div><div style={{ color:"#888", fontSize:14, marginTop:10 }}>{s.label}</div></div>
           ))}
         </div>
@@ -392,8 +397,8 @@ const Portfolio = () => {
                 <div style={{ display:"grid", gap:1, background:"#1A1A1A", borderRadius:12, overflow:"hidden", border:"1px solid #1E1E1E" }}>
                   {group.items.map((item, ii) => (
                     <div key={ii} style={{ display:"grid", gridTemplateColumns:"1fr auto auto", alignItems:"center", gap:16, padding:"14px 20px", background:"#111", transition:"background .3s" }}
-                      onMouseEnter={e=>e.currentTarget.style.background="#161616"}
-                      onMouseLeave={e=>e.currentTarget.style.background="#111"}>
+                      onMouseEnter={e=>(e.currentTarget as HTMLElement).style.background="#161616"}
+                      onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background="#111"}>
                       <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                         <span style={{ color:"#555", fontSize:12, fontWeight:700, fontVariantNumeric:"tabular-nums", flexShrink:0, width:22 }}>{String(ii+1).padStart(2,"0")}</span>
                         <span style={{ fontSize:14, color:"#DDD", fontWeight:500 }}>{item.name}</span>
@@ -499,7 +504,7 @@ const Portfolio = () => {
           <div className="st" style={{ marginBottom:16 }}>Let's Work Together</div>
           <p style={{ color:"#888", fontSize:15, marginBottom:48, lineHeight:1.7 }}>새로운 도전과 협업에 열려 있습니다. 언제든 연락 주세요.</p>
           <div style={{ display:"flex", gap:24, justifyContent:"center", flexWrap:"wrap" }}>
-            {[{icon:"✉️",label:"Email",value:"swat782@nate.com",href:"mailto:swat782@nate.com"},{icon:"📱",label:"Phone",value:"010-9143-6650",href:"tel:010-9143-6650"},{icon:"📍",label:"Location",value:"부산광역시 해운대구",href:null}].map((c,i)=>(
+            {[{icon:"✉️",label:"Email",value:"swat782@nate.com",href:"mailto:swat782@nate.com"},{icon:"📱",label:"Phone",value:"010-9143-6650",href:"tel:010-9143-6650"},{icon:"📍",label:"Location",value:"부산광역시 해운대구",href:null as string|null}].map((c,i)=>(
               <div key={i} className="gc" style={{ cursor:c.href?"pointer":"default", minWidth:220 }} onClick={()=>c.href&&window.open(c.href)}>
                 <div className="inn" style={{ padding:"36px 44px" }}>
                   <div style={{ fontSize:32, marginBottom:14, animation:"float 2.5s ease-in-out infinite", animationDelay:`${i*.3}s` }}>{c.icon}</div>
