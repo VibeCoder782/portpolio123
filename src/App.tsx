@@ -1,4 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import Lenis from "lenis";
+import * as THREE from "three";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 
 const Chatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const [messages, setMessages] = useState([{ role:"assistant", content:"안녕하세요! 양순민의 포트폴리오 AI 어시스턴트입니다. 경력, 프로젝트, 스킬 등 궁금한 점을 물어보세요 😊" }]);
@@ -10,8 +15,8 @@ const Chatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
   useEffect(() => { if (isOpen) setTimeout(() => inputRef.current?.focus(), 300); }, [isOpen]);
 
   const PROFILE = `양순민 프로필:
-- 이름: 양순민, 남성, 1987년생(38세), 부산 해운대구
-- 이메일: swat782@nate.com / 전화: 010-9143-6650
+- 이름: 양순민, 남성, 39세, 부산
+- 이메일: swat782@nate.com
 - 학력: 경성대학교 경영학과 졸업(편입)
 - 자격증: 웹디자인개발기능사(2024.09)
 - PM/PO 경력: 약 2년 9개월
@@ -36,7 +41,9 @@ const Chatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
 
 [스킬] 기획,JIRA,Notion,Figma,Photoshop,HTML/CSS/JS,Claude,Agile/Scrum,WBS
 [수상] 경성대 최우수상(2018), KT&G 팀워크상(2011)
-[성격] "성격좋은꼰대" - 원칙+유연함, 34세에 웹기획 전향, 바이브코딩으로 앱개발중`;
+[성격] "성격좋은꼰대" - 원칙+유연함, 34세에 웹기획 전향, 바이브코딩으로 앱개발중
+
+[개인 개발 프로젝트-바이브코딩] 기획에 머무르지 않고 직접 설계·개발한 앱/서비스 9개+: MountainOn(등산 기록 앱,Flutter), WebOps Builder(여러 서비스 운영·배포 관리 플랫폼,Next.js), 콘텐츠 서비스 플랫폼(웹+관리자CMS), 부기온(정서케어 앱,팀 기여 최다), 모의톡(AI 셀프점검 웹), 북잇다(독서 소셜앱,실배포), Flowon 홈페이지(3D 인터랙티브 웹), 위치기반 앱(Flutter), 시민의 턴(Unity 2D 의사결정 게임). "기획하고 직접 만들어 검증까지 하는 실행형 PO"`;
 
   const send = async () => {
     const q = input.trim(); if (!q || loading) return;
@@ -100,36 +107,223 @@ const Chatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
   );
 };
 
+const LoadingScreen = () => {
+  const [count, setCount] = useState(0);
+  const [phase, setPhase] = useState<"load" | "open" | "done">("load");
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setPhase("done"); return; }
+    const start = performance.now(), DUR = 2000;
+    const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+    let raf = 0, t1 = 0, t2 = 0;
+    const tick = (now: number) => {
+      const p = Math.min((now - start) / DUR, 1);
+      setCount(Math.round(ease(p) * 100));
+      if (p < 1) raf = requestAnimationFrame(tick);
+      else { t1 = window.setTimeout(() => setPhase("open"), 350); t2 = window.setTimeout(() => setPhase("done"), 1400); }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(raf); clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+  if (phase === "done") return null;
+  const open = phase === "open";
+  return (
+    <>
+      <div className="ldr-cover" style={{ top: 0, transform: open ? "translateY(-100%)" : "none", borderBottom: "1px solid rgba(16,185,129,.14)" }} />
+      <div className="ldr-cover" style={{ bottom: 0, transform: open ? "translateY(100%)" : "none", borderTop: "1px solid rgba(16,185,129,.14)" }} />
+      <div className={`ldr ${open ? "gone" : ""}`}>
+        <div style={{ fontSize: 11, letterSpacing: ".5em", color: "#5C6663", textTransform: "uppercase", marginBottom: 20 }}><span style={{ color: "#10B981", fontWeight: 600 }}>PORTFOLIO</span> · 2026 · BUSAN</div>
+        <div style={{ fontFamily: "ui-monospace,'SF Mono',Menlo,monospace", fontVariantNumeric: "tabular-nums", fontSize: "clamp(80px,20vw,200px)", fontWeight: 200, letterSpacing: "-.04em", lineHeight: .9, color: "#F2F4F3" }}>
+          {String(count).padStart(3, "0")}<span style={{ fontSize: ".28em", color: "#10B981", verticalAlign: "super" }}>%</span>
+        </div>
+        <div style={{ marginTop: 22, fontSize: 15, fontWeight: 900, letterSpacing: ".04em", color: "#5C6663" }}>YSM<span style={{ color: "#10B981" }}>.</span></div>
+        <div style={{ position: "fixed", left: 0, bottom: 0, width: "100%", height: 2, background: "rgba(255,255,255,.06)" }}>
+          <div style={{ height: "100%", width: `${count}%`, background: "linear-gradient(90deg,#10B981,#3B82F6)" }} />
+        </div>
+      </div>
+    </>
+  );
+};
+
+const Cursor = () => {
+  const dot = useRef<HTMLDivElement>(null);
+  const ring = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!window.matchMedia("(hover:hover) and (pointer:fine)").matches) return;
+    const rm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const pos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    const rpos = { x: pos.x, y: pos.y };
+    const move = (e: MouseEvent) => {
+      pos.x = e.clientX; pos.y = e.clientY;
+      if (dot.current) dot.current.style.transform = `translate(${pos.x}px,${pos.y}px) translate(-50%,-50%)`;
+      if (rm && ring.current) ring.current.style.transform = `translate(${pos.x}px,${pos.y}px) translate(-50%,-50%)`;
+    };
+    const over = (e: MouseEvent) => {
+      const hot = (e.target as HTMLElement).closest("a,button,.nav-link,.skill-tag,.chat-fab,.case-card,.gc,input");
+      ring.current?.classList.toggle("hot", !!hot);
+    };
+    let raf = 0;
+    const loop = () => {
+      rpos.x += (pos.x - rpos.x) * .18; rpos.y += (pos.y - rpos.y) * .18;
+      if (ring.current) ring.current.style.transform = `translate(${rpos.x}px,${rpos.y}px) translate(-50%,-50%)`;
+      raf = requestAnimationFrame(loop);
+    };
+    window.addEventListener("mousemove", move); window.addEventListener("mouseover", over);
+    if (!rm) loop();
+    return () => { window.removeEventListener("mousemove", move); window.removeEventListener("mouseover", over); cancelAnimationFrame(raf); };
+  }, []);
+  return (<><div ref={ring} className="cur-ring" /><div ref={dot} className="cur-dot" /></>);
+};
+
 const Portfolio = () => {
   const [scrollY, setScrollY] = useState(0);
   const [activeSection, setActiveSection] = useState("hero");
   const [menuOpen, setMenuOpen] = useState(false);
   const [visibleSections, setVisibleSections] = useState(new Set<string>());
-  const [mousePos, setMousePos] = useState({ x:0, y:0 });
   const [counts, setCounts] = useState({ exp:0, sites:0, projects:0 });
   const [countsStarted, setCountsStarted] = useState(false);
   const [typedText, setTypedText] = useState("");
-  const [cursorVisible, setCursorVisible] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [buildsProgress, setBuildsProgress] = useState(0);
+  const [wipe, setWipe] = useState<"idle" | "in" | "out">("idle");
+  const canvasRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<{x:number;y:number;vx:number;vy:number;r:number;o:number}[]>([]);
   const animFrameRef = useRef<number>(0);
+  const lenisRef = useRef<Lenis | null>(null);
+  const buildsGridRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
+  const wipeTimers = useRef<number[]>([]);
+  const wipeTargetRef = useRef<string | null>(null);
+  const reduceMotion = typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const fullText = "안 되는 건 없다. 방법이 다를 뿐.";
 
   useEffect(() => {
     let i=0;
     const t=setInterval(()=>{if(i<=fullText.length){setTypedText(fullText.slice(0,i));i++}else clearInterval(t)},80);
-    const b=setInterval(()=>setCursorVisible(v=>!v),530);
-    return()=>{clearInterval(t);clearInterval(b)};
+    return()=>clearInterval(t);
   }, []);
 
   useEffect(() => {
-    const c=canvasRef.current;if(!c)return;const ctx=c.getContext("2d");if(!ctx)return;
-    const resize=()=>{c.width=window.innerWidth;c.height=window.innerHeight};resize();window.addEventListener("resize",resize);
-    if(!particlesRef.current.length){for(let i=0;i<60;i++)particlesRef.current.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,r:Math.random()*2+.5,o:Math.random()*.4+.1})}
-    const draw=()=>{ctx.clearRect(0,0,c.width,c.height);const pts=particlesRef.current;pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=c.width;if(p.x>c.width)p.x=0;if(p.y<0)p.y=c.height;if(p.y>c.height)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(16,185,129,${p.o})`;ctx.fill()});for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const d=Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y);if(d<120){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(16,185,129,${.06*(1-d/120)})`;ctx.stroke()}}animFrameRef.current=requestAnimationFrame(draw)};draw();
-    return()=>{window.removeEventListener("resize",resize);cancelAnimationFrame(animFrameRef.current)};
+    const container = canvasRef.current; if (!container) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let renderer: THREE.WebGLRenderer;
+    try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" }); }
+    catch { return; }
+    const isMobile = window.innerWidth < 768;
+    renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.75));
+    renderer.domElement.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;display:block;";
+    container.appendChild(renderer.domElement);
+    const DPR = renderer.getPixelRatio();
+    renderer.setClearColor(0x08090a, 1);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 15;
+
+    const COUNT = window.innerWidth < 768 ? 9000 : 22000;
+    const positions = new Float32Array(COUNT * 3);
+    const scales = new Float32Array(COUNT);
+    const GA = Math.PI * (1 + Math.sqrt(5));
+    for (let i = 0; i < COUNT; i++) {
+      const tt = (i + 0.5) / COUNT;
+      const phi = Math.acos(1 - 2 * tt);
+      const theta = GA * i;
+      const rr = 6 + (Math.random() - 0.5) * 0.7;
+      positions[i * 3] = rr * Math.sin(phi) * Math.cos(theta);
+      positions[i * 3 + 1] = rr * Math.sin(phi) * Math.sin(theta);
+      positions[i * 3 + 2] = rr * Math.cos(phi);
+      scales[i] = 0.5 + Math.random();
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute("aScale", new THREE.BufferAttribute(scales, 1));
+
+    const uniforms = { uTime: { value: 0 }, uSize: { value: 5.5 * DPR } };
+    const material = new THREE.ShaderMaterial({
+      uniforms, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+      vertexShader: `
+        uniform float uTime; uniform float uSize; attribute float aScale; varying float vN;
+        vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}
+        vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}
+        vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);}
+        vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
+        float snoise(vec3 v){
+          const vec2 C=vec2(1.0/6.0,1.0/3.0); const vec4 D=vec4(0.0,0.5,1.0,2.0);
+          vec3 i=floor(v+dot(v,C.yyy)); vec3 x0=v-i+dot(i,C.xxx);
+          vec3 g=step(x0.yzx,x0.xyz); vec3 l=1.0-g; vec3 i1=min(g.xyz,l.zxy); vec3 i2=max(g.xyz,l.zxy);
+          vec3 x1=x0-i1+C.xxx; vec3 x2=x0-i2+C.yyy; vec3 x3=x0-D.yyy;
+          i=mod289(i);
+          vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));
+          float n_=0.142857142857; vec3 ns=n_*D.wyz-D.xzx;
+          vec4 j=p-49.0*floor(p*ns.z*ns.z); vec4 x_=floor(j*ns.z); vec4 y_=floor(j-7.0*x_);
+          vec4 x=x_*ns.x+ns.yyyy; vec4 y=y_*ns.x+ns.yyyy; vec4 h=1.0-abs(x)-abs(y);
+          vec4 b0=vec4(x.xy,y.xy); vec4 b1=vec4(x.zw,y.zw);
+          vec4 s0=floor(b0)*2.0+1.0; vec4 s1=floor(b1)*2.0+1.0; vec4 sh=-step(h,vec4(0.0));
+          vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy; vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
+          vec3 p0=vec3(a0.xy,h.x); vec3 p1=vec3(a0.zw,h.y); vec3 p2=vec3(a1.xy,h.z); vec3 p3=vec3(a1.zw,h.w);
+          vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
+          p0*=norm.x; p1*=norm.y; p2*=norm.z; p3*=norm.w;
+          vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0); m=m*m;
+          return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
+        }
+        void main(){
+          vec3 pos=position;
+          float n=snoise(pos*0.35+vec3(0.0,0.0,uTime*0.16));
+          pos+=normalize(position)*n*1.7;
+          pos*=1.0+0.05*sin(uTime*0.6);
+          float a=uTime*0.07; float s=sin(a),c=cos(a);
+          pos=vec3(c*pos.x+s*pos.z,pos.y,-s*pos.x+c*pos.z);
+          vN=n;
+          vec4 mv=modelViewMatrix*vec4(pos,1.0);
+          gl_PointSize=uSize*aScale*(1.0+0.4*n)*(12.0/-mv.z);
+          gl_Position=projectionMatrix*mv;
+        }
+      `,
+      fragmentShader: `
+        varying float vN;
+        void main(){
+          float d=length(gl_PointCoord-0.5); if(d>0.5) discard;
+          float al=smoothstep(0.5,0.03,d)*0.5;
+          vec3 emerald=vec3(0.09,0.85,0.6), blue=vec3(0.25,0.55,1.0);
+          vec3 col=mix(emerald,blue,smoothstep(-0.6,0.8,vN));
+          gl_FragColor=vec4(col,al);
+        }
+      `,
+    });
+    const points = new THREE.Points(geo, material);
+    scene.add(points);
+
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.45, 0.55, 0.12);
+    composer.addPass(bloom);
+
+    const resize = () => { const w = window.innerWidth, h = window.innerHeight; camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h, false); composer.setSize(w, h); };
+    resize(); window.addEventListener("resize", resize);
+    const mouse = new THREE.Vector2(0, 0), tgt = new THREE.Vector2(0, 0);
+    const onMove = (e: MouseEvent) => mouse.set(e.clientX / window.innerWidth - 0.5, -(e.clientY / window.innerHeight - 0.5));
+    window.addEventListener("mousemove", onMove);
+    const clock = new THREE.Clock();
+    let running = false;
+    const draw = () => {
+      if (!running) return;
+      uniforms.uTime.value = clock.getElapsedTime();
+      tgt.lerp(mouse, 0.05);
+      camera.position.x = tgt.x * 5; camera.position.y = tgt.y * 5; camera.lookAt(0, 0, 0);
+      composer.render();
+      animFrameRef.current = requestAnimationFrame(draw);
+    };
+    const start = () => { if (running) return; running = true; animFrameRef.current = requestAnimationFrame(draw); };
+    const stop = () => { running = false; cancelAnimationFrame(animFrameRef.current); };
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) start(); else stop(); }, { threshold: 0 });
+    io.observe(container);
+    start();
+    return () => {
+      window.removeEventListener("resize", resize); window.removeEventListener("mousemove", onMove);
+      io.disconnect(); stop();
+      geo.dispose(); material.dispose(); bloom.dispose(); composer.dispose();
+      if (renderer.domElement.parentNode === container) container.removeChild(renderer.domElement);
+      renderer.dispose();
+    };
   }, []);
 
   useEffect(()=>{const h=()=>setScrollY(window.scrollY);window.addEventListener("scroll",h,{passive:true});return()=>window.removeEventListener("scroll",h)},[]);
@@ -146,13 +340,54 @@ const Portfolio = () => {
     requestAnimationFrame(tick);
   },[countsStarted]);
 
-  const handleMouse=useCallback((e:MouseEvent)=>setMousePos({x:e.clientX,y:e.clientY}),[]);
-  useEffect(()=>{window.addEventListener("mousemove",handleMouse);return()=>window.removeEventListener("mousemove",handleMouse)},[handleMouse]);
+  useEffect(()=>{
+    const el=glowRef.current;if(!el)return;
+    const move=(e:MouseEvent)=>{el.style.transform=`translate(${e.clientX-150}px,${e.clientY-150}px)`;};
+    window.addEventListener("mousemove",move,{passive:true});
+    return()=>window.removeEventListener("mousemove",move);
+  },[]);
+
+  useEffect(()=>{
+    if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+    const lenis=new Lenis({lerp:0.09,smoothWheel:true});
+    lenisRef.current=lenis;
+    let raf=0,cur=0;
+    const loop=(t:number)=>{
+      lenis.raf(t);
+      cur+=(((lenis as unknown as {velocity:number}).velocity||0)-cur)*0.12;
+      const g=buildsGridRef.current;
+      if(g)g.style.transform=`skewY(${Math.max(-5,Math.min(5,cur*0.22)).toFixed(2)}deg)`;
+      raf=requestAnimationFrame(loop);
+    };
+    raf=requestAnimationFrame(loop);
+    return()=>{cancelAnimationFrame(raf);lenis.destroy();lenisRef.current=null};
+  },[]);
+
+  useEffect(()=>{
+    if(reduceMotion){setBuildsProgress(1);return;}
+    const onScroll=()=>{
+      const el=document.getElementById("builds");if(!el)return;
+      const rect=el.getBoundingClientRect();const vh=window.innerHeight;
+      const p=(vh*0.82-rect.top)/(vh*0.55);
+      setBuildsProgress(Math.max(0,Math.min(1,p)));
+    };
+    window.addEventListener("scroll",onScroll,{passive:true});onScroll();
+    return()=>window.removeEventListener("scroll",onScroll);
+  },[]);
 
   const vis=(id:string)=>visibleSections.has(id);
-  const scrollTo=(id:string)=>{document.getElementById(id)?.scrollIntoView({behavior:"smooth"});setMenuOpen(false)};
+  const scrollTo=(id:string)=>{
+    const el=document.getElementById(id);if(!el)return;setMenuOpen(false);
+    wipeTargetRef.current=id;
+    if(reduceMotion){el.scrollIntoView();return;}
+    const go=()=>{const t=wipeTargetRef.current?document.getElementById(wipeTargetRef.current):null;if(!t)return;if(lenisRef.current)lenisRef.current.scrollTo(t,{offset:-10,immediate:true});else t.scrollIntoView();};
+    wipeTimers.current.forEach(clearTimeout);wipeTimers.current=[];
+    setWipe("in");
+    wipeTimers.current.push(window.setTimeout(()=>{go();setWipe("out");},560));
+    wipeTimers.current.push(window.setTimeout(()=>{setWipe("idle");},1120));
+  };
 
-  const navItems=[{id:"about",label:"About"},{id:"competency",label:"Competency"},{id:"experience",label:"Experience"},{id:"projects",label:"Projects"},{id:"skills",label:"Skills"},{id:"contact",label:"Contact"}];
+  const navItems=[{id:"about",label:"About"},{id:"competency",label:"Competency"},{id:"experience",label:"Experience"},{id:"projects",label:"Projects"},{id:"builds",label:"Builds"},{id:"skills",label:"Skills"},{id:"contact",label:"Contact"}];
 
   const experiences = [
     { period:"2024.08 — 2025.08", company:"㈜ 핸디", role:"개발 1팀 이사/팀장 · PO", desc:"애자일 스크럼 환경 도입, JIRA 기반 프로젝트 관리, Figma UI/UX 기획, AI 업무 자동화 주도", projects:["CMS 기획 및 UI/UX","부산 경상대 창업가꿈","아르피나 예약 시스템","울산과학대 EPL"], recent:true },
@@ -178,11 +413,24 @@ const Portfolio = () => {
     { name:"방법론", items:["Agile/Scrum","Waterfall","WBS","리스크관리"], pct:90 },
   ];
 
+  const sideProjects = [
+    { name:"MountainOn", cat:"모바일 앱 · 등산 기록", stack:"Flutter · Supabase · Vercel", role:"1인 풀스택", status:"진행 중", color:"#10B981", icon:"⛰️", desc:"GPS 산행 기록·정상 인증·정보를 다루는 등산 앱. 기획(PRD·IA)부터 설계·개발·테스트까지 단독 수행. 오프라인 대응·위치정보 비식별 등 실사용 엔지니어링 반영." },
+    { name:"WebOps Builder", cat:"멀티 프로덕트 운영 플랫폼", stack:"TypeScript · Next.js · Turborepo", role:"1인 설계·개발", status:"진행 중", color:"#3B82F6", icon:"🛠️", desc:"여러 서비스의 등록·상태 관측·배포·릴리스 승인/롤백을 한 콘솔에서 관리. 감사 로그·시크릿 관리 등 운영 안전성 중심 설계." },
+    { name:"콘텐츠 서비스 플랫폼", cat:"웹 서비스 + 관리자 CMS", stack:"Next.js · React · Supabase", role:"1인 기획·개발", status:"운영", color:"#8B5CF6", icon:"🧩", desc:"사용자용 웹 서비스와 운영자용 관리 콘솔(CMS)을 함께 구축. 비개발자도 콘텐츠를 등록·큐레이션·운영 가능하게 설계." },
+    { name:"부기온 (Boogion)", cat:"모바일 앱 · 정서 케어", stack:"Flutter · Firebase · Vercel", role:"팀 · 기여 최다", status:"출시 준비", color:"#F59E0B", icon:"🌡️", desc:"5인 팀 프로젝트. 기획 및 앱 프론트/일부 서버 개발 주도. 푸시·소셜로그인·원격설정 등 상용 앱 인프라 구성." },
+    { name:"모의톡 (CaseTalk)", cat:"AI 셀프 점검 웹", stack:"Next.js · 생성형 AI", role:"1인 기획·개발", status:"MVP", color:"#EC4899", icon:"⚖️", desc:"생성형 AI 연동 셀프 점검 서비스. 안전 가드레일·개인정보 무저장 등 'AI 안전성'을 아키텍처로 구현." },
+    { name:"북잇다 (Bookitda)", cat:"모바일 앱 · 독서 소셜", stack:"Flutter · Supabase · Firebase", role:"1인 풀스택", status:"실배포", color:"#F97316", icon:"📚", desc:"책 한줄평을 공유하는 소셜 앱. 소셜 로그인(카카오·구글) 실연동, 서버리스 백엔드 실배포 완료." },
+    { name:"Flowon 홈페이지", cat:"인터랙티브 웹", stack:"Three.js · GSAP · Lenis", role:"1인 프론트", status:"완성", color:"#06B6D4", icon:"🌊", desc:"WebGL 셰이더 히어로 + 스크롤 인터랙션·커스텀 커서·프리로더를 구현한 브랜드 원페이지." },
+    { name:"위치 기반 앱", cat:"모바일 앱 (도메인 비공개)", stack:"Flutter", role:"1인 기획·개발", status:"배포 준비", color:"#14B8A6", icon:"📍", desc:"위치 정보를 활용한 개인화 모바일 서비스 앱. 구체 도메인은 아이디어 보호를 위해 비공개." },
+    { name:"시민의 턴", cat:"2D 의사결정 게임", stack:"Unity", role:"1인 기획·개발", status:"개발 중", color:"#A855F7", icon:"🎮", desc:"스프라이트 시트 기반 2D 게임. 매주 시나리오가 자동 로테이션되는 의사결정 게임 구조 설계." },
+  ];
+
   return (
     <div style={{ fontFamily:"'Pretendard',-apple-system,sans-serif", background:"#0A0A0A", color:"#E5E5E5", minHeight:"100vh", overflowX:"hidden" }}>
       <style>{`
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
-        *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+        *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:auto}
+        html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!important}.lenis.lenis-stopped{overflow:hidden}.lenis.lenis-smooth iframe{pointer-events:none}
         ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#0A0A0A}::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
         .fade-up{opacity:0;transform:translateY(50px);transition:all .9s cubic-bezier(.16,1,.3,1)}.fade-up.visible{opacity:1;transform:translateY(0)}
         .fade-left{opacity:0;transform:translateX(-50px);transition:all .9s cubic-bezier(.16,1,.3,1)}.fade-left.visible{opacity:1;transform:translateX(0)}
@@ -228,9 +476,28 @@ const Portfolio = () => {
         .case-result{font-size:13px;line-height:1.75;color:#E5E5E5;font-weight:600}
         @keyframes fadeSlideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
         @media(max-width:768px){.hamburger{display:block}.desktop-nav{display:none!important}.section{padding:80px 20px}.stat-number{font-size:36px}.hero-title{font-size:40px!important}.cases-grid{grid-template-columns:1fr!important}}
+        .ldr{position:fixed;inset:0;z-index:3000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s ease}
+        .ldr.gone{opacity:0;pointer-events:none}
+        .ldr-cover{position:fixed;left:0;right:0;height:50.5%;z-index:2999;background:#08090A;transition:transform 1.05s cubic-bezier(.16,1,.3,1)}
+        @media (hover:hover) and (pointer:fine){
+          *{cursor:none!important}
+          .cur-dot{position:fixed;top:0;left:0;width:7px;height:7px;border-radius:50%;background:#10B981;z-index:4000;pointer-events:none;transform:translate(-50%,-50%);will-change:transform}
+          .cur-ring{position:fixed;top:0;left:0;width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(16,185,129,.5);z-index:4000;pointer-events:none;transform:translate(-50%,-50%);transition:width .25s,height .25s,background .25s,border-color .25s;will-change:transform}
+          .cur-ring.hot{width:64px;height:64px;background:rgba(16,185,129,.08);border-color:#10B981}
+        }
+        .page-wipe{position:fixed;inset:0;z-index:2600;background:#08090A;border-top:2px solid #10B981;transform:translateY(100%);pointer-events:none;display:flex;align-items:center;justify-content:center}
+        .page-wipe.in{transform:translateY(0);transition:transform .55s cubic-bezier(.76,0,.24,1)}
+        .page-wipe.out{transform:translateY(-100%);transition:transform .55s cubic-bezier(.76,0,.24,1)}
+        .pw-mark{font-size:26px;font-weight:900;letter-spacing:.04em;color:#F2F4F3;opacity:0;transition:opacity .3s .1s}.pw-mark b{color:#10B981}.page-wipe.in .pw-mark{opacity:1}
+        .caret{animation:caretBlink 1.06s step-end infinite}@keyframes caretBlink{0%,100%{opacity:1}50%{opacity:0}}
+        @media (prefers-reduced-motion:reduce){
+          .ldr,.ldr-cover,.page-wipe{display:none!important}
+          .marquee,.caret,.stat-number,.fab-pulse{animation:none!important}
+          *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.15s!important}
+        }
       `}</style>
 
-      <div style={{ position:"fixed", width:300, height:300, borderRadius:"50%", background:"radial-gradient(circle,rgba(16,185,129,.06),transparent 70%)", pointerEvents:"none", zIndex:1, left:mousePos.x-150, top:mousePos.y-150, transition:"left .3s ease-out,top .3s ease-out" }}/>
+      <div ref={glowRef} style={{ position:"fixed", top:0, left:0, width:300, height:300, borderRadius:"50%", background:"radial-gradient(circle,rgba(16,185,129,.06),transparent 70%)", pointerEvents:"none", zIndex:1, transform:"translate(-150px,-150px)", transition:"transform .3s ease-out", willChange:"transform" }}/>
 
       {/* Nav */}
       <nav style={{ position:"fixed", top:0, left:0, right:0, zIndex:50, background:scrollY>50?"rgba(10,10,10,.85)":"transparent", backdropFilter:scrollY>50?"blur(24px)":"none", borderBottom:scrollY>50?"1px solid #1A1A1A":"none", transition:"all .4s", padding:"0 24px" }}>
@@ -248,21 +515,22 @@ const Portfolio = () => {
 
       {/* Hero */}
       <section id="hero" data-nav="hero" style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", position:"relative", padding:"0 24px" }}>
-        <canvas ref={canvasRef} style={{ position:"absolute", inset:0, zIndex:0 }}/>
-        <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 30% 20%,rgba(16,185,129,.08) 0%,transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(59,130,246,.06) 0%,transparent 60%)", zIndex:1 }}/>
-        <div style={{ textAlign:"center", position:"relative", zIndex:2, transform:`translateY(${-scrollY*.06}px)`, maxWidth:800, margin:"0 auto" }}>
+        <div ref={canvasRef} style={{ position:"absolute", inset:0, zIndex:0 }}/>
+        <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 30% 20%,rgba(16,185,129,.08) 0%,transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(59,130,246,.06) 0%,transparent 60%)", zIndex:1, pointerEvents:"none" }}/>
+        <div style={{ position:"absolute", inset:0, zIndex:1, pointerEvents:"none", background:"radial-gradient(ellipse 50% 46% at 50% 47%, rgba(8,9,10,0.8) 0%, rgba(8,9,10,0.42) 48%, transparent 74%)" }}/>
+        <div style={{ textAlign:"center", position:"relative", zIndex:2, transform:reduceMotion?"none":`translateY(${-scrollY*.06}px)`, maxWidth:800, margin:"0 auto" }}>
           <p style={{ fontSize:13, letterSpacing:6, color:"#10B981", marginBottom:32, textTransform:"uppercase", fontWeight:600, opacity:.85 }}>Product Manager & Product Owner</p>
           <h1 className="hero-title" style={{ fontSize:"clamp(52px,10vw,88px)", fontWeight:900, color:"#fff", lineHeight:1.0, marginBottom:20, letterSpacing:-2 }}>양순민</h1>
           <div style={{ width:60, height:3, background:"linear-gradient(90deg,#10B981,#3B82F6)", margin:"0 auto 32px", borderRadius:2 }} />
           <div style={{ fontSize:"clamp(22px,4vw,36px)", fontWeight:800, color:"#fff", lineHeight:1.3, marginBottom:12 }}>
-            {typedText}<span style={{ color:"#10B981", opacity:cursorVisible?1:0, fontWeight:400 }}>|</span>
+            {typedText}<span className="caret" style={{ color:"#10B981", fontWeight:400 }}>|</span>
           </div>
           <p style={{ fontSize:"clamp(14px,2vw,17px)", color:"#666", maxWidth:480, margin:"0 auto 44px", lineHeight:1.8 }}>
             체계적인 문서화와 유연한 리더십으로<br/>프로젝트를 이끄는 PM
           </p>
           <div style={{ display:"flex", gap:16, justifyContent:"center", flexWrap:"wrap" }}>
-            <button className="mag-btn" onClick={()=>scrollTo("experience")} style={{ padding:"16px 36px", background:"linear-gradient(135deg,#10B981,#059669)", color:"#fff", border:"none", borderRadius:12, fontSize:15, fontWeight:700, cursor:"pointer" }}>Experience ↓</button>
-            <button className="mag-btn" onClick={()=>scrollTo("contact")} style={{ padding:"16px 36px", background:"transparent", color:"#fff", border:"1px solid #333", borderRadius:12, fontSize:15, fontWeight:700, cursor:"pointer" }}>Contact</button>
+            <button className="mag-btn" onClick={()=>scrollTo("experience")} onMouseMove={e=>{const r=e.currentTarget.getBoundingClientRect();e.currentTarget.style.transform=`translate(${(e.clientX-r.left-r.width/2)*0.3}px,${(e.clientY-r.top-r.height/2)*0.5}px)`}} onMouseLeave={e=>{e.currentTarget.style.transform=""}} style={{ padding:"16px 36px", background:"linear-gradient(135deg,#10B981,#059669)", color:"#fff", border:"none", borderRadius:12, fontSize:15, fontWeight:700, cursor:"pointer" }}>Experience ↓</button>
+            <button className="mag-btn" onClick={()=>scrollTo("contact")} onMouseMove={e=>{const r=e.currentTarget.getBoundingClientRect();e.currentTarget.style.transform=`translate(${(e.clientX-r.left-r.width/2)*0.3}px,${(e.clientY-r.top-r.height/2)*0.5}px)`}} onMouseLeave={e=>{e.currentTarget.style.transform=""}} style={{ padding:"16px 36px", background:"transparent", color:"#fff", border:"1px solid #333", borderRadius:12, fontSize:15, fontWeight:700, cursor:"pointer" }}>Contact</button>
           </div>
         </div>
         <div style={{ position:"absolute", bottom:40, left:"50%", transform:"translateX(-50%)", zIndex:2, animation:"float 2s ease-in-out infinite" }}>
@@ -457,6 +725,52 @@ const Portfolio = () => {
         </div>
       </section>
 
+      {/* Personal Builds */}
+      <section id="builds" data-nav="builds" style={{ background:"#0F0F0F" }}>
+        <div className="section">
+          <div id="sp-h" data-animate className={`fade-up ${vis("sp-h")?"visible":""}`}>
+            <div className="sl">Personal Builds</div>
+            <div className="st">직접 만든 제품들</div>
+            <p style={{ color:"#888", fontSize:15, lineHeight:1.7, maxWidth:660, marginBottom:48 }}>기획에 머무르지 않고, AI 페어코딩(바이브코딩)으로 직접 설계·개발한 9개+의 앱·서비스입니다. 말이 아닌 결과물로 증명하는 실행형 PO.</p>
+          </div>
+          <div ref={buildsGridRef} className="cases-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))", gap:20, willChange:"transform" }}>
+            {sideProjects.map((p,i)=>{
+              const lp=reduceMotion?1:Math.max(0,Math.min(1,(buildsProgress-i*0.045)*1.7));
+              const e=1-Math.pow(1-lp,3);
+              const ang=i*0.9-Math.PI/2, rad=(1-e)*520;
+              const tx=Math.cos(ang)*rad, ty=Math.sin(ang)*rad*0.6;
+              const rot=(1-e)*(i*10+35), sc=0.4+e*0.6;
+              const op=Math.min(1,lp*1.6);
+              const mid=lp>0&&lp<1;
+              return (
+              <div key={i} style={{ transform:mid?`translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) rotate(${rot.toFixed(1)}deg) scale(${sc.toFixed(3)})`:lp>=1?"none":`translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) rotate(${rot.toFixed(1)}deg) scale(${sc.toFixed(3)})`, opacity:op, willChange:mid?"transform,opacity":"auto" }}>
+                <div className="case-card" style={{ height:"100%" }}>
+                  <div className="top-bar" style={{ background:p.color }}/>
+                  <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14 }}>
+                    <div className="case-icon" style={{ background:`${p.color}15`, border:`1px solid ${p.color}30`, fontSize:22, marginBottom:0 }}>{p.icon}</div>
+                    <div>
+                      <h4 style={{ fontSize:17, fontWeight:800, color:"#fff", lineHeight:1.2 }}>{p.name}</h4>
+                      <div style={{ fontSize:12, color:p.color, fontWeight:600, marginTop:3 }}>{p.cat}</div>
+                    </div>
+                  </div>
+                  <p className="case-text" style={{ marginBottom:16, flex:1 }}>{p.desc}</p>
+                  <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:14 }}>
+                    {p.stack.split(" · ").map((s,j)=>(
+                      <span key={j} style={{ padding:"3px 10px", background:"#1A1A1A", border:"1px solid #2A2A2A", borderRadius:6, fontSize:11, color:"#AAA" }}>{s}</span>
+                    ))}
+                  </div>
+                  <div style={{ display:"flex", gap:8, alignItems:"center", paddingTop:12, borderTop:"1px solid #1E1E1E" }}>
+                    <span style={{ fontSize:11, color:"#888", fontWeight:600 }}>{p.role}</span>
+                    <span style={{ marginLeft:"auto", padding:"3px 10px", background:`${p.color}12`, border:`1px solid ${p.color}25`, borderRadius:20, fontSize:11, color:p.color, fontWeight:600 }}>{p.status}</span>
+                  </div>
+                </div>
+              </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* Skills */}
       <section id="skills" data-nav="skills" className="section">
         <div id="sk-h" data-animate className={`fade-up ${vis("sk-h")?"visible":""}`}><div className="sl">Skills</div><div className="st">Technical Proficiency</div></div>
@@ -504,7 +818,7 @@ const Portfolio = () => {
           <div className="st" style={{ marginBottom:16 }}>Let's Work Together</div>
           <p style={{ color:"#888", fontSize:15, marginBottom:48, lineHeight:1.7 }}>새로운 도전과 협업에 열려 있습니다. 언제든 연락 주세요.</p>
           <div style={{ display:"flex", gap:24, justifyContent:"center", flexWrap:"wrap" }}>
-            {[{icon:"✉️",label:"Email",value:"swat782@nate.com",href:"mailto:swat782@nate.com"},{icon:"📱",label:"Phone",value:"010-9143-6650",href:"tel:010-9143-6650"},{icon:"📍",label:"Location",value:"부산광역시 해운대구",href:null as string|null}].map((c,i)=>(
+            {[{icon:"✉️",label:"Email",value:"swat782@nate.com",href:"mailto:swat782@nate.com"},{icon:"📍",label:"Location",value:"부산광역시",href:null as string|null}].map((c,i)=>(
               <div key={i} className="gc" style={{ cursor:c.href?"pointer":"default", minWidth:220 }} onClick={()=>c.href&&window.open(c.href)}>
                 <div className="inn" style={{ padding:"36px 44px" }}>
                   <div style={{ fontSize:32, marginBottom:14, animation:"float 2.5s ease-in-out infinite", animationDelay:`${i*.3}s` }}>{c.icon}</div>
@@ -522,6 +836,9 @@ const Portfolio = () => {
       <div className="fab-pulse"/>
       <button className="chat-fab" onClick={()=>setChatOpen(o=>!o)} style={{ fontSize:chatOpen?22:26 }}>{chatOpen?"✕":"💬"}</button>
       <Chatbot isOpen={chatOpen} onClose={()=>setChatOpen(false)}/>
+      <div className={`page-wipe ${wipe}`} aria-hidden="true"><span className="pw-mark">YSM<b>.</b></span></div>
+      <Cursor/>
+      <LoadingScreen/>
     </div>
   );
 };
