@@ -189,8 +189,6 @@ const Portfolio = () => {
   const particlesRef = useRef<{x:number;y:number;vx:number;vy:number;r:number;o:number}[]>([]);
   const animFrameRef = useRef<number>(0);
   const lenisRef = useRef<Lenis | null>(null);
-  const buildsGridRef = useRef<HTMLDivElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
   const wipeTimers = useRef<number[]>([]);
   const wipeTargetRef = useRef<string | null>(null);
   const reduceMotion = typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -219,7 +217,7 @@ const Portfolio = () => {
     const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 100);
     camera.position.z = 15;
 
-    const COUNT = window.innerWidth < 768 ? 9000 : 22000;
+    const COUNT = window.innerWidth < 768 ? 9000 : 15000;
     const positions = new Float32Array(COUNT * 3);
     const scales = new Float32Array(COUNT);
     const GA = Math.PI * (1 + Math.sqrt(5));
@@ -227,7 +225,7 @@ const Portfolio = () => {
       const tt = (i + 0.5) / COUNT;
       const phi = Math.acos(1 - 2 * tt);
       const theta = GA * i;
-      const rr = 6 + (Math.random() - 0.5) * 0.7;
+      const rr = 4.4 + (Math.random() - 0.5) * 0.6;
       positions[i * 3] = rr * Math.sin(phi) * Math.cos(theta);
       positions[i * 3 + 1] = rr * Math.sin(phi) * Math.sin(theta);
       positions[i * 3 + 2] = rr * Math.cos(phi);
@@ -268,7 +266,7 @@ const Portfolio = () => {
         void main(){
           vec3 pos=position;
           float n=snoise(pos*0.35+vec3(0.0,0.0,uTime*0.16));
-          pos+=normalize(position)*n*1.7;
+          pos+=normalize(position)*n*0.8;
           pos*=1.0+0.05*sin(uTime*0.6);
           float a=uTime*0.07; float s=sin(a),c=cos(a);
           pos=vec3(c*pos.x+s*pos.z,pos.y,-s*pos.x+c*pos.z);
@@ -341,22 +339,12 @@ const Portfolio = () => {
   },[countsStarted]);
 
   useEffect(()=>{
-    const el=glowRef.current;if(!el)return;
-    const move=(e:MouseEvent)=>{el.style.transform=`translate(${e.clientX-150}px,${e.clientY-150}px)`;};
-    window.addEventListener("mousemove",move,{passive:true});
-    return()=>window.removeEventListener("mousemove",move);
-  },[]);
-
-  useEffect(()=>{
     if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
     const lenis=new Lenis({lerp:0.09,smoothWheel:true});
     lenisRef.current=lenis;
-    let raf=0,cur=0;
+    let raf=0;
     const loop=(t:number)=>{
       lenis.raf(t);
-      cur+=(((lenis as unknown as {velocity:number}).velocity||0)-cur)*0.12;
-      const g=buildsGridRef.current;
-      if(g)g.style.transform=`skewY(${Math.max(-5,Math.min(5,cur*0.22)).toFixed(2)}deg)`;
       raf=requestAnimationFrame(loop);
     };
     raf=requestAnimationFrame(loop);
@@ -432,25 +420,24 @@ const Portfolio = () => {
         *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:auto}
         html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!important}.lenis.lenis-stopped{overflow:hidden}.lenis.lenis-smooth iframe{pointer-events:none}
         ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#0A0A0A}::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
-        .fade-up{opacity:0;transform:translateY(50px);transition:all .9s cubic-bezier(.16,1,.3,1)}.fade-up.visible{opacity:1;transform:translateY(0)}
-        .fade-left{opacity:0;transform:translateX(-50px);transition:all .9s cubic-bezier(.16,1,.3,1)}.fade-left.visible{opacity:1;transform:translateX(0)}
-        .fade-right{opacity:0;transform:translateX(50px);transition:all .9s cubic-bezier(.16,1,.3,1)}.fade-right.visible{opacity:1;transform:translateX(0)}
-        .scale-in{opacity:0;transform:scale(.85);transition:all .9s cubic-bezier(.16,1,.3,1)}.scale-in.visible{opacity:1;transform:scale(1)}
+        .fade-up{opacity:0;transform:translateY(28px);transition:all .6s cubic-bezier(.16,1,.3,1)}.fade-up.visible{opacity:1;transform:translateY(0)}
+        .fade-left{opacity:0;transform:translateX(-28px);transition:all .6s cubic-bezier(.16,1,.3,1)}.fade-left.visible{opacity:1;transform:translateX(0)}
+        .fade-right{opacity:0;transform:translateX(28px);transition:all .6s cubic-bezier(.16,1,.3,1)}.fade-right.visible{opacity:1;transform:translateX(0)}
+        .scale-in{opacity:0;transform:scale(.94);transition:all .6s cubic-bezier(.16,1,.3,1)}.scale-in.visible{opacity:1;transform:scale(1)}
         .s1{transition-delay:.1s}.s2{transition-delay:.2s}.s3{transition-delay:.3s}.s4{transition-delay:.4s}.s5{transition-delay:.5s}.s6{transition-delay:.6s}
-        .nav-link{position:relative;cursor:pointer;padding:8px 0;font-size:14px;color:#888;transition:color .3s;letter-spacing:.5px}
+        .nav-link{position:relative;cursor:pointer;padding:8px 0;font-size:14px;color:#888;transition:color .3s cubic-bezier(.16,1,.3,1);letter-spacing:.5px}
         .nav-link:hover,.nav-link.active{color:#fff}.nav-link.active::after{content:'';position:absolute;bottom:4px;left:0;width:100%;height:2px;background:#10B981;border-radius:1px}
         @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-        @keyframes gradientMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-        .gc{position:relative;background:#141414;border:1px solid #222;border-radius:16px;overflow:hidden;transition:all .5s cubic-bezier(.16,1,.3,1)}
+        .gc{position:relative;background:#141414;border:1px solid #222;border-radius:16px;overflow:hidden;transition:all .3s cubic-bezier(.16,1,.3,1)}
         .gc:hover{border-color:#333;transform:translateY(-6px);box-shadow:0 20px 60px rgba(0,0,0,.4)}
         .gc>.inn{background:#141414;border-radius:15px;position:relative;z-index:1;height:100%}
-        .timeline-item{position:relative;padding-left:36px;padding-bottom:52px;border-left:2px solid #1A1A1A;transition:border-color .5s}
+        .timeline-item{position:relative;padding-left:36px;padding-bottom:52px;border-left:2px solid #1A1A1A;transition:border-color .3s cubic-bezier(.16,1,.3,1)}
         .timeline-item:hover{border-left-color:#10B981}.timeline-item:last-child{border-left-color:transparent;padding-bottom:0}
-        .timeline-dot{position:absolute;left:-8px;top:6px;width:14px;height:14px;border-radius:50%;border:3px solid #10B981;background:#0A0A0A;transition:all .4s}
+        .timeline-dot{position:absolute;left:-8px;top:6px;width:14px;height:14px;border-radius:50%;border:3px solid #10B981;background:#0A0A0A;transition:all .3s cubic-bezier(.16,1,.3,1)}
         .timeline-item:hover .timeline-dot{background:#10B981;box-shadow:0 0 16px rgba(16,185,129,.5);transform:scale(1.3)}
-        .skill-tag{display:inline-block;padding:6px 16px;border-radius:20px;font-size:13px;background:#1A1A1A;border:1px solid #2A2A2A;color:#CCC;margin:4px;transition:all .4s;cursor:default}
+        .skill-tag{display:inline-block;padding:6px 16px;border-radius:20px;font-size:13px;background:#1A1A1A;border:1px solid #2A2A2A;color:#CCC;margin:4px;transition:all .3s cubic-bezier(.16,1,.3,1);cursor:default}
         .skill-tag:hover{border-color:#10B981;color:#10B981;background:rgba(16,185,129,.1);transform:translateY(-3px);box-shadow:0 4px 15px rgba(16,185,129,.15)}
-        .stat-number{font-size:52px;font-weight:900;background:linear-gradient(135deg,#10B981,#3B82F6);background-size:200% 200%;animation:gradientMove 3s ease infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+        .stat-number{font-size:52px;font-weight:900;background:linear-gradient(135deg,#10B981,#3B82F6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
         .section{padding:120px 24px;max-width:1100px;margin:0 auto}
         .sl{font-size:13px;text-transform:uppercase;letter-spacing:4px;color:#10B981;margin-bottom:16px;font-weight:600}
         .st{font-size:clamp(28px,5vw,42px);font-weight:900;color:#fff;margin-bottom:24px;line-height:1.3}
@@ -458,14 +445,11 @@ const Portfolio = () => {
         .mobile-menu-link{font-size:28px;color:#888;cursor:pointer;transition:all .3s;font-weight:600}.mobile-menu-link:hover{color:#fff;transform:scale(1.1)}
         .hamburger{display:none;cursor:pointer;z-index:200}
         .progress-bar{height:4px;border-radius:2px;background:#1A1A1A;overflow:hidden;margin-top:8px}
-        .progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#10B981,#3B82F6);transition:width 1.5s cubic-bezier(.16,1,.3,1)}
-        .mag-btn{transition:all .4s cubic-bezier(.16,1,.3,1)}.mag-btn:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(16,185,129,.3)}
-        .marquee{display:flex;gap:48px;animation:marquee 20s linear infinite}@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-        .chat-fab{position:fixed;bottom:28px;right:28px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#10B981,#059669);border:none;cursor:pointer;z-index:999;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 8px 32px rgba(16,185,129,.35);transition:all .4s cubic-bezier(.16,1,.3,1)}
+        .progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#10B981,#3B82F6);transition:width 1s cubic-bezier(.16,1,.3,1)}
+        .mag-btn{transition:all .3s cubic-bezier(.16,1,.3,1)}.mag-btn:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(16,185,129,.3)}
+        .chat-fab{position:fixed;bottom:28px;right:28px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#10B981,#059669);border:none;cursor:pointer;z-index:999;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 8px 32px rgba(16,185,129,.35);transition:all .3s cubic-bezier(.16,1,.3,1)}
         .chat-fab:hover{transform:scale(1.1);box-shadow:0 12px 44px rgba(16,185,129,.5)}
-        .fab-pulse{position:fixed;bottom:28px;right:28px;width:60px;height:60px;border-radius:50%;z-index:998;animation:fabPulse 2s ease infinite}
-        @keyframes fabPulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.4)}70%{box-shadow:0 0 0 20px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
-        .case-card{position:relative;background:#141414;border:1px solid #222;border-radius:20px;padding:32px;transition:all .5s cubic-bezier(.16,1,.3,1);overflow:hidden;display:flex;flex-direction:column}
+        .case-card{position:relative;background:#141414;border:1px solid #222;border-radius:20px;padding:32px;transition:all .3s cubic-bezier(.16,1,.3,1);overflow:hidden;display:flex;flex-direction:column}
         .case-card:hover{border-color:#333;transform:translateY(-8px);box-shadow:0 24px 64px rgba(0,0,0,.5)}
         .case-card .top-bar{position:absolute;top:0;left:0;right:0;height:3px;border-radius:20px 20px 0 0}
         .case-num{font-size:56px;font-weight:900;line-height:1;margin-bottom:4px;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -482,7 +466,7 @@ const Portfolio = () => {
         @media (hover:hover) and (pointer:fine){
           *{cursor:none!important}
           .cur-dot{position:fixed;top:0;left:0;width:7px;height:7px;border-radius:50%;background:#10B981;z-index:4000;pointer-events:none;transform:translate(-50%,-50%);will-change:transform}
-          .cur-ring{position:fixed;top:0;left:0;width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(16,185,129,.5);z-index:4000;pointer-events:none;transform:translate(-50%,-50%);transition:width .25s,height .25s,background .25s,border-color .25s;will-change:transform}
+          .cur-ring{position:fixed;top:0;left:0;width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(16,185,129,.5);z-index:4000;pointer-events:none;transform:translate(-50%,-50%);transition:width .3s cubic-bezier(.16,1,.3,1),height .3s cubic-bezier(.16,1,.3,1),background .3s cubic-bezier(.16,1,.3,1),border-color .3s cubic-bezier(.16,1,.3,1);will-change:transform}
           .cur-ring.hot{width:64px;height:64px;background:rgba(16,185,129,.08);border-color:#10B981}
         }
         .page-wipe{position:fixed;inset:0;z-index:2600;background:#08090A;border-top:2px solid #10B981;transform:translateY(100%);pointer-events:none;display:flex;align-items:center;justify-content:center}
@@ -492,12 +476,10 @@ const Portfolio = () => {
         .caret{animation:caretBlink 1.06s step-end infinite}@keyframes caretBlink{0%,100%{opacity:1}50%{opacity:0}}
         @media (prefers-reduced-motion:reduce){
           .ldr,.ldr-cover,.page-wipe{display:none!important}
-          .marquee,.caret,.stat-number,.fab-pulse{animation:none!important}
+          .caret{animation:none!important}
           *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.15s!important}
         }
       `}</style>
-
-      <div ref={glowRef} style={{ position:"fixed", top:0, left:0, width:300, height:300, borderRadius:"50%", background:"radial-gradient(circle,rgba(16,185,129,.06),transparent 70%)", pointerEvents:"none", zIndex:1, transform:"translate(-150px,-150px)", transition:"transform .3s ease-out", willChange:"transform" }}/>
 
       {/* Nav */}
       <nav style={{ position:"fixed", top:0, left:0, right:0, zIndex:50, background:scrollY>50?"rgba(10,10,10,.85)":"transparent", backdropFilter:scrollY>50?"blur(24px)":"none", borderBottom:scrollY>50?"1px solid #1A1A1A":"none", transition:"all .4s", padding:"0 24px" }}>
@@ -519,13 +501,13 @@ const Portfolio = () => {
         <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 30% 20%,rgba(16,185,129,.08) 0%,transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(59,130,246,.06) 0%,transparent 60%)", zIndex:1, pointerEvents:"none" }}/>
         <div style={{ position:"absolute", inset:0, zIndex:1, pointerEvents:"none", background:"radial-gradient(ellipse 50% 46% at 50% 47%, rgba(8,9,10,0.8) 0%, rgba(8,9,10,0.42) 48%, transparent 74%)" }}/>
         <div style={{ textAlign:"center", position:"relative", zIndex:2, transform:reduceMotion?"none":`translateY(${-scrollY*.06}px)`, maxWidth:800, margin:"0 auto" }}>
-          <p style={{ fontSize:13, letterSpacing:6, color:"#10B981", marginBottom:32, textTransform:"uppercase", fontWeight:600, opacity:.85 }}>Product Manager & Product Owner</p>
-          <h1 className="hero-title" style={{ fontSize:"clamp(52px,10vw,88px)", fontWeight:900, color:"#fff", lineHeight:1.0, marginBottom:20, letterSpacing:-2 }}>양순민</h1>
-          <div style={{ width:60, height:3, background:"linear-gradient(90deg,#10B981,#3B82F6)", margin:"0 auto 32px", borderRadius:2 }} />
-          <div style={{ fontSize:"clamp(22px,4vw,36px)", fontWeight:800, color:"#fff", lineHeight:1.3, marginBottom:12 }}>
+          <p style={{ fontSize:13, letterSpacing:6, color:"#10B981", marginBottom:40, textTransform:"uppercase", fontWeight:600, opacity:.85 }}>Product Manager & Product Owner</p>
+          <h1 className="hero-title" style={{ fontSize:"clamp(52px,10vw,88px)", fontWeight:900, color:"#fff", lineHeight:1.0, marginBottom:28, letterSpacing:-2 }}>양순민</h1>
+          <div style={{ width:60, height:3, background:"linear-gradient(90deg,#10B981,#3B82F6)", margin:"0 auto 40px", borderRadius:2 }} />
+          <div style={{ fontSize:"clamp(22px,4vw,36px)", fontWeight:800, color:"#fff", lineHeight:1.3, marginBottom:20 }}>
             {typedText}<span className="caret" style={{ color:"#10B981", fontWeight:400 }}>|</span>
           </div>
-          <p style={{ fontSize:"clamp(14px,2vw,17px)", color:"#666", maxWidth:480, margin:"0 auto 44px", lineHeight:1.8 }}>
+          <p style={{ fontSize:"clamp(14px,2vw,17px)", color:"#666", maxWidth:480, margin:"0 auto 52px", lineHeight:1.8 }}>
             체계적인 문서화와 유연한 리더십으로<br/>프로젝트를 이끄는 PM
           </p>
           <div style={{ display:"flex", gap:16, justifyContent:"center", flexWrap:"wrap" }}>
@@ -547,11 +529,6 @@ const Portfolio = () => {
             <div key={i}><div className="stat-number">{s.num}<span style={{ fontSize:24 }}>{s.unit}</span></div><div style={{ color:"#888", fontSize:14, marginTop:10 }}>{s.label}</div></div>
           ))}
         </div>
-      </div>
-
-      {/* Marquee */}
-      <div style={{ overflow:"hidden", padding:"20px 0", borderBottom:"1px solid #1A1A1A", background:"#0D0D0D" }}>
-        <div className="marquee">{[...Array(2)].map((_,k)=><div key={k} style={{ display:"flex", gap:48, flexShrink:0 }}>{["서비스기획","Agile/Scrum","JIRA","Figma","문서화","리스크관리","UI/UX","WBS","커뮤니케이션","AI 자동화","스토리보드","PM/PO"].map((t,i)=><span key={i} style={{ fontSize:14, color:"#333", fontWeight:700, letterSpacing:2, whiteSpace:"nowrap" }}>{t}</span>)}</div>)}</div>
       </div>
 
       {/* About */}
@@ -584,7 +561,7 @@ const Portfolio = () => {
             {[{icon:"⚖️",title:"합리적 판단",desc:"클라이언트 요구와 내부 상황을 고려하여 서로가 윈윈할 수 있는 사업 방향을 모색합니다."},{icon:"🛡️",title:"리스크 관리",desc:"책임감 있는 성실함과 유연한 리더십으로 프로젝트 리스크를 조기에 발견하고 최대한 감소시킵니다."},{icon:"📋",title:"문서화 & 소통",desc:"풍부한 현장 경험 기반의 커뮤니케이션 역량으로 프로젝트 진행을 체계화·문서화합니다."}].map((c,i)=>(
               <div key={i} id={`comp-${i}`} data-animate className={`gc scale-in s${i+1} ${vis(`comp-${i}`)?"visible":""}`}>
                 <div className="inn" style={{ padding:40, textAlign:"center" }}>
-                  <div style={{ fontSize:48, marginBottom:20, animation:"float 3s ease-in-out infinite", animationDelay:`${i*.3}s` }}>{c.icon}</div>
+                  <div style={{ fontSize:48, marginBottom:20 }}>{c.icon}</div>
                   <div style={{ fontSize:20, fontWeight:800, color:"#fff", marginBottom:14 }}>{c.title}</div>
                   <div style={{ color:"#999", fontSize:14, lineHeight:1.8 }}>{c.desc}</div>
                 </div>
@@ -733,13 +710,13 @@ const Portfolio = () => {
             <div className="st">직접 만든 제품들</div>
             <p style={{ color:"#888", fontSize:15, lineHeight:1.7, maxWidth:660, marginBottom:48 }}>기획에 머무르지 않고, AI 페어코딩(바이브코딩)으로 직접 설계·개발한 9개+의 앱·서비스입니다. 말이 아닌 결과물로 증명하는 실행형 PO.</p>
           </div>
-          <div ref={buildsGridRef} className="cases-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))", gap:20, willChange:"transform" }}>
+          <div className="cases-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))", gap:20 }}>
             {sideProjects.map((p,i)=>{
               const lp=reduceMotion?1:Math.max(0,Math.min(1,(buildsProgress-i*0.045)*1.7));
               const e=1-Math.pow(1-lp,3);
-              const ang=i*0.9-Math.PI/2, rad=(1-e)*520;
+              const ang=i*0.9-Math.PI/2, rad=(1-e)*260;
               const tx=Math.cos(ang)*rad, ty=Math.sin(ang)*rad*0.6;
-              const rot=(1-e)*(i*10+35), sc=0.4+e*0.6;
+              const rot=(1-e)*(i*5+18), sc=0.7+e*0.3;
               const op=Math.min(1,lp*1.6);
               const mid=lp>0&&lp<1;
               return (
@@ -798,7 +775,7 @@ const Portfolio = () => {
             {[{icon:"🎓",title:"경성대학교",desc:"경영학과 졸업 (편입)",period:"2011 — 2019"},{icon:"🏆",title:"웹디자인개발기능사",desc:"한국산업인력공단",period:"2024.09"},{icon:"🥇",title:"서비스 디자인 청사진",desc:"경성대 우수과제공모전 최우수상",period:"2018"},{icon:"🤝",title:"KT&G 마케팅 캠프",desc:"롯데 에비뉴몰 전략 공모전 팀워크상",period:"2011"}].map((item,i)=>(
               <div key={i} id={`edu-${i}`} data-animate className={`gc scale-in s${i+1} ${vis(`edu-${i}`)?"visible":""}`}>
                 <div className="inn" style={{ padding:28, display:"flex", gap:16, alignItems:"flex-start" }}>
-                  <span style={{ fontSize:32, flexShrink:0, animation:"float 3s ease-in-out infinite", animationDelay:`${i*.4}s` }}>{item.icon}</span>
+                  <span style={{ fontSize:32, flexShrink:0 }}>{item.icon}</span>
                   <div>
                     <div style={{ fontSize:16, fontWeight:700, color:"#fff", marginBottom:4 }}>{item.title}</div>
                     <div style={{ fontSize:13, color:"#999", marginBottom:4 }}>{item.desc}</div>
@@ -821,7 +798,7 @@ const Portfolio = () => {
             {[{icon:"✉️",label:"Email",value:"swat782@nate.com",href:"mailto:swat782@nate.com"},{icon:"📍",label:"Location",value:"부산광역시",href:null as string|null}].map((c,i)=>(
               <div key={i} className="gc" style={{ cursor:c.href?"pointer":"default", minWidth:220 }} onClick={()=>c.href&&window.open(c.href)}>
                 <div className="inn" style={{ padding:"36px 44px" }}>
-                  <div style={{ fontSize:32, marginBottom:14, animation:"float 2.5s ease-in-out infinite", animationDelay:`${i*.3}s` }}>{c.icon}</div>
+                  <div style={{ fontSize:32, marginBottom:14 }}>{c.icon}</div>
                   <div style={{ fontSize:12, color:"#888", marginBottom:4, textTransform:"uppercase", letterSpacing:1.5 }}>{c.label}</div>
                   <div style={{ fontSize:15, color:"#fff", fontWeight:600 }}>{c.value}</div>
                 </div>
@@ -833,7 +810,6 @@ const Portfolio = () => {
 
       <footer style={{ borderTop:"1px solid #1A1A1A", padding:"32px 24px", textAlign:"center" }}><p style={{ fontSize:13, color:"#444" }}>© 2025 Yang SoonMin — Built with passion.</p></footer>
 
-      <div className="fab-pulse"/>
       <button className="chat-fab" onClick={()=>setChatOpen(o=>!o)} style={{ fontSize:chatOpen?22:26 }}>{chatOpen?"✕":"💬"}</button>
       <Chatbot isOpen={chatOpen} onClose={()=>setChatOpen(false)}/>
       <div className={`page-wipe ${wipe}`} aria-hidden="true"><span className="pw-mark">YSM<b>.</b></span></div>
