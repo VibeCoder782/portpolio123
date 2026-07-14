@@ -7,4 +7,4 @@ dist
 .env.*.local
 
 # 개인 PII 문서 — 로컬 보관용, 저장소에 올리지 않음
-docs/이력서_반영안.md
+docs/이력서_*.md

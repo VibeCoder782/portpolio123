@@ -19,31 +19,32 @@ const Chatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
 - 이메일: swat782@nate.com
 - 학력: 경성대학교 경영학과 졸업(편입)
 - 자격증: 웹디자인개발기능사(2024.09)
-- PM/PO 경력: 약 2년 9개월
+- PM/PO 경력: 약 3년 (도미노 서비스업 포함 전체 사회경력 14년+)
 
 [경력]
 1. ㈜핸디 (2024.08~2025.08) 개발1팀 이사/팀장, PO
    - 애자일 스크럼 도입, JIRA 관리, Figma UI/UX, AI 자동화
    - 프로젝트: 자체 CMS 기획 및 UI/UX디자인, 부산경상대 창업가꿈, 아르피나 수영장 선착순예약시스템, 허치슨 리뉴얼, 부산경상대 메이커스페이스, 울산과학대 EPL
 2. ㈜아리모아 (2022.12~2024.07) 기획팀 과장 PM/PL
-   - 1년반만에 사원→과장 진급, 15개 계약건 수행
-   - 프로젝트: 경성대LINC3.0(12개프로그램), 한국기술교육대 산학협력단, 상지건축 리뉴얼, 울산과학대 통합(40개+), 동아대 고도화, 대동대 통합(30개), 영렘브란트, 한진 리뉴얼
+   - 1년반만에 사원→대리→과장 진급, 15개 계약건 수행
+   - 프로젝트: 경성대LINC3.0(11개프로그램), 한국기술교육대 산학협력단, 상지건축 리뉴얼, 울산과학대 통합(40개+), 동아대 고도화, 대동대 통합(30개, 착수보고회 재학생 의견 반영), 영렘브란트, 한진 리뉴얼
 3. 도미노피자 (2009.09~2021.05) 매장매니저 12년 - 고객중심사고 체득
 
-[핵심역량] 합리적판단, 리스크관리, 문서화&소통
+[핵심역량] 합리적판단, 리스크관리, 문서화&소통, AI·업무자동화
 [문제해결사례]
 1. 문서화시스템구축: 워터폴환경 개선
-2. 2개월내 12개프로그램: 공통프로세스 설계
+2. 2개월내 11개프로그램: 공통프로세스 설계
 3. 스코프크리프 대응: 회의록 문서화
-4. 1인PM 60개사이트: WBS,PL선정으로 연기0건
+4. 1인PM 60개사이트: WBS·체계적 문서화·팀원 케어로 연기0건
 5. 자체CMS 설계: 처음부터 IA/스토리보드/플로우차트/UI설계까지 전과정 주도
-6. 아르피나 실시간 선착순 예약시스템: 동시접속 대응 설계
+6. 아르피나 선착순 예약: 새벽 오프라인 줄서기→온라인 전환, 동시접속 대응 설계
 
-[스킬] 기획,JIRA,Notion,Figma,Photoshop,HTML/CSS/JS,Claude,Agile/Scrum,WBS
+[스킬] 기획,JIRA,Notion,Figma,HTML/CSS/JS,Claude Code,ChatGPT,n8n,Flutter,Supabase,Agile/Scrum,WBS
+[AI·업무자동화] n8n으로 회의록→할일추출→Notion정리→Discord알림, 스크린샷 OCR→인사이트DB 등 반복업무 자동화 워크플로우 설계·구현
 [수상] 경성대 최우수상(2018), KT&G 팀워크상(2011)
 [성격] "성격좋은꼰대" - 원칙+유연함, 34세에 웹기획 전향, 바이브코딩으로 앱개발중
 
-[개인 개발 프로젝트-바이브코딩] 기획에 머무르지 않고 직접 설계·개발한 앱/서비스 9개+: MountainOn(등산 기록 앱,Flutter), WebOps Builder(여러 서비스 운영·배포 관리 플랫폼,Next.js), 콘텐츠 서비스 플랫폼(웹+관리자CMS), 부기온(정서케어 앱,팀 기여 최다), 모의톡(AI 셀프점검 웹), 북잇다(독서 소셜앱,실배포), Flowon 홈페이지(3D 인터랙티브 웹), 위치기반 앱(Flutter), 시민의 턴(Unity 2D 의사결정 게임). "기획하고 직접 만들어 검증까지 하는 실행형 PO"`;
+[개인 개발 프로젝트-바이브코딩] 기획에 머무르지 않고 직접 설계·개발한 앱/서비스 10개+: AI 업무자동화(n8n 워크플로우), AI Insight OS(개인용 AI Knowledge OS 설계·35개 스펙문서), MountainOn(등산 기록 앱,Flutter), WebOps Builder(여러 서비스 운영·배포 관리 플랫폼,Next.js), 콘텐츠 서비스 플랫폼(웹+관리자CMS,운영중), 부기온(정서케어 앱,4인팀 기여 최다), 모의톡(AI 셀프점검 웹), 북잇다(독서 소셜앱,출시 직전), Flowon 홈페이지(3D 인터랙티브 웹), 시민의 턴(Unity 2D 의사결정 게임). "기획하고 직접 만들어 검증까지 하는 실행형 PO"`;
 
   const send = async () => {
     const q = input.trim(); if (!q || loading) return;
@@ -379,37 +380,38 @@ const Portfolio = () => {
 
   const experiences = [
     { period:"2024.08 — 2025.08", company:"㈜ 핸디", role:"개발 1팀 이사/팀장 · PO", desc:"애자일 스크럼 환경 도입, JIRA 기반 프로젝트 관리, Figma UI/UX 기획, AI 업무 자동화 주도", projects:["CMS 기획 및 UI/UX","부산 경상대 창업가꿈","아르피나 예약 시스템","울산과학대 EPL"], recent:true },
-    { period:"2022.12 — 2024.07", company:"㈜ 아리모아", role:"기획팀 과장 · PM/PL", desc:"1년 반 만에 사원→과장 진급. 총 15개 계약건 프로젝트 수행, 문서화 시스템 구축", projects:["경성대 LINC 3.0","한국기술교육대 산학협력단","울산과학대 통합(60개)","대동대 통합(30개)"] },
+    { period:"2022.12 — 2024.07", company:"㈜ 아리모아", role:"기획팀 과장 · PM/PL", desc:"1년 반 만에 사원→대리→과장 진급. 총 15개 계약건 프로젝트 수행, 문서화 시스템 구축", projects:["경성대 LINC 3.0","한국기술교육대 산학협력단","울산과학대 통합(40개+)","대동대 통합(30개)"] },
     { period:"2009.09 — 2021.05", company:"청오디피케이 (도미노피자)", role:"매장 매니저 · Expert · 11년 9개월", desc:"약 12년간 고객 중심 사고, 서비스 개선, 효율적 커뮤니케이션의 가치를 현장에서 체득", projects:[] },
   ];
 
   const caseStudies = [
     { num:"01", title:"문서화 시스템 구축", problem:"에이전시 특성상 워터폴 구조에서 업무분장·일정관리가 불명확하여 프로젝트 효율 저하", solution:"Google Sheets, Notion, Figma, Slack으로 프로젝트 리딩 문서화 체계 구축. 클라이언트에게 히스토리 남겨 신뢰 형성", result:"리스크 조기 파악·최소화, 더 나은 품질의 웹 홈페이지 제공", color:"#10B981", icon:"📄" },
-    { num:"02", title:"2개월 내 12개 프로그램 오픈", problem:"경성대 LINC 3.0 — 12개 신청·관리 프로그램을 2개월 내 오픈 일정에 맞춰 납부 필수", solution:"공통 프로세스 설계로 개발 부담 경감, 핵심 프로그램 2개에 집중하여 클라이언트 만족도 극대화", result:"일정 내 안정적 오픈 완료. 유지보수 후 현재까지 다수 사용자 이용 중", color:"#F59E0B", icon:"⚡" },
+    { num:"02", title:"2개월 내 11개 프로그램 오픈", problem:"경성대 LINC 3.0 — 11개 신청·관리 프로그램을 2개월 내 오픈 일정에 맞춰 납부 필수", solution:"공통 프로세스 설계로 개발 부담 경감, 핵심 프로그램 2개에 집중하여 클라이언트 만족도 극대화", result:"일정 내 안정적 오픈 완료. 유지보수 후 현재까지 다수 사용자 이용 중", color:"#F59E0B", icon:"⚡" },
     { num:"03", title:"스코프 크리프 대응", problem:"상지건축 50주년 리뉴얼 — 계약서상 문제로 일정·요구사항 불명확, 미팅 후에도 끊임없는 변경 요청", solution:"회의록 전수 문서화 및 고객 확인 프로세스 도입. 내부 타격 최소화 위해 후순위 조율, 끈질긴 재협의", result:"서브 프로젝트 형식으로 전환하여 잔금 처리 및 성공적 오픈 완료", color:"#8B5CF6", icon:"🔄" },
-    { num:"04", title:"1인 PM, 60개+ 사이트 관리", problem:"울산과학대 통합 홈페이지(PHP→JAVA) — 본대·입학·학과 등 40여개 + 대동대 30개까지, 혼자 관리해야 하는 극한 상황", solution:"전 작업 문서화, Google Sheets로 메뉴별·팀별 체킹, 팀별 PL 선정 소통 일원화, WBS 기반 체계적 일정관리", result:"단 한 건의 연기 없이 전체 일정에 맞춰 오픈 완료", color:"#EC4899", icon:"🚀" },
+    { num:"04", title:"1인 PM, 60개+ 사이트 관리", problem:"울산과학대 통합 홈페이지(PHP→JAVA) — 본대·입학·학과 등 40여개 + 대동대 30개까지, 혼자 관리해야 하는 극한 상황", solution:"전 작업을 체계적으로 문서화하고 Google Sheets로 메뉴별 진행 상황을 관리. 팀원들의 상황을 살피고 다독여 가며 WBS 기반으로 일정을 조율", result:"단 한 건의 연기 없이 전체 일정에 맞춰 오픈 완료", color:"#EC4899", icon:"🚀" },
     { num:"05", title:"자체 CMS 제로부터 설계", problem:"㈜핸디 — 기존에 없던 홈페이지 관리 CMS를 처음부터 기획해야 하는 상황. 레퍼런스 없이 IA부터 UI까지 전 과정을 주도해야 함", solution:"IA 구조도 → 프로그램 스토리보드 → 플로우차트 → CMS UI/UX 디자인까지 약 9개월에 걸쳐 전 과정을 Figma로 설계. 팀원 및 내부 협의를 반복하며 실사용 기반의 구조 확립", result:"실무에 바로 적용 가능한 CMS 체계 완성, 향후 모든 웹 프로젝트의 관리 기반으로 활용", color:"#3B82F6", icon:"🏗️" },
-    { num:"06", title:"실시간 선착순 예약 시스템", problem:"아르피나 수영장 — 온라인 선착순 예약 시스템을 신규 구축해야 하며, 오픈 시 동시 접속 폭주가 예상되는 고난도 프로젝트", solution:"고객 요구사항을 면밀 분석 후 예약 플로우를 설계. IA 구조도·플로우차트 작성 및 내부 개발팀과 기술적 협의를 반복하며 안정적 동시접속 처리 구조 도출", result:"약 2.5개월 만에 예약 시스템 + 홈페이지 리뉴얼 동시 오픈 성공", color:"#F97316", icon:"🎫" },
+    { num:"06", title:"새벽 줄서기를 온라인으로", problem:"아르피나 수영장 — 이용객이 새벽부터 현장에 줄을 서서 접수하던 오프라인 선착순 방식. 이를 온라인 예약 시스템으로 전환하되, 오픈 시 동시 접속 폭주까지 대응해야 하는 고난도 프로젝트", solution:"유사 예약 서비스 레퍼런스를 조사하고 실무자들과 개별 미팅으로 요구사항을 수렴·조율. 예약 플로우와 IA·플로우차트를 설계하고 개발팀과 기술 협의를 반복하며 안정적 동시접속 처리 구조 도출", result:"약 2.5개월 만에 예약 시스템 + 홈페이지 리뉴얼 동시 오픈 성공", color:"#F97316", icon:"🎫" },
   ];
 
   const skillCategories = [
     { name:"기획 & 관리", items:["서비스기획","웹기획","전략기획","PM","PO","스토리보드","IA설계"], pct:95 },
     { name:"협업 도구", items:["JIRA","Notion","Google Sheets","Slack","Figma"], pct:90 },
     { name:"디자인", items:["Figma","Photoshop","Illustrator","After Effects","Premiere"], pct:80 },
-    { name:"개발 이해", items:["HTML5","CSS3","JavaScript","Firebase","Cursor"], pct:65 },
-    { name:"AI 활용", items:["Claude","Gemini","Gamma AI","바이브코딩"], pct:85 },
+    { name:"개발 이해", items:["HTML5","CSS3","JavaScript","Flutter","Supabase","Firebase"], pct:70 },
+    { name:"AI · 업무자동화", items:["Claude Code","ChatGPT","Codex","n8n","Gemini","바이브코딩"], pct:88 },
     { name:"방법론", items:["Agile/Scrum","Waterfall","WBS","리스크관리"], pct:90 },
   ];
 
   const sideProjects = [
     { name:"MountainOn", cat:"모바일 앱 · 등산 기록", stack:"Flutter · Supabase · Vercel", role:"1인 풀스택", status:"진행 중", color:"#10B981", icon:"⛰️", desc:"GPS 산행 기록·정상 인증·정보를 다루는 등산 앱. 기획(PRD·IA)부터 설계·개발·테스트까지 단독 수행. 오프라인 대응·위치정보 비식별 등 실사용 엔지니어링 반영." },
     { name:"WebOps Builder", cat:"멀티 프로덕트 운영 플랫폼", stack:"TypeScript · Next.js · Turborepo", role:"1인 설계·개발", status:"진행 중", color:"#3B82F6", icon:"🛠️", desc:"여러 서비스의 등록·상태 관측·배포·릴리스 승인/롤백을 한 콘솔에서 관리. 감사 로그·시크릿 관리 등 운영 안전성 중심 설계." },
-    { name:"콘텐츠 서비스 플랫폼", cat:"웹 서비스 + 관리자 CMS", stack:"Next.js · React · Supabase", role:"1인 기획·개발", status:"운영", color:"#8B5CF6", icon:"🧩", desc:"사용자용 웹 서비스와 운영자용 관리 콘솔(CMS)을 함께 구축. 비개발자도 콘텐츠를 등록·큐레이션·운영 가능하게 설계." },
-    { name:"부기온 (Boogion)", cat:"모바일 앱 · 정서 케어", stack:"Flutter · Firebase · Vercel", role:"팀 · 기여 최다", status:"출시 준비", color:"#F59E0B", icon:"🌡️", desc:"5인 팀 프로젝트. 기획 및 앱 프론트/일부 서버 개발 주도. 푸시·소셜로그인·원격설정 등 상용 앱 인프라 구성." },
+    { name:"AI 업무자동화", cat:"업무 자동화 워크플로우", stack:"n8n · OCR · Notion API", role:"1인 설계·구현", status:"진행 중", color:"#EF4444", icon:"⚙️", desc:"회의 녹음→할 일 추출→Notion 정리→Discord 알림, 스크린샷 OCR→인사이트 DB 저장 등 반복 업무를 실제 n8n 워크플로우로 자동화." },
+    { name:"AI Insight OS", cat:"AI Knowledge OS · 설계", stack:"React · Cloudflare · n8n", role:"1인 PO · 설계", status:"설계·문서화", color:"#6366F1", icon:"🧠", desc:"자료를 AI가 조사해 추적 가능한 지식으로 구조화·재사용하는 개인용 Knowledge OS. 35개 스펙 문서로 전체 구조·정책 설계 (MVP 구현 전)." },
+    { name:"콘텐츠 서비스 플랫폼", cat:"웹 서비스 + 관리자 CMS", stack:"Next.js · React · Supabase", role:"1인 기획·개발", status:"운영", color:"#8B5CF6", icon:"🧩", desc:"사용자용 웹 서비스와 운영자용 관리 콘솔(CMS)을 함께 구축·운영. 비개발자도 콘텐츠를 등록·큐레이션·운영 가능하게 설계." },
+    { name:"부기온 (Boogion)", cat:"모바일 앱 · 정서 케어", stack:"Flutter · Firebase · Vercel", role:"팀 · 기여 최다", status:"출시 준비", color:"#F59E0B", icon:"🌡️", desc:"4인 팀 프로젝트. 기획 및 앱 프론트/일부 서버 개발 주도. 푸시·소셜로그인·원격설정 등 상용 앱 인프라 구성." },
     { name:"모의톡 (CaseTalk)", cat:"AI 셀프 점검 웹", stack:"Next.js · 생성형 AI", role:"1인 기획·개발", status:"MVP", color:"#EC4899", icon:"⚖️", desc:"생성형 AI 연동 셀프 점검 서비스. 안전 가드레일·개인정보 무저장 등 'AI 안전성'을 아키텍처로 구현." },
-    { name:"북잇다 (Bookitda)", cat:"모바일 앱 · 독서 소셜", stack:"Flutter · Supabase · Firebase", role:"1인 풀스택", status:"실배포", color:"#F97316", icon:"📚", desc:"책 한줄평을 공유하는 소셜 앱. 소셜 로그인(카카오·구글) 실연동, 서버리스 백엔드 실배포 완료." },
+    { name:"북잇다 (Bookitda)", cat:"모바일 앱 · 독서 소셜", stack:"Flutter · Supabase · Firebase", role:"1인 풀스택", status:"출시 직전", color:"#F97316", icon:"📚", desc:"책 한줄평을 공유하는 소셜 앱. 카카오·구글 소셜 로그인 실연동, Firebase 푸시 알림 적용. 백엔드·인증 구성 완료(출시 직전)." },
     { name:"Flowon 홈페이지", cat:"인터랙티브 웹", stack:"Three.js · GSAP · Lenis", role:"1인 프론트", status:"완성", color:"#06B6D4", icon:"🌊", desc:"WebGL 셰이더 히어로 + 스크롤 인터랙션·커스텀 커서·프리로더를 구현한 브랜드 원페이지." },
-    { name:"위치 기반 앱", cat:"모바일 앱 (도메인 비공개)", stack:"Flutter", role:"1인 기획·개발", status:"배포 준비", color:"#14B8A6", icon:"📍", desc:"위치 정보를 활용한 개인화 모바일 서비스 앱. 구체 도메인은 아이디어 보호를 위해 비공개." },
     { name:"시민의 턴", cat:"2D 의사결정 게임", stack:"Unity", role:"1인 기획·개발", status:"개발 중", color:"#A855F7", icon:"🎮", desc:"스프라이트 시트 기반 2D 게임. 매주 시나리오가 자동 로테이션되는 의사결정 게임 구조 설계." },
   ];
 
@@ -537,7 +539,7 @@ const Portfolio = () => {
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))", gap:40, marginTop:20 }}>
           <div id="about-l" data-animate className={`fade-left ${vis("about-l")?"visible":""}`} style={{ lineHeight:1.9, color:"#AAA", fontSize:15 }}>
             <p style={{ marginBottom:20 }}>도미노피자에서 약 12년간 매니저로 근무하며 체득한 <strong style={{ color:"#fff" }}>고객 중심 사고</strong>와 <strong style={{ color:"#fff" }}>현장 커뮤니케이션 역량</strong>을 바탕으로, 34세에 웹 기획자로 전향했습니다.</p>
-            <p style={{ marginBottom:20 }}>아리모아에서 1년 반 만에 사원에서 과장으로 진급, ㈜핸디에서 <strong style={{ color:"#fff" }}>PO(Product Owner)</strong>로서 애자일 조직을 리딩했습니다.</p>
+            <p style={{ marginBottom:20 }}>아리모아에서 1년 반 만에 사원에서 대리를 거쳐 과장으로 진급, ㈜핸디에서 <strong style={{ color:"#fff" }}>개발 1팀 이사·PO(Product Owner)</strong>로서 애자일 조직을 리딩했습니다.</p>
             <p>바이브코딩을 통한 모바일 앱 개발, Cursor·Firebase 등 최신 환경 학습까지 — 프로덕트의 A to Z를 직접 경험하고 있습니다.</p>
           </div>
           <div id="about-r" data-animate className={`fade-right s2 ${vis("about-r")?"visible":""}`}>
@@ -708,7 +710,7 @@ const Portfolio = () => {
           <div id="sp-h" data-animate className={`fade-up ${vis("sp-h")?"visible":""}`}>
             <div className="sl">Personal Builds</div>
             <div className="st">직접 만든 제품들</div>
-            <p style={{ color:"#888", fontSize:15, lineHeight:1.7, maxWidth:660, marginBottom:48 }}>기획에 머무르지 않고, AI 페어코딩(바이브코딩)으로 직접 설계·개발한 9개+의 앱·서비스입니다. 말이 아닌 결과물로 증명하는 실행형 PO.</p>
+            <p style={{ color:"#888", fontSize:15, lineHeight:1.7, maxWidth:660, marginBottom:48 }}>기획에 머무르지 않고, AI 페어코딩(바이브코딩)과 업무 자동화로 직접 설계·개발한 10개+의 앱·서비스입니다. 말이 아닌 결과물로 증명하는 실행형 PO.</p>
           </div>
           <div className="cases-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))", gap:20 }}>
             {sideProjects.map((p,i)=>{
