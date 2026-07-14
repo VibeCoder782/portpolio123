@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Lenis from "lenis";
-import * as THREE from "three";
-import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { gsap, ScrollTrigger } from "./journey/gsapSetup";
+import { initJourney } from "./journey/Director";
+import ChapterNarration from "./components/ChapterNarration";
 
 const Chatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const [messages, setMessages] = useState([{ role:"assistant", content:"안녕하세요! 양순민의 포트폴리오 AI 어시스턴트입니다. 경력, 프로젝트, 스킬 등 궁금한 점을 물어보세요 😊" }]);
@@ -112,13 +111,14 @@ const LoadingScreen = () => {
   const [count, setCount] = useState(0);
   const [phase, setPhase] = useState<"load" | "open" | "done">("load");
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setPhase("done"); return; }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { window.dispatchEvent(new CustomEvent("ysm-loader", { detail: 1 })); setPhase("done"); return; }
     const start = performance.now(), DUR = 2000;
     const ease = (t: number) => 1 - Math.pow(1 - t, 3);
     let raf = 0, t1 = 0, t2 = 0;
     const tick = (now: number) => {
       const p = Math.min((now - start) / DUR, 1);
       setCount(Math.round(ease(p) * 100));
+      window.dispatchEvent(new CustomEvent("ysm-loader", { detail: ease(p) })); // 씬0: 불씨 점화 동기화
       if (p < 1) raf = requestAnimationFrame(tick);
       else { t1 = window.setTimeout(() => setPhase("open"), 350); t2 = window.setTimeout(() => setPhase("done"), 1400); }
     };
@@ -186,9 +186,7 @@ const Portfolio = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [buildsProgress, setBuildsProgress] = useState(0);
   const [wipe, setWipe] = useState<"idle" | "in" | "out">("idle");
-  const canvasRef = useRef<HTMLDivElement>(null);
-  const particlesRef = useRef<{x:number;y:number;vx:number;vy:number;r:number;o:number}[]>([]);
-  const animFrameRef = useRef<number>(0);
+  const journeyRef = useRef<HTMLDivElement>(null);
   const lenisRef = useRef<Lenis | null>(null);
   const wipeTimers = useRef<number[]>([]);
   const wipeTargetRef = useRef<string | null>(null);
@@ -202,127 +200,11 @@ const Portfolio = () => {
     return()=>clearInterval(t);
   }, []);
 
+  // 필름 씬 — 볼류메트릭 파티클 저니 (src/journey/Director)
   useEffect(() => {
-    const container = canvasRef.current; if (!container) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let renderer: THREE.WebGLRenderer;
-    try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" }); }
-    catch { return; }
-    const isMobile = window.innerWidth < 768;
-    renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.75));
-    renderer.domElement.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;display:block;";
-    container.appendChild(renderer.domElement);
-    const DPR = renderer.getPixelRatio();
-    renderer.setClearColor(0x08090a, 1);
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.z = 15;
-
-    const COUNT = window.innerWidth < 768 ? 9000 : 15000;
-    const positions = new Float32Array(COUNT * 3);
-    const scales = new Float32Array(COUNT);
-    const GA = Math.PI * (1 + Math.sqrt(5));
-    for (let i = 0; i < COUNT; i++) {
-      const tt = (i + 0.5) / COUNT;
-      const phi = Math.acos(1 - 2 * tt);
-      const theta = GA * i;
-      const rr = 4.4 + (Math.random() - 0.5) * 0.6;
-      positions[i * 3] = rr * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = rr * Math.sin(phi) * Math.sin(theta);
-      positions[i * 3 + 2] = rr * Math.cos(phi);
-      scales[i] = 0.5 + Math.random();
-    }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute("aScale", new THREE.BufferAttribute(scales, 1));
-
-    const uniforms = { uTime: { value: 0 }, uSize: { value: 5.5 * DPR } };
-    const material = new THREE.ShaderMaterial({
-      uniforms, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-      vertexShader: `
-        uniform float uTime; uniform float uSize; attribute float aScale; varying float vN;
-        vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}
-        vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}
-        vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);}
-        vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
-        float snoise(vec3 v){
-          const vec2 C=vec2(1.0/6.0,1.0/3.0); const vec4 D=vec4(0.0,0.5,1.0,2.0);
-          vec3 i=floor(v+dot(v,C.yyy)); vec3 x0=v-i+dot(i,C.xxx);
-          vec3 g=step(x0.yzx,x0.xyz); vec3 l=1.0-g; vec3 i1=min(g.xyz,l.zxy); vec3 i2=max(g.xyz,l.zxy);
-          vec3 x1=x0-i1+C.xxx; vec3 x2=x0-i2+C.yyy; vec3 x3=x0-D.yyy;
-          i=mod289(i);
-          vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));
-          float n_=0.142857142857; vec3 ns=n_*D.wyz-D.xzx;
-          vec4 j=p-49.0*floor(p*ns.z*ns.z); vec4 x_=floor(j*ns.z); vec4 y_=floor(j-7.0*x_);
-          vec4 x=x_*ns.x+ns.yyyy; vec4 y=y_*ns.x+ns.yyyy; vec4 h=1.0-abs(x)-abs(y);
-          vec4 b0=vec4(x.xy,y.xy); vec4 b1=vec4(x.zw,y.zw);
-          vec4 s0=floor(b0)*2.0+1.0; vec4 s1=floor(b1)*2.0+1.0; vec4 sh=-step(h,vec4(0.0));
-          vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy; vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
-          vec3 p0=vec3(a0.xy,h.x); vec3 p1=vec3(a0.zw,h.y); vec3 p2=vec3(a1.xy,h.z); vec3 p3=vec3(a1.zw,h.w);
-          vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
-          p0*=norm.x; p1*=norm.y; p2*=norm.z; p3*=norm.w;
-          vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0); m=m*m;
-          return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
-        }
-        void main(){
-          vec3 pos=position;
-          float n=snoise(pos*0.35+vec3(0.0,0.0,uTime*0.16));
-          pos+=normalize(position)*n*0.8;
-          pos*=1.0+0.05*sin(uTime*0.6);
-          float a=uTime*0.07; float s=sin(a),c=cos(a);
-          pos=vec3(c*pos.x+s*pos.z,pos.y,-s*pos.x+c*pos.z);
-          vN=n;
-          vec4 mv=modelViewMatrix*vec4(pos,1.0);
-          gl_PointSize=uSize*aScale*(1.0+0.4*n)*(12.0/-mv.z);
-          gl_Position=projectionMatrix*mv;
-        }
-      `,
-      fragmentShader: `
-        varying float vN;
-        void main(){
-          float d=length(gl_PointCoord-0.5); if(d>0.5) discard;
-          float al=smoothstep(0.5,0.03,d)*0.5;
-          vec3 emerald=vec3(0.09,0.85,0.6), blue=vec3(0.25,0.55,1.0);
-          vec3 col=mix(emerald,blue,smoothstep(-0.6,0.8,vN));
-          gl_FragColor=vec4(col,al);
-        }
-      `,
-    });
-    const points = new THREE.Points(geo, material);
-    scene.add(points);
-
-    const composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.45, 0.55, 0.12);
-    composer.addPass(bloom);
-
-    const resize = () => { const w = window.innerWidth, h = window.innerHeight; camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h, false); composer.setSize(w, h); };
-    resize(); window.addEventListener("resize", resize);
-    const mouse = new THREE.Vector2(0, 0), tgt = new THREE.Vector2(0, 0);
-    const onMove = (e: MouseEvent) => mouse.set(e.clientX / window.innerWidth - 0.5, -(e.clientY / window.innerHeight - 0.5));
-    window.addEventListener("mousemove", onMove);
-    const clock = new THREE.Clock();
-    let running = false;
-    const draw = () => {
-      if (!running) return;
-      uniforms.uTime.value = clock.getElapsedTime();
-      tgt.lerp(mouse, 0.05);
-      camera.position.x = tgt.x * 5; camera.position.y = tgt.y * 5; camera.lookAt(0, 0, 0);
-      composer.render();
-      animFrameRef.current = requestAnimationFrame(draw);
-    };
-    const start = () => { if (running) return; running = true; animFrameRef.current = requestAnimationFrame(draw); };
-    const stop = () => { running = false; cancelAnimationFrame(animFrameRef.current); };
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) start(); else stop(); }, { threshold: 0 });
-    io.observe(container);
-    start();
-    return () => {
-      window.removeEventListener("resize", resize); window.removeEventListener("mousemove", onMove);
-      io.disconnect(); stop();
-      geo.dispose(); material.dispose(); bloom.dispose(); composer.dispose();
-      if (renderer.domElement.parentNode === container) container.removeChild(renderer.domElement);
-      renderer.dispose();
-    };
+    const el = journeyRef.current; if (!el) return;
+    return initJourney(el);
   }, []);
 
   useEffect(()=>{const h=()=>setScrollY(window.scrollY);window.addEventListener("scroll",h,{passive:true});return()=>window.removeEventListener("scroll",h)},[]);
@@ -343,13 +225,11 @@ const Portfolio = () => {
     if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
     const lenis=new Lenis({lerp:0.09,smoothWheel:true});
     lenisRef.current=lenis;
-    let raf=0;
-    const loop=(t:number)=>{
-      lenis.raf(t);
-      raf=requestAnimationFrame(loop);
-    };
-    raf=requestAnimationFrame(loop);
-    return()=>{cancelAnimationFrame(raf);lenis.destroy();lenisRef.current=null};
+    lenis.on("scroll",ScrollTrigger.update); // Lenis ↔ ScrollTrigger 공식 연동
+    const tick=(time:number)=>{lenis.raf(time*1000)};
+    gsap.ticker.add(tick);
+    gsap.ticker.lagSmoothing(0);
+    return()=>{gsap.ticker.remove(tick);lenis.destroy();lenisRef.current=null};
   },[]);
 
   useEffect(()=>{
@@ -416,10 +296,11 @@ const Portfolio = () => {
   ];
 
   return (
-    <div style={{ fontFamily:"'Pretendard',-apple-system,sans-serif", background:"#0A0A0A", color:"#E5E5E5", minHeight:"100vh", overflowX:"hidden" }}>
+    <div style={{ fontFamily:"'Pretendard',-apple-system,sans-serif", background:"transparent", color:"#E5E5E5", minHeight:"100vh", overflowX:"hidden" }}>
       <style>{`
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
         *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:auto}
+        html,body{background:#07080A}
         html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!important}.lenis.lenis-stopped{overflow:hidden}.lenis.lenis-smooth iframe{pointer-events:none}
         ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#0A0A0A}::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
         .fade-up{opacity:0;transform:translateY(28px);transition:all .6s cubic-bezier(.16,1,.3,1)}.fade-up.visible{opacity:1;transform:translateY(0)}
@@ -464,7 +345,7 @@ const Portfolio = () => {
         @media(max-width:768px){.hamburger{display:block}.desktop-nav{display:none!important}.section{padding:80px 20px}.stat-number{font-size:36px}.hero-title{font-size:40px!important}.cases-grid{grid-template-columns:1fr!important}}
         .ldr{position:fixed;inset:0;z-index:3000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s ease}
         .ldr.gone{opacity:0;pointer-events:none}
-        .ldr-cover{position:fixed;left:0;right:0;height:50.5%;z-index:2999;background:#08090A;transition:transform 1.05s cubic-bezier(.16,1,.3,1)}
+        .ldr-cover{position:fixed;left:0;right:0;height:50.5%;z-index:2999;background:rgba(6,7,9,.84);transition:transform 1.05s cubic-bezier(.16,1,.3,1)}
         @media (hover:hover) and (pointer:fine){
           *{cursor:none!important}
           .cur-dot{position:fixed;top:0;left:0;width:7px;height:7px;border-radius:50%;background:#10B981;z-index:4000;pointer-events:none;transform:translate(-50%,-50%);will-change:transform}
@@ -483,6 +364,11 @@ const Portfolio = () => {
         }
       `}</style>
 
+      {/* 필름 씬 캔버스 — 페이지 전체 고정 배경 */}
+      <div ref={journeyRef} style={{ position:"fixed", inset:0, zIndex:0, pointerEvents:"none" }}/>
+      {!reduceMotion && <ChapterNarration/>}
+
+      <div style={{ position:"relative", zIndex:1 }}>
       {/* Nav */}
       <nav style={{ position:"fixed", top:0, left:0, right:0, zIndex:50, background:scrollY>50?"rgba(10,10,10,.85)":"transparent", backdropFilter:scrollY>50?"blur(24px)":"none", borderBottom:scrollY>50?"1px solid #1A1A1A":"none", transition:"all .4s", padding:"0 24px" }}>
         <div style={{ maxWidth:1100, margin:"0 auto", display:"flex", justifyContent:"space-between", alignItems:"center", height:64 }}>
@@ -499,10 +385,8 @@ const Portfolio = () => {
 
       {/* Hero */}
       <section id="hero" data-nav="hero" style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", position:"relative", padding:"0 24px" }}>
-        <div ref={canvasRef} style={{ position:"absolute", inset:0, zIndex:0 }}/>
-        <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 30% 20%,rgba(16,185,129,.08) 0%,transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(59,130,246,.06) 0%,transparent 60%)", zIndex:1, pointerEvents:"none" }}/>
-        <div style={{ position:"absolute", inset:0, zIndex:1, pointerEvents:"none", background:"radial-gradient(ellipse 50% 46% at 50% 47%, rgba(8,9,10,0.8) 0%, rgba(8,9,10,0.42) 48%, transparent 74%)" }}/>
-        <div style={{ textAlign:"center", position:"relative", zIndex:2, transform:reduceMotion?"none":`translateY(${-scrollY*.06}px)`, maxWidth:800, margin:"0 auto" }}>
+        <div id="hero-vignette" style={{ position:"absolute", inset:0, zIndex:1, pointerEvents:"none", background:"radial-gradient(ellipse 50% 46% at 50% 47%, rgba(8,7,6,0.72) 0%, rgba(8,7,6,0.38) 48%, transparent 74%)" }}/>
+        <div id="hero-content" style={{ textAlign:"center", position:"relative", zIndex:2, maxWidth:800, margin:"0 auto", willChange:"transform,opacity" }}>
           <p style={{ fontSize:13, letterSpacing:6, color:"#10B981", marginBottom:40, textTransform:"uppercase", fontWeight:600, opacity:.85 }}>Product Manager & Product Owner</p>
           <h1 className="hero-title" style={{ fontSize:"clamp(52px,10vw,88px)", fontWeight:900, color:"#fff", lineHeight:1.0, marginBottom:28, letterSpacing:-2 }}>양순민</h1>
           <div style={{ width:60, height:3, background:"linear-gradient(90deg,#10B981,#3B82F6)", margin:"0 auto 40px", borderRadius:2 }} />
@@ -517,7 +401,7 @@ const Portfolio = () => {
             <button className="mag-btn" onClick={()=>scrollTo("contact")} onMouseMove={e=>{const r=e.currentTarget.getBoundingClientRect();e.currentTarget.style.transform=`translate(${(e.clientX-r.left-r.width/2)*0.3}px,${(e.clientY-r.top-r.height/2)*0.5}px)`}} onMouseLeave={e=>{e.currentTarget.style.transform=""}} style={{ padding:"16px 36px", background:"transparent", color:"#fff", border:"1px solid #333", borderRadius:12, fontSize:15, fontWeight:700, cursor:"pointer" }}>Contact</button>
           </div>
         </div>
-        <div style={{ position:"absolute", bottom:40, left:"50%", transform:"translateX(-50%)", zIndex:2, animation:"float 2s ease-in-out infinite" }}>
+        <div id="hero-scrollcue" style={{ position:"absolute", bottom:40, left:"50%", transform:"translateX(-50%)", zIndex:2, animation:"float 2s ease-in-out infinite" }}>
           <div style={{ width:24, height:40, border:"2px solid #333", borderRadius:12, display:"flex", justifyContent:"center", paddingTop:8 }}>
             <div style={{ width:3, height:8, background:"#10B981", borderRadius:2, animation:"float 1.5s ease-in-out infinite" }}/>
           </div>
@@ -556,7 +440,7 @@ const Portfolio = () => {
       </section>
 
       {/* Competency */}
-      <section id="competency" data-nav="competency" style={{ background:"#0F0F0F" }}>
+      <section id="competency" data-nav="competency" style={{ background:"rgba(15,16,18,.55)" }}>
         <div className="section">
           <div id="comp-h" data-animate className={`fade-up ${vis("comp-h")?"visible":""}`}><div className="sl">Core Competency</div><div className="st">Three Core Strengths</div></div>
           <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))", gap:24, marginTop:48 }}>
@@ -594,7 +478,7 @@ const Portfolio = () => {
       </section>
 
       {/* Project List */}
-      <section id="project-list" style={{ background:"#0F0F0F" }}>
+      <section id="project-list" style={{ background:"rgba(15,16,18,.55)" }}>
         <div className="section">
           <div id="pl-h" data-animate className={`fade-up ${vis("pl-h")?"visible":""}`}>
             <div className="sl">Project Archive</div>
@@ -705,7 +589,7 @@ const Portfolio = () => {
       </section>
 
       {/* Personal Builds */}
-      <section id="builds" data-nav="builds" style={{ background:"#0F0F0F" }}>
+      <section id="builds" data-nav="builds" style={{ background:"rgba(15,16,18,.55)" }}>
         <div className="section">
           <div id="sp-h" data-animate className={`fade-up ${vis("sp-h")?"visible":""}`}>
             <div className="sl">Personal Builds</div>
@@ -770,7 +654,7 @@ const Portfolio = () => {
       </section>
 
       {/* Education */}
-      <section style={{ background:"#0F0F0F" }}>
+      <section style={{ background:"rgba(15,16,18,.55)" }}>
         <div className="section">
           <div id="edu-h" data-animate className={`fade-up ${vis("edu-h")?"visible":""}`}><div className="sl">Education & Awards</div><div className="st">Background</div></div>
           <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))", gap:24, marginTop:48 }}>
@@ -811,6 +695,7 @@ const Portfolio = () => {
       </section>
 
       <footer style={{ borderTop:"1px solid #1A1A1A", padding:"32px 24px", textAlign:"center" }}><p style={{ fontSize:13, color:"#444" }}>© 2025 Yang SoonMin — Built with passion.</p></footer>
+      </div>
 
       <button className="chat-fab" onClick={()=>setChatOpen(o=>!o)} style={{ fontSize:chatOpen?22:26 }}>{chatOpen?"✕":"💬"}</button>
       <Chatbot isOpen={chatOpen} onClose={()=>setChatOpen(false)}/>
