@@ -1117,9 +1117,10 @@ const Portfolio = () => {
         /* 좁은 화면에선 히어로 오브제 숨김 */
         @media (max-width:900px){.gchunk-wrap,.hero-obj{display:none}}
 
-        /* 영수증 펄럭임 — 피드가 끝난 직후 2회 흔들리고 정지 */
-        .paper-flutter{animation:paperWave 1.9s ease-in-out 1.75s 2}
+        /* 영수증 펄럭임 — 피드 직후 크게 2회, 이후 미풍에 걸린 듯 미세하게 상시 흔들림 (입체감) */
+        .paper-flutter{animation:paperWave 1.9s ease-in-out 1.75s 2, paperIdle 5.6s ease-in-out 5.55s infinite}
         @keyframes paperWave{0%,100%{transform:rotateX(0deg)}28%{transform:rotateX(7deg)}62%{transform:rotateX(-4.5deg)}}
+        @keyframes paperIdle{0%,100%{transform:rotateX(0deg) rotate(0deg)}32%{transform:rotateX(2.6deg) rotate(.18deg)}66%{transform:rotateX(-2deg) rotate(-.14deg)}}
         /* 인쇄 LED — 피드 동안 슬롯에서 라임 점멸 */
         .print-led{position:absolute;right:9px;top:3.5px;width:5px;height:5px;border-radius:50%;background:#3a3a3a}
         .print-led.on{animation:ledBlink 1.75s linear 1}
@@ -1130,7 +1131,7 @@ const Portfolio = () => {
         [data-row]:hover .bflip{transform:rotateX(180deg)}
         .bface{backface-visibility:hidden;-webkit-backface-visibility:hidden}
 
-        @media (prefers-reduced-motion:reduce){.w3spin,.lens,[data-op-hint]{animation:none!important}[aria-hidden] > div{animation:none!important}.bflip{transition:none!important}}
+        @media (prefers-reduced-motion:reduce){.w3spin,.lens,[data-op-hint],.paper-flutter{animation:none!important}[aria-hidden] > div{animation:none!important}.bflip{transition:none!important}}
         .mono-btn{transition:border-color .25s,color .25s}
         .mono-btn:hover{border-color:${ACC}!important;color:${ACC}!important}
         .arc-row{transition:background .25s}
