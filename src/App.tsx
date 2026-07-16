@@ -597,8 +597,26 @@ const Portfolio = () => {
   const [imgOk, setImgOk] = useState(true);
   const [qrOk, setQrOk] = useState(true);
   // 프로젝트 목록(sub)이 있는 행은 기본 펼침 — 스크롤만 해도 전체 이력이 보이게
-  const [openArcs, setOpenArcs] = useState<number[]>(() => ARCHIVE.flatMap((a, i) => (a.sub ? [i] : [])));
+  const [openArcs, setOpenArcs] = useState<number[]>([]); // 전부 닫힌 채 시작 — 인쇄 장면을 보여주기 위해
   const toggleArc = (i: number) => setOpenArcs((p) => (p.includes(i) ? p.filter((x) => x !== i) : [...p, i]));
+
+  // 아카이브 첫 진입 시 영수증 자동 인쇄 데모 — 1회, 행마다 스태거로 뽑혀 나옴
+  useEffect(() => {
+    const el = document.querySelector("[data-arc-section]");
+    if (!el) return;
+    let fired = false;
+    const io = new IntersectionObserver((entries) => {
+      if (fired || !entries.some((e) => e.isIntersecting)) return;
+      fired = true;
+      io.disconnect();
+      ARCHIVE.forEach((a, i) => {
+        if (!a.sub && !a.desc) return;
+        setTimeout(() => setOpenArcs((p) => (p.includes(i) ? p : [...p, i])), 250 + i * 550);
+      });
+    }, { threshold: 0.3 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   const rootRef = useRef<HTMLDivElement>(null);
   const reduceMotion = typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -1084,9 +1102,13 @@ const Portfolio = () => {
         /* 좁은 화면에선 히어로 오브제 숨김 */
         @media (max-width:900px){.gchunk-wrap,.hero-obj{display:none}}
 
-        /* 영수증 펄럭임 — 출력 직후 2회 흔들리고 정지 */
-        .paper-flutter{animation:paperWave 1.9s ease-in-out .8s 2}
+        /* 영수증 펄럭임 — 피드가 끝난 직후 2회 흔들리고 정지 */
+        .paper-flutter{animation:paperWave 1.9s ease-in-out 1.15s 2}
         @keyframes paperWave{0%,100%{transform:rotateX(0deg)}28%{transform:rotateX(7deg)}62%{transform:rotateX(-4.5deg)}}
+        /* 인쇄 LED — 피드 동안 슬롯에서 라임 점멸 */
+        .print-led{position:absolute;right:9px;top:3.5px;width:5px;height:5px;border-radius:50%;background:#3a3a3a}
+        .print-led.on{animation:ledBlink 1.15s linear 1}
+        @keyframes ledBlink{0%,19%,40%,59%,80%{background:#C8FF16;box-shadow:0 0 7px rgba(200,255,22,.95)}20%,39%,60%,79%,100%{background:#3a3a3a;box-shadow:none}}
 
         /* 행 플립 — 호버 시 행 전체가 젖혀지며 뒷면(라임+한글) 공개 */
         .bflip{position:relative;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.45,0,.22,1)}
@@ -1253,7 +1275,7 @@ const Portfolio = () => {
         </section>
 
         {/* ============ 04 ARCHIVE ============ */}
-        <section data-scene="flow" style={{ position: "relative", background: "#f4f3f0", color: "#111", padding: "14vh 3.5vw 12vh" }}>
+        <section data-scene="flow" data-arc-section style={{ position: "relative", background: "#f4f3f0", color: "#111", padding: "14vh 3.5vw 12vh" }}>
           <div style={{ display: "flex", justifyContent: "space-between", ...label, color: "#666" }}>
             <span data-scramble>04 — CAREER</span><span>2009 → 2026</span>
           </div>
@@ -1280,13 +1302,17 @@ const Portfolio = () => {
                     </span>
                   </div>
                   {expandable && (
-                    <div style={{ display: "grid", gridTemplateRows: openArcs.includes(i) ? "1fr" : "0fr", transition: "grid-template-rows .75s cubic-bezier(.3,.85,.25,1)" }}>
+                    <div style={{ display: "grid", gridTemplateRows: openArcs.includes(i) ? "1fr" : "0fr", transition: "grid-template-rows 1.1s cubic-bezier(.3,.8,.3,1)" }}>
                       <div style={{ overflow: "hidden" }}>
-                        {/* 영수증 — 출력구(슬롯)에서 기계식으로 뽑혀 나와 잠시 펄럭임 */}
+                        {/* 영수증 — 슬롯 아래로 지나간 부분만 보이며 뽑혀 나옴 (진짜 인쇄 마스킹) + 인쇄 중 LED */}
                         <div style={{ padding: "1.4vh 0 3.2vh calc(9ch + 2.5vw)" }}>
                           <div style={{ maxWidth: 580, transform: "rotate(.4deg)", perspective: 700 }}>
-                            <div style={{ position: "relative", zIndex: 2, height: 12, background: "#161616", borderRadius: 7, boxShadow: "inset 0 2px 5px rgba(0,0,0,.65), 0 1px 0 rgba(255,255,255,.4)" }} />
-                            <div className={openArcs.includes(i) ? "paper-flutter" : ""} style={{ marginTop: -2, transformOrigin: "top center" }}>
+                            <div style={{ position: "relative", zIndex: 2, height: 12, background: "#161616", borderRadius: 7, boxShadow: "inset 0 2px 5px rgba(0,0,0,.65), 0 1px 0 rgba(255,255,255,.4)" }}>
+                              <span className={openArcs.includes(i) ? "print-led on" : "print-led"} />
+                            </div>
+                            {/* 인쇄 창 — 슬롯 아래만 노출. 종이는 창 안에서 translateY로 피드 */}
+                            <div style={{ overflow: "hidden", marginTop: -2 }}>
+                            <div className={openArcs.includes(i) ? "paper-flutter" : ""} style={{ transformOrigin: "top center", transform: openArcs.includes(i) ? "translateY(0)" : "translateY(-101%)", transition: "transform 1.1s cubic-bezier(.3,.8,.3,1)" }}>
                             <div style={{ background: "#fff", padding: "15px 20px 16px", borderTop: "2px dashed rgba(17,17,17,.3)", boxShadow: "0 20px 46px rgba(17,17,17,.11)" }}>
                               <div style={{ display: "flex", justifyContent: "space-between", fontFamily: MONO, fontSize: 9, letterSpacing: ".18em", color: "#999" }}>
                                 <span>RECEIPT — {a.name.split(" —")[0]}</span><span>{a.yr}</span>
@@ -1312,6 +1338,7 @@ const Portfolio = () => {
                               </div>
                             </div>
                               <div style={{ height: 9, background: "linear-gradient(45deg,#fff 6px,transparent 0),linear-gradient(-45deg,#fff 6px,transparent 0)", backgroundSize: "12px 12px", backgroundRepeat: "repeat-x", filter: "drop-shadow(0 8px 12px rgba(17,17,17,.07))" }} />
+                            </div>
                             </div>
                           </div>
                         </div>
