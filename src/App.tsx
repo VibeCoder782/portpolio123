@@ -363,19 +363,26 @@ const HeroGlass = () => {
       uni.uRes.value.copy(db);
       const cr = cell.getBoundingClientRect();
       const W = (x: number, y: number) => new THREE.Vector3(x - w / 2, h / 2 - y, 0);
-      // 대형 유리구 — 1행 "FLOOR," 우측 끝에 반쯤 걸침 (타이포 관통형)
-      const ds = cell.querySelectorAll<HTMLElement>("[data-split]");
-      let sx = w * 0.74, sy = h * 0.4;
-      if (ds[0]) {
-        const r = ds[0].getBoundingClientRect();
-        sx = Math.min(r.right - cr.left - 30, w * 0.88);
-        sy = r.top - cr.top + r.height * 0.38;
-      }
+      // 랜덤 시작 위치 — 방문할 때마다 다른 구도. 서로 최소 간격 확보(리젝션 샘플링, 유영 반경만큼 여유)
+      const rand = (a: number, b: number) => a + Math.random() * (b - a);
+      const placed: { x: number; y: number; r: number }[] = [];
+      const place = (r: number, ax: number, ay: number) => {
+        // 여유 = 반지름 + 유영 최대 반경 → 떠다니는 중에도 화면 밖으로 안 나감
+        const mx = Math.min(r + ax + 20, w * 0.42), my = Math.min(r + ay + 20, h * 0.42);
+        for (let k = 0; k < 30; k++) {
+          const x = rand(mx, w - mx), y = rand(my, h - my);
+          if (placed.every((q) => Math.hypot(q.x - x, q.y - y) > q.r + r + 90)) { placed.push({ x, y, r }); return { x, y }; }
+        }
+        const x = rand(mx, w - mx), y = rand(my, h - my);
+        placed.push({ x, y, r });
+        return { x, y };
+      };
+      const p1 = place(190, w * 0.0675, h * 0.117), p2 = place(104, w * 0.108, h * 0.143), p3 = place(55, w * 0.1485, h * 0.195);
       // ampX/ampY = 유영 반경, f1/f2 = 유영 주파수(느릴수록 몽환적) — 둥둥 떠다니다 그 자리에서 퇴장
       objs = [
-        { m: sphere, base: W(sx, sy), exit: new THREE.Vector2(0.6 * w, 0.8 * h), exitAt: 0.12, entDelay: 0, phase: 0, ampX: w * 0.05, ampY: h * 0.09, f1: 0.11, f2: 0.07 },
-        { m: torus, base: W(w * 0.60, h * 0.16), exit: new THREE.Vector2(-0.5 * w, 0.7 * h), exitAt: 0.17, entDelay: 120, phase: 2.1, ampX: w * 0.08, ampY: h * 0.11, f1: 0.09, f2: 0.13 },
-        { m: small, base: W(w * 0.72, h * 0.66), exit: new THREE.Vector2(0.06 * w, -1.0 * h), exitAt: 0.22, entDelay: 240, phase: 4.2, ampX: w * 0.11, ampY: h * 0.15, f1: 0.14, f2: 0.1 },
+        { m: sphere, base: W(p1.x, p1.y), exit: new THREE.Vector2(0.6 * w, 0.8 * h), exitAt: 0.12, entDelay: 0, phase: rand(0, 6.28), ampX: w * 0.05, ampY: h * 0.09, f1: 0.11, f2: 0.07 },
+        { m: torus, base: W(p2.x, p2.y), exit: new THREE.Vector2(-0.5 * w, 0.7 * h), exitAt: 0.17, entDelay: 120, phase: rand(0, 6.28), ampX: w * 0.08, ampY: h * 0.11, f1: 0.09, f2: 0.13 },
+        { m: small, base: W(p3.x, p3.y), exit: new THREE.Vector2(0.06 * w, -1.0 * h), exitAt: 0.22, entDelay: 240, phase: rand(0, 6.28), ampX: w * 0.11, ampY: h * 0.15, f1: 0.14, f2: 0.1 },
       ];
       drawTexture(w, h, cr);
     };
@@ -600,22 +607,30 @@ const Portfolio = () => {
   const [openArcs, setOpenArcs] = useState<number[]>([]); // 전부 닫힌 채 시작 — 인쇄 장면을 보여주기 위해
   const toggleArc = (i: number) => setOpenArcs((p) => (p.includes(i) ? p.filter((x) => x !== i) : [...p, i]));
 
-  // 아카이브 첫 진입 시 영수증 자동 인쇄 데모 — 1회, 행마다 스태거로 뽑혀 나옴
+  // 영수증 자동 인쇄 — 각 "행"이 화면 상단 65% 안으로 확실히 들어온 순간 그 행을 인쇄.
+  // (섹션 단위 트리거는 사용자가 보기도 전에 인쇄가 끝나는 문제 → 행 단위로 교체)
+  // 여러 행이 동시에 진입하면 0.6초 간격으로 직렬화해 순차로 뽑힌다.
   useEffect(() => {
-    const el = document.querySelector("[data-arc-section]");
-    if (!el) return;
-    let fired = false;
+    const rows = Array.from(document.querySelectorAll<HTMLElement>("[data-arc-row]"));
+    if (!rows.length) return;
+    const done = new Set<number>();
+    let lastAt = 0;
+    const timers: number[] = [];
     const io = new IntersectionObserver((entries) => {
-      if (fired || !entries.some((e) => e.isIntersecting)) return;
-      fired = true;
-      io.disconnect();
-      ARCHIVE.forEach((a, i) => {
-        if (!a.sub && !a.desc) return;
-        setTimeout(() => setOpenArcs((p) => (p.includes(i) ? p : [...p, i])), 250 + i * 550);
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const i = Number((e.target as HTMLElement).dataset.arcRow);
+        if (done.has(i)) return;
+        done.add(i);
+        io.unobserve(e.target);
+        const now = performance.now();
+        const at = Math.max(now, lastAt + 600);
+        lastAt = at;
+        timers.push(window.setTimeout(() => setOpenArcs((p) => (p.includes(i) ? p : [...p, i])), at - now));
       });
-    }, { threshold: 0.3 });
-    io.observe(el);
-    return () => io.disconnect();
+    }, { rootMargin: "0px 0px -35% 0px" });
+    rows.forEach((r) => io.observe(r));
+    return () => { io.disconnect(); timers.forEach(clearTimeout); };
   }, []);
   const rootRef = useRef<HTMLDivElement>(null);
   const reduceMotion = typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1103,12 +1118,12 @@ const Portfolio = () => {
         @media (max-width:900px){.gchunk-wrap,.hero-obj{display:none}}
 
         /* 영수증 펄럭임 — 피드가 끝난 직후 2회 흔들리고 정지 */
-        .paper-flutter{animation:paperWave 1.9s ease-in-out 1.15s 2}
+        .paper-flutter{animation:paperWave 1.9s ease-in-out 1.75s 2}
         @keyframes paperWave{0%,100%{transform:rotateX(0deg)}28%{transform:rotateX(7deg)}62%{transform:rotateX(-4.5deg)}}
         /* 인쇄 LED — 피드 동안 슬롯에서 라임 점멸 */
         .print-led{position:absolute;right:9px;top:3.5px;width:5px;height:5px;border-radius:50%;background:#3a3a3a}
-        .print-led.on{animation:ledBlink 1.15s linear 1}
-        @keyframes ledBlink{0%,19%,40%,59%,80%{background:#C8FF16;box-shadow:0 0 7px rgba(200,255,22,.95)}20%,39%,60%,79%,100%{background:#3a3a3a;box-shadow:none}}
+        .print-led.on{animation:ledBlink 1.75s linear 1}
+        @keyframes ledBlink{0%,15%,32%,47%,64%,79%{background:#C8FF16;box-shadow:0 0 7px rgba(200,255,22,.95)}16%,31%,48%,63%,80%,100%{background:#3a3a3a;box-shadow:none}}
 
         /* 행 플립 — 호버 시 행 전체가 젖혀지며 뒷면(라임+한글) 공개 */
         .bflip{position:relative;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.45,0,.22,1)}
@@ -1283,7 +1298,7 @@ const Portfolio = () => {
             {ARCHIVE.map((a, i) => {
               const expandable = !!(a.sub || a.desc);
               return (
-                <div key={i}>
+                <div key={i} data-arc-row={expandable ? i : undefined}>
                   <div
                     className="arc-row"
                     data-hover={expandable ? true : undefined}
@@ -1302,7 +1317,7 @@ const Portfolio = () => {
                     </span>
                   </div>
                   {expandable && (
-                    <div style={{ display: "grid", gridTemplateRows: openArcs.includes(i) ? "1fr" : "0fr", transition: "grid-template-rows 1.1s cubic-bezier(.3,.8,.3,1)" }}>
+                    <div style={{ display: "grid", gridTemplateRows: openArcs.includes(i) ? "1fr" : "0fr", transition: "grid-template-rows 1.7s cubic-bezier(.3,.65,.3,1)" }}>
                       <div style={{ overflow: "hidden" }}>
                         {/* 영수증 — 슬롯 아래로 지나간 부분만 보이며 뽑혀 나옴 (진짜 인쇄 마스킹) + 인쇄 중 LED */}
                         <div style={{ padding: "1.4vh 0 3.2vh calc(9ch + 2.5vw)" }}>
@@ -1312,7 +1327,7 @@ const Portfolio = () => {
                             </div>
                             {/* 인쇄 창 — 슬롯 아래만 노출. 종이는 창 안에서 translateY로 피드 */}
                             <div style={{ overflow: "hidden", marginTop: -2 }}>
-                            <div className={openArcs.includes(i) ? "paper-flutter" : ""} style={{ transformOrigin: "top center", transform: openArcs.includes(i) ? "translateY(0)" : "translateY(-101%)", transition: "transform 1.1s cubic-bezier(.3,.8,.3,1)" }}>
+                            <div className={openArcs.includes(i) ? "paper-flutter" : ""} style={{ transformOrigin: "top center", transform: openArcs.includes(i) ? "translateY(0)" : "translateY(-101%)", transition: "transform 1.7s cubic-bezier(.3,.65,.3,1)" }}>
                             <div style={{ background: "#fff", padding: "15px 20px 16px", borderTop: "2px dashed rgba(17,17,17,.3)", boxShadow: "0 20px 46px rgba(17,17,17,.11)" }}>
                               <div style={{ display: "flex", justifyContent: "space-between", fontFamily: MONO, fontSize: 9, letterSpacing: ".18em", color: "#999" }}>
                                 <span>RECEIPT — {a.name.split(" —")[0]}</span><span>{a.yr}</span>
