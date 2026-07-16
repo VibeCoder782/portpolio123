@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import * as THREE from "three";
 
 // ─────────────────────────────────────────────────────────────
 // "타이포 기반 3D 포트폴리오" — 클로드 디자인(포트폴리오 메인.dc.html) React 포팅
@@ -238,6 +239,205 @@ const Sparks = () => {
   return <canvas ref={ref} aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none" }} />;
 };
 
+// ─────────────────────────────────────────────────────────────
+// 히어로 WebGL 유리 오브제 — 커스텀 굴절 셰이더.
+// 핵심: DOM 타이포·그리드를 캔버스 텍스처로 복제해 유리 픽셀이 그 텍스처를
+// 스크린공간 굴절로 샘플링 → 진짜로 글자가 유리 안에서 휘어 보인다.
+// (WebGL transmission은 씬 안의 것만 굴절시키므로 이 방식이 DOM 통합의 정석)
+// 메인 rAF 루프가 glassTick을 호출 — 루프는 하나만 존재.
+// ─────────────────────────────────────────────────────────────
+let glassTick: ((emx: number, emy: number, introDone: boolean) => void) | null = null;
+
+const GLASS_VERT = `
+varying vec3 vN; varying vec3 vV;
+void main(){
+  vN = normalize(normalMatrix * normal);
+  vec4 mv = modelViewMatrix * vec4(position, 1.0);
+  vV = -mv.xyz;
+  gl_Position = projectionMatrix * mv;
+}`;
+
+const GLASS_FRAG = `
+precision highp float;
+uniform sampler2D uTex; uniform vec2 uRes; uniform float uRefr;
+varying vec3 vN; varying vec3 vV;
+void main(){
+  vec3 n = normalize(vN);
+  vec3 v = normalize(vV);
+  float ndv = clamp(dot(n, v), 0.0, 1.0);
+  float edge = pow(1.0 - ndv, 1.6);
+  vec2 uv = gl_FragCoord.xy / uRes;
+  vec2 off = (n.xy * uRefr * (0.3 + 0.7 * edge)) / uRes;
+  vec2 suv = uv - off;
+  vec2 fo = vec2(1.6) / uRes;
+  vec3 col = ( texture2D(uTex, suv).rgb
+             + texture2D(uTex, suv + vec2(fo.x, 0.0)).rgb
+             + texture2D(uTex, suv - vec2(fo.x, 0.0)).rgb
+             + texture2D(uTex, suv + vec2(0.0, fo.y)).rgb ) * 0.25;
+  col *= 0.9 + 0.1 * ndv;                       // 두께감 — 가장자리 미세하게 어둡게
+  float fres = pow(1.0 - ndv, 3.0);
+  col = mix(col, vec3(1.0), fres * 0.5);        // 프레넬 림 라이트
+  vec3 l1 = normalize(vec3(-0.45, 0.55, 0.62)); // 스튜디오 키 라이트
+  vec3 l2 = normalize(vec3(0.62, 0.18, 0.5));   // 보조 라이트
+  col += vec3(pow(max(dot(reflect(-l1, n), v), 0.0), 90.0) * 0.45
+            + pow(max(dot(reflect(-l2, n), v), 0.0), 170.0) * 0.3);
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+const HeroGlass = () => {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || window.innerWidth <= 900) return;
+    const cell = canvas.parentElement as HTMLElement;
+    const sceneEl = canvas.closest<HTMLElement>("[data-scene]");
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let disposed = false;
+    let ready = false;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(30, 1, 1, 5000);
+    const CAMD = 1000; // 카메라 거리 1000 + fov 보정 = z0 평면에서 1 world unit = 1 px
+
+    const texCanvas = document.createElement("canvas");
+    const tex = new THREE.CanvasTexture(texCanvas);
+    tex.minFilter = THREE.LinearFilter;
+    const uni = { uTex: { value: tex }, uRes: { value: new THREE.Vector2(1, 1) }, uRefr: { value: 90 } };
+    const mat = new THREE.ShaderMaterial({ vertexShader: GLASS_VERT, fragmentShader: GLASS_FRAG, uniforms: uni });
+
+    const sphere = new THREE.Mesh(new THREE.SphereGeometry(190, 64, 64), mat);
+    const torus = new THREE.Mesh(new THREE.TorusGeometry(78, 26, 48, 96), mat);
+    const small = new THREE.Mesh(new THREE.SphereGeometry(55, 48, 48), mat);
+    scene.add(sphere, torus, small);
+
+    type Obj = { m: THREE.Mesh; base: THREE.Vector3; exit: THREE.Vector2; exitAt: number; entDelay: number; phase: number };
+    let objs: Obj[] = [];
+
+    const drawTexture = (w: number, h: number, cr: DOMRect) => {
+      const s = Math.min(window.devicePixelRatio, 1.5);
+      texCanvas.width = Math.round(w * s);
+      texCanvas.height = Math.round(h * s);
+      const g = texCanvas.getContext("2d");
+      if (!g) return;
+      g.scale(s, s);
+      g.fillStyle = "#f4f3f0"; g.fillRect(0, 0, w, h);
+      g.strokeStyle = "rgba(17,17,17,.07)"; g.lineWidth = 1;
+      for (let x = 0.5; x < w; x += 72) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
+      for (let y = 0.5; y < h; y += 72) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
+      g.textBaseline = "middle"; g.textAlign = "left";
+      const num = cell.querySelector<HTMLElement>("[data-hero-num]");
+      if (num) {
+        const r = num.getBoundingClientRect();
+        g.font = `${parseFloat(getComputedStyle(num).fontSize)}px Anton`;
+        g.strokeStyle = "rgba(17,17,17,.13)"; g.lineWidth = 2;
+        g.strokeText("12/3", r.left - cr.left, r.top - cr.top + r.height * 0.55);
+      }
+      const ds = cell.querySelectorAll<HTMLElement>("[data-split]");
+      const line = (el: HTMLElement | undefined, text: string, color = "#111") => {
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        g.font = `${parseFloat(getComputedStyle(el).fontSize)}px Anton`;
+        g.fillStyle = color;
+        g.fillText(text, r.left - cr.left, r.top - cr.top + r.height * 0.56);
+      };
+      line(ds[0], "12 YEARS ON THE FLOOR,");
+      line(ds[1], "3 IN PRODUCT.");
+      line(ds[2], "NOW");
+      line(ds[3], " I BUILD.");
+      line(cell.querySelector<HTMLElement>("[data-hero-dash]") ?? undefined, "—", ACC);
+      tex.needsUpdate = true;
+    };
+
+    const measure = () => {
+      const w = cell.clientWidth, h = cell.clientHeight;
+      renderer.setSize(w, h);
+      camera.aspect = w / h;
+      camera.position.z = CAMD;
+      camera.fov = (2 * Math.atan(h / 2 / CAMD) * 180) / Math.PI;
+      camera.updateProjectionMatrix();
+      const db = new THREE.Vector2();
+      renderer.getDrawingBufferSize(db);
+      uni.uRes.value.copy(db);
+      const cr = cell.getBoundingClientRect();
+      const W = (x: number, y: number) => new THREE.Vector3(x - w / 2, h / 2 - y, 0);
+      // 대형 유리구 — 1행 "FLOOR," 우측 끝에 반쯤 걸침 (타이포 관통형)
+      const ds = cell.querySelectorAll<HTMLElement>("[data-split]");
+      let sx = w * 0.74, sy = h * 0.4;
+      if (ds[0]) {
+        const r = ds[0].getBoundingClientRect();
+        sx = Math.min(r.right - cr.left - 30, w * 0.88);
+        sy = r.top - cr.top + r.height * 0.38;
+      }
+      objs = [
+        { m: sphere, base: W(sx, sy), exit: new THREE.Vector2(0.6 * w, 0.8 * h), exitAt: 0.12, entDelay: 0, phase: 0 },
+        { m: torus, base: W(w * 0.60, h * 0.16), exit: new THREE.Vector2(-0.5 * w, 0.7 * h), exitAt: 0.17, entDelay: 120, phase: 2.1 },
+        { m: small, base: W(w * 0.72, h * 0.66), exit: new THREE.Vector2(0.06 * w, -1.0 * h), exitAt: 0.22, entDelay: 240, phase: 4.2 },
+      ];
+      drawTexture(w, h, cr);
+    };
+
+    document.fonts.ready.then(() => {
+      if (disposed) return;
+      measure();
+      ready = true;
+    });
+
+    let entT0 = 0;
+    const easeOutBack = (t: number) => { const c = 1.2; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
+    const easeIn = (t: number) => t * t * t;
+
+    glassTick = (emx, emy, introDone) => {
+      if (disposed || !ready) return;
+      const now = performance.now();
+      if (introDone && !entT0) entT0 = now;
+      const p = sceneEl ? parseFloat(sceneEl.style.getPropertyValue("--p") || "0") : 0;
+      const t = now / 1000;
+      objs.forEach((o, i) => {
+        let en = 1;
+        if (!reduce) {
+          if (!entT0) en = 0;
+          else {
+            const raw = Math.max(0, Math.min(1, (now - entT0 - o.entDelay) / 850));
+            en = raw >= 1 ? 1 : easeOutBack(raw);
+          }
+        }
+        const ex = easeIn(Math.max(0, Math.min(1, (p - o.exitAt) / 0.38))); // 스크럽 연동 퇴장 — 각자 다른 방향
+        const fl = reduce ? 0 : Math.sin(t * 0.5 + o.phase) * 7;
+        o.m.position.set(
+          o.base.x + o.exit.x * (ex + (1 - en) * 0.35) + emx * (14 + i * 8),
+          o.base.y + o.exit.y * (ex + (1 - en) * 0.35) + fl - emy * (10 + i * 6),
+          0
+        );
+        if (i === 1) { // 토러스 — 상시 저속 텀블, 퇴장 시 가속 스핀
+          o.m.rotation.set(1.05 + ex * 1.6, -0.4 + (reduce ? 0 : t * 0.16) + ex * 2.4, 0.2);
+        }
+      });
+      renderer.render(scene, camera);
+    };
+
+    let rto = 0;
+    const onResize = () => {
+      clearTimeout(rto);
+      rto = window.setTimeout(() => { if (!disposed && ready) measure(); }, 200);
+    };
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      disposed = true;
+      glassTick = null;
+      window.removeEventListener("resize", onResize);
+      clearTimeout(rto);
+      sphere.geometry.dispose(); torus.geometry.dispose(); small.geometry.dispose();
+      mat.dispose(); tex.dispose();
+      renderer.dispose();
+    };
+  }, []);
+  return <canvas ref={canvasRef} aria-hidden="true" className="hero-obj" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 3, pointerEvents: "none" }} />;
+};
+
 // Builds 행 — 호버 시 라임 스윕 + 유리 패널 프리뷰(스크린샷 있으면 이미지, 없으면 와이어프레임 도형)
 const BuildRow = ({ b, i }: { b: Build; i: number }) => {
   const [shotOk, setShotOk] = useState(true);
@@ -413,6 +613,7 @@ const Portfolio = () => {
       curRow: null as HTMLElement | null,
       introDone: false, raf: 0, dead: false, opInteracted: false,
       prevPx: undefined as number | undefined, prevPy: undefined as number | undefined, opAcc: 0,
+      cardEntT0: 0, // 유리 카드 입장 애니메이션 시작 시각 (인트로 완료 시점)
       dash: null as null | { x: number; y: number; vx: number; vy: number; r: number },
     };
 
@@ -438,8 +639,12 @@ const Portfolio = () => {
     };
     document.addEventListener("mouseover", onOver);
 
+    const heroCard = root.querySelector<HTMLElement>("[data-hero-card]");
+    const heroScene = heroCard ? heroCard.closest<HTMLElement>("[data-scene]") : null;
+
     const loopBody = () => {
       const vh = window.innerHeight;
+      const now = performance.now();
       S.emx = L(S.emx, S.mx, 0.06); S.emy = L(S.emy, S.my, 0.06);
       root.style.setProperty("--emx", S.emx.toFixed(4));
       root.style.setProperty("--emy", S.emy.toFixed(4));
@@ -703,6 +908,24 @@ const Portfolio = () => {
         el.style.transform = `translate(${m.x.toFixed(2)}px,${m.y.toFixed(2)}px)`;
       });
 
+      // 히어로 유리 카드 — 인트로 후 입장 + 스크롤 걷어내기 퇴장 (우하단으로, 틸트 심화)
+      if (heroCard && heroScene) {
+        if (S.introDone && !S.cardEntT0) S.cardEntT0 = now;
+        let enE = 1;
+        if (!reduceMotion) {
+          const en = S.cardEntT0 ? Math.max(0, Math.min(1, (now - S.cardEntT0 - 300) / 750)) : 0;
+          enE = 1 - Math.pow(1 - en, 3);
+        }
+        const hp = parseFloat(heroScene.style.getPropertyValue("--p") || "0");
+        const ex = Math.max(0, Math.min(1, (hp - 0.16) / 0.38));
+        const exE = ex * ex * ex;
+        const ox = (1 - enE) * window.innerWidth * 0.18 + exE * window.innerWidth * 0.55 + S.emx * 10;
+        const oy = (1 - enE) * vh * 0.22 + exE * vh * 0.5 + S.emy * 6;
+        heroCard.style.transform = `translate3d(${ox.toFixed(1)}px, ${oy.toFixed(1)}px, 0) rotate(${(-5 - exE * 10).toFixed(2)}deg)`;
+      }
+
+      // WebGL 유리 오브제 렌더 (HeroGlass가 등록한 틱 — rAF 루프는 이거 하나)
+      if (glassTick) glassTick(S.emx, S.emy, S.introDone);
     };
     // 한 프레임에서 예외가 나도 rAF 루프는 죽지 않는다 (루프 사망 = 페이지 전체 정지)
     let loopErrLogged = false;
@@ -892,80 +1115,31 @@ const Portfolio = () => {
               <span style={{ color: "#666" }}>PM/PO · BUSAN · <span data-clock>LOCAL --:--:-- KST</span></span>
             </div>
             <div style={{ position: "absolute", top: 27, left: "50%", transform: "translateX(-50%)", fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#999", zIndex: 5 }}>TYPE IS PHYSICAL</div>
-            <div style={{ position: "absolute", top: "4vh", right: "1.5vw", fontFamily: ANTON, fontSize: "46vh", lineHeight: 1, color: "transparent", WebkitTextStroke: "1.5px rgba(17,17,17,.13)", zIndex: 1, transform: "translateY(calc(var(--p,0)*-24vh))" }}>12/3</div>
+            <div data-hero-num style={{ position: "absolute", top: "4vh", right: "1.5vw", fontFamily: ANTON, fontSize: "46vh", lineHeight: 1, color: "transparent", WebkitTextStroke: "1.5px rgba(17,17,17,.13)", zIndex: 1, transform: "translateY(calc(var(--p,0)*-24vh))" }}>12/3</div>
             <div style={{ position: "absolute", left: "3.5vw", bottom: "12vh", zIndex: 2, transform: "perspective(950px) rotateX(calc(var(--emy,0)*var(--tilt,0)*4deg)) rotateY(calc(var(--emx,0)*var(--tilt,0)*-6deg))", transformStyle: "preserve-3d" }}>
               <div data-split style={{ ...heroLine, transform: "translateX(calc(var(--p,0)*-5vw))" }}>{split("12 YEARS ON THE FLOOR,")}</div>
               <div data-split style={{ ...heroLine, transform: "translateX(calc(var(--p,0)*3.5vw))" }}>{split("3 IN PRODUCT.")}</div>
               <div style={{ transform: "translateX(calc(var(--p,0)*-2vw))" }}>
                 <span style={{ position: "relative", display: "inline-block", ...heroLine }}>
                   <span data-split style={{ whiteSpace: "pre" }}>{split("NOW ")}</span>
-                  <span style={{ color: ACC }}>—</span>
+                  <span data-hero-dash style={{ color: ACC }}>—</span>
                   <span data-split style={{ whiteSpace: "pre" }}>{split(" I BUILD.")}</span>
                 </span>
               </div>
             </div>
             <div data-magnetic data-hover style={{ position: "absolute", left: "3.5vw", bottom: "3.5vh", zIndex: 4, fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#555", border: "1px solid rgba(17,17,17,.25)", padding: "10px 16px" }}>SCROLL</div>
 
-            {/* ── 히어로 오브제: 조명 셰이딩된 입체 오브젝트 + 유리 카드 (유리 "뒤"에 입체물이 있어야 유리가 산다) ──
+            {/* ── 히어로 오브제: WebGL 유리 (타이포 관통형 대형구 + 토러스 + 소형구) ──
+                타이포(z2) 위, 유리 카드(z4) 아래 캔버스 한 장. 유리 안에서 글자가 굴절됨 */}
+            <HeroGlass />
+
+            {/* 유리 선언문 카드 — DOM 유지 (backdrop-filter). 입장·퇴장은 메인 루프가 구동
                 ⚠ backdrop-filter 요소의 조상에 filter 금지 (backdrop-root 경계 → 유리 무효) */}
-
-            {/* 토러스 — 심도 흐림으로 뒤판 느낌 */}
-            <div aria-hidden="true" className="hero-obj" style={{ position: "absolute", top: "4vh", right: "32vw", width: 185, height: 185, zIndex: 1, pointerEvents: "none", filter: "blur(1.6px)", transform: "translate3d(calc(var(--emx,0)*-14px), calc(var(--p,0)*-4vh + var(--emy,0)*-9px), 0)" }}>
-              <div style={{ position: "absolute", inset: 0, animation: "heroFloatB 26s ease-in-out infinite" }}>
-                <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "conic-gradient(from 210deg, #232321, #77746e 80deg, #99968e 115deg, #45443f 195deg, #191918 265deg, #232321)", WebkitMaskImage: "radial-gradient(circle, transparent 32%, #000 34%, #000 62%, transparent 64%)", maskImage: "radial-gradient(circle, transparent 32%, #000 34%, #000 62%, transparent 64%)", transform: "rotate(-14deg)" }} />
-              </div>
-            </div>
-
-            {/* 메인 스피어 — 스튜디오 조명 셰이딩 (하이라이트→코어섀도→바닥 반사광) */}
-            <div aria-hidden="true" className="hero-obj" style={{ position: "absolute", top: "12vh", right: "5vw", width: 330, height: 330, zIndex: 1, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*22px), calc(var(--p,0)*-7vh + var(--emy,0)*14px), 0)" }}>
-              <div style={{ position: "absolute", inset: 0, animation: "heroFloatA 30s ease-in-out infinite" }}>
-                <svg viewBox="0 0 100 100" width="100%" height="100%">
-                  <defs>
-                    <radialGradient id="orbA" cx="35%" cy="27%" r="78%">
-                      <stop offset="0%" stopColor="#918f89" />
-                      <stop offset="32%" stopColor="#5e5c56" />
-                      <stop offset="66%" stopColor="#302f2c" />
-                      <stop offset="100%" stopColor="#131312" />
-                    </radialGradient>
-                    <radialGradient id="orbARim" cx="50%" cy="90%" r="58%">
-                      <stop offset="0%" stopColor="rgba(244,243,240,.30)" />
-                      <stop offset="55%" stopColor="rgba(244,243,240,.07)" />
-                      <stop offset="100%" stopColor="rgba(244,243,240,0)" />
-                    </radialGradient>
-                    <filter id="orbASpec" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.7" /></filter>
-                  </defs>
-                  <circle cx="50" cy="50" r="46" fill="url(#orbA)" />
-                  <circle cx="50" cy="50" r="46" fill="url(#orbARim)" />
-                  <ellipse cx="37" cy="26" rx="11" ry="7.5" fill="rgba(255,255,255,.5)" filter="url(#orbASpec)" />
-                </svg>
-              </div>
-            </div>
-
-            {/* 유리 카드 — 선언문 (오브제·타이포를 굴절시키는 프론트 레이어) */}
-            <div style={{ position: "absolute", top: "44vh", right: "4.5vw", width: 370, zIndex: 4, pointerEvents: "none", transform: "rotate(-5deg) translate3d(calc(var(--emx,0)*10px), calc(var(--emy,0)*6px), 0)" }}>
+            <div data-hero-card style={{ position: "absolute", top: "44vh", right: "4.5vw", width: 370, zIndex: 4, pointerEvents: "none", transform: "rotate(-5deg)" }}>
               <div style={{ borderRadius: 22, padding: "24px 28px", background: "linear-gradient(150deg, rgba(255,255,255,.38), rgba(255,255,255,.10) 55%, rgba(255,255,255,.24))", backdropFilter: "blur(9px) saturate(1.12) brightness(1.03)", WebkitBackdropFilter: "blur(9px) saturate(1.12) brightness(1.03)", border: "1px solid rgba(255,255,255,.65)", boxShadow: "0 34px 70px rgba(17,17,17,.14), inset 0 1px 0 rgba(255,255,255,.75)" }}>
                 <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#666", marginBottom: 13 }}>MANIFESTO</div>
                 <div style={{ fontSize: 15, lineHeight: 1.75, fontWeight: 500, color: "#2a2a28" }}>현장에서 12년, 프로덕트에서 3년.<br />이제는 직접 만들어 증명한다.</div>
                 <b style={{ display: "block", marginTop: 10, fontSize: 15.5, color: "#111", fontWeight: 800 }}>"안 되는 건 없다, 방법이 다를 뿐."</b>
-              </div>
-            </div>
-
-            {/* 소형 스피어 — 유리 카드 "앞"에 겹쳐 깊이 샌드위치 */}
-            <div aria-hidden="true" className="hero-obj" style={{ position: "absolute", top: "57vh", right: "22vw", width: 110, height: 110, zIndex: 5, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*30px), calc(var(--emy,0)*20px), 0)" }}>
-              <div style={{ position: "absolute", inset: 0, animation: "heroFloatB 22s ease-in-out infinite" }}>
-                <svg viewBox="0 0 100 100" width="100%" height="100%">
-                  <defs>
-                    <radialGradient id="orbB" cx="38%" cy="30%" r="76%">
-                      <stop offset="0%" stopColor="#9b9992" />
-                      <stop offset="35%" stopColor="#6a6862" />
-                      <stop offset="70%" stopColor="#383734" />
-                      <stop offset="100%" stopColor="#161615" />
-                    </radialGradient>
-                    <filter id="orbBSpec" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" /></filter>
-                  </defs>
-                  <circle cx="50" cy="50" r="46" fill="url(#orbB)" />
-                  <ellipse cx="39" cy="28" rx="12" ry="8" fill="rgba(255,255,255,.55)" filter="url(#orbBSpec)" />
-                </svg>
               </div>
             </div>
           </div>
