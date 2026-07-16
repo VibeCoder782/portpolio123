@@ -29,18 +29,18 @@ const split = (txt: string) =>
 
 // shape: 호버 프리뷰의 블루프린트 와이어프레임 3D 도형 (프로젝트의 은유) / cap: 도형 캡션
 // shot: /public/shots/ 에 스크린샷이 생기면 자동으로 도형 대신 표시
-type Build = { no: string; name: string; meta: string; shape: string; cap: string; shot: string | null };
+type Build = { no: string; name: string; meta: string; shape: string; cap: string; shot: string | null; ko: string; koDesc: string };
 const BUILDS: Build[] = [
-  { no: "01", name: "AI AUTOMATION", meta: "N8N · IN USE", shape: "rings", cap: "AUTOMATION LOOP", shot: "/shots/n8n.png" },
-  { no: "02", name: "BOOGION", meta: "TEAM OF 4 · TOP CONTRIBUTOR", shape: "cube4", cap: "TEAM OF FOUR", shot: "/shots/boogion.png" },
-  { no: "03", name: "MOUNTAINON", meta: "APP BUILD", shape: "peak", cap: "THE PEAK", shot: "/shots/mountainon.png" },
-  { no: "04", name: "BOOKITDA", meta: "STORE-READY", shape: "pages", cap: "PAGES", shot: "/shots/bookitda.png" },
-  { no: "05", name: "CASETALK", meta: "AI SELF-CHECK", shape: "dialogue", cap: "DIALOGUE", shot: "/shots/casetalk.png" },
-  { no: "06", name: "AI INSIGHT OS", meta: "35 SPECS · PRE-MVP", shape: "stack", cap: "STACK OF 35", shot: "/shots/insightos.png" },
-  { no: "07", name: "CONTENT PLATFORM ※", meta: "IN SERVICE · ANONYMOUS", shape: "sealed", cap: "SEALED", shot: null },
-  { no: "08", name: "WEBOPS BUILDER", meta: "OPS CONSOLE · IN DESIGN", shape: "console", cap: "CONSOLE", shot: "/shots/webops.png" },
-  { no: "09", name: "FLOWON", meta: "3D WEB · SHIPPED", shape: "wave", cap: "THE WAVE", shot: "/shots/flowon.png" },
-  { no: "10", name: "CITIZEN'S TURN", meta: "UNITY 2D · IN DEV", shape: "die", cap: "THE DIE", shot: "/shots/citizensturn.png" },
+  { no: "01", name: "AI AUTOMATION", meta: "N8N · IN USE", shape: "rings", cap: "AUTOMATION LOOP", shot: "/shots/n8n.png", ko: "AI 업무자동화", koDesc: "회의록·OCR·트렌드 자동화 — 지금도 매일 쓴다" },
+  { no: "02", name: "BOOGION", meta: "TEAM OF 4 · TOP CONTRIBUTOR", shape: "cube4", cap: "TEAM OF FOUR", shot: "/shots/boogion.png", ko: "부기온", koDesc: "정서 케어 앱 · 4인 팀 · 기여 최다" },
+  { no: "03", name: "MOUNTAINON", meta: "APP BUILD", shape: "peak", cap: "THE PEAK", shot: "/shots/mountainon.png", ko: "마운틴온", koDesc: "GPS 등산 기록 앱 · 1인 개발" },
+  { no: "04", name: "BOOKITDA", meta: "STORE-READY", shape: "pages", cap: "PAGES", shot: "/shots/bookitda.png", ko: "북잇다", koDesc: "독서 한줄평 소셜 · 출시 직전" },
+  { no: "05", name: "CASETALK", meta: "AI SELF-CHECK", shape: "dialogue", cap: "DIALOGUE", shot: "/shots/casetalk.png", ko: "모의톡", koDesc: "AI 셀프 점검 웹 · 안전장치 설계" },
+  { no: "06", name: "AI INSIGHT OS", meta: "35 SPECS · PRE-MVP", shape: "stack", cap: "STACK OF 35", shot: "/shots/insightos.png", ko: "AI 인사이트 OS", koDesc: "35개 스펙 문서로 설계한 개인용 지식 OS" },
+  { no: "07", name: "CONTENT PLATFORM ※", meta: "IN SERVICE · ANONYMOUS", shape: "sealed", cap: "SEALED", shot: null, ko: "콘텐츠 플랫폼", koDesc: "운영 중 · 서비스명은 비공개" },
+  { no: "08", name: "WEBOPS BUILDER", meta: "OPS CONSOLE · IN DESIGN", shape: "console", cap: "CONSOLE", shot: "/shots/webops.png", ko: "웹옵스 빌더", koDesc: "멀티 프로덕트 운영 콘솔 · 설계 중" },
+  { no: "09", name: "FLOWON", meta: "3D WEB · SHIPPED", shape: "wave", cap: "THE WAVE", shot: "/shots/flowon.png", ko: "플로우온", koDesc: "3D 인터랙티브 웹 · 완성" },
+  { no: "10", name: "CITIZEN'S TURN", meta: "UNITY 2D · IN DEV", shape: "die", cap: "THE DIE", shot: "/shots/citizensturn.png", ko: "시민의 턴", koDesc: "Unity 2D 의사결정 게임 · 개발 중" },
 ];
 
 type ArchiveRow = { yr: string; name: string; meta: string; desc?: string; sub?: { n: string; p: string }[] };
@@ -204,14 +204,6 @@ const WireShape = ({ type }: { type: string }) => {
   );
 };
 
-// 호버 플립 — 행 제목이 마디마디 젖혀지며 일어남 (split-flap)
-const flipTxt = (txt: string) =>
-  [...txt].map((ch, i) => (
-    <span key={i} className="fl" style={{ ["--i" as string]: i } as React.CSSProperties}>
-      {ch}
-    </span>
-  ));
-
 // 콘택트 파티클 — "LET'S BUILD" 위로 피어오르는 작업장의 불씨
 const Sparks = () => {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -260,11 +252,24 @@ const BuildRow = ({ b, i }: { b: Build; i: number }) => {
   const th = (0.16 + i * 0.09).toFixed(2);
   const vis = `clamp(0, calc(var(--p,0)*4 - ${th}), 1)`;
   return (
-    <div data-row data-hover style={{ position: "relative", display: "flex", alignItems: "center", gap: "2.5vw", padding: "2.2vh 3.5vw", borderTop: "1px solid #242424", color: "#f4f3f0", transition: "color .2s ease", transformOrigin: "center bottom", opacity: vis, transform: `translateY(calc((1 - ${vis})*40px)) rotateX(calc((1 - ${vis})*-32deg))` }}>
-      <span style={{ position: "absolute", inset: 0, background: ACC, transform: "scaleX(var(--th,0))", transformOrigin: "left", transition: "transform .34s cubic-bezier(.2,.7,.2,1)", zIndex: 0 }} />
-      <span style={{ fontFamily: MONO, fontSize: 11, width: "3ch", flex: "none", color: "inherit", opacity: 0.55, position: "relative", zIndex: 2 }}>{b.no}</span>
-      <span style={{ fontFamily: ANTON, fontSize: "clamp(26px,3.9vw,64px)", lineHeight: 1, position: "relative", zIndex: 2, transform: "skewY(var(--skew,0deg))", perspective: 700 }}>{flipTxt(b.name)}</span>
-      <span style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 11, letterSpacing: ".14em", color: "inherit", opacity: 0.55, position: "relative", zIndex: 2 }}>{b.meta}</span>
+    <div data-row data-hover style={{ position: "relative", borderTop: "1px solid #242424", opacity: vis, transform: `translateY(calc((1 - ${vis})*40px))`, perspective: 1200 }}>
+      <div className="bflip">
+        {/* 앞면 — 영문 타이틀 */}
+        <div className="bface" style={{ display: "flex", alignItems: "center", gap: "2.5vw", padding: "2.2vh 3.5vw", color: "#f4f3f0" }}>
+          <span style={{ fontFamily: MONO, fontSize: 11, width: "3ch", flex: "none", opacity: 0.55 }}>{b.no}</span>
+          <span style={{ fontFamily: ANTON, fontSize: "clamp(26px,3.9vw,64px)", lineHeight: 1, transform: "skewY(var(--skew,0deg))" }}>{b.name}</span>
+          <span style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 11, letterSpacing: ".14em", opacity: 0.55 }}>{b.meta}</span>
+        </div>
+        {/* 뒷면 — 라임 + 한글 정보 */}
+        <div className="bface" style={{ position: "absolute", inset: 0, transform: "rotateX(180deg)", background: ACC, color: "#0a0a0a", display: "flex", alignItems: "center", gap: "2.5vw", padding: "2.2vh 3.5vw" }}>
+          <span style={{ fontFamily: MONO, fontSize: 11, width: "3ch", flex: "none", opacity: 0.6 }}>{b.no}</span>
+          <span style={{ fontSize: "clamp(17px,2vw,26px)", fontWeight: 800, letterSpacing: "-.015em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {b.ko}
+            <span style={{ fontWeight: 500, opacity: 0.72, marginLeft: 16, fontSize: "clamp(13px,1.4vw,17px)", letterSpacing: "-.005em" }}>{b.koDesc}</span>
+          </span>
+          <span style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 10, letterSpacing: ".14em", opacity: 0.55, flex: "none" }}>{b.name}</span>
+        </div>
+      </div>
       <span className="glass-d glassy" data-glass-track style={{ position: "absolute", right: "9vw", top: "50%", width: 270, height: 175, zIndex: 1, pointerEvents: "none", opacity: "var(--th,0)", transform: "translateY(-50%) perspective(750px) rotateY(calc(-24deg + var(--th,0)*10deg)) rotateX(7deg)", transition: "opacity .28s ease,transform .38s cubic-bezier(.2,.7,.2,1)", overflow: "hidden", borderRadius: 14 }}>
         {b.shot && shotOk ? (
           <img src={b.shot} alt="" onError={() => setShotOk(false)} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
@@ -870,17 +875,15 @@ const Portfolio = () => {
         @keyframes w3spin{from{transform:rotateX(-16deg) rotateY(0deg)}to{transform:rotateX(-16deg) rotateY(360deg)}}
 
         @keyframes opBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-        @keyframes heroDrift1{0%,100%{transform:perspective(700px) rotateX(10deg) rotate(-13deg) translateY(0)}50%{transform:perspective(700px) rotateX(10deg) rotate(-10.5deg) translateY(-14px)}}
-        @keyframes heroDrift2{0%,100%{transform:translateY(0)}50%{transform:translateY(18px)}}
-        @keyframes heroSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        @keyframes heroFloatA{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-18px) rotate(1.6deg)}}
+        @keyframes heroFloatB{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(16px) rotate(-1.8deg)}}
 
-        /* 마디마디 플립 (split-flap) — 행 제목 글자 */
-        .fl{display:inline-block;white-space:pre;backface-visibility:hidden;transform-origin:50% 100%}
-        [data-row]:hover .fl,.arc-row:hover .fl{animation:flipCas .5s cubic-bezier(.2,.7,.25,1) both;animation-delay:calc(var(--i)*.026s)}
-        @keyframes flipCas{from{transform:rotateX(-86deg);opacity:.15}to{transform:rotateX(0deg);opacity:1}}
+        /* 행 플립 — 호버 시 행 전체가 젖혀지며 뒷면(라임+한글) 공개 */
+        .bflip{position:relative;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.45,0,.22,1)}
+        [data-row]:hover .bflip{transform:rotateX(180deg)}
+        .bface{backface-visibility:hidden;-webkit-backface-visibility:hidden}
 
-        @media (prefers-reduced-motion:reduce){.w3spin,.lens,[data-op-hint],.fl{animation:none!important}[aria-hidden] > div{animation:none!important}}
-        [data-row]:hover{color:#0a0a0a!important}
+        @media (prefers-reduced-motion:reduce){.w3spin,.lens,[data-op-hint]{animation:none!important}[aria-hidden] > div{animation:none!important}.bflip{transition:none!important}}
         .mono-btn{transition:border-color .25s,color .25s}
         .mono-btn:hover{border-color:${ACC}!important;color:${ACC}!important}
         .arc-row{transition:background .25s}
@@ -922,19 +925,12 @@ const Portfolio = () => {
             </div>
             <div data-magnetic data-hover style={{ position: "absolute", left: "3.5vw", bottom: "3.5vh", zIndex: 4, fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#555", border: "1px solid rgba(17,17,17,.25)", padding: "10px 16px" }}>SCROLL</div>
 
-            {/* 유리 오브제 — OBJ 도형들의 유리 버전, 타이포 "앞"에 떠서 뒤를 굴절 (rayraylab 문법) */}
-            <div aria-hidden="true" style={{ position: "absolute", top: "26vh", right: "10vw", width: "min(24vw,360px)", height: "min(24vw,360px)", zIndex: 4, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*22px), calc(var(--p,0)*-10vh + var(--emy,0)*14px), 0)" }}>
-              <div style={{ position: "relative", width: "100%", height: "100%", animation: "heroSpin 46s linear infinite" }}>
-                <div style={{ position: "absolute", inset: 0, borderRadius: "50%", backdropFilter: "blur(11px) saturate(1.08) brightness(1.03)", WebkitBackdropFilter: "blur(11px) saturate(1.08) brightness(1.03)", background: "conic-gradient(from 210deg, rgba(255,255,255,.42), rgba(255,255,255,.06) 35%, rgba(255,255,255,.30) 60%, rgba(255,255,255,.10) 85%, rgba(255,255,255,.42))", WebkitMaskImage: "radial-gradient(circle, transparent 55%, #000 56%)", maskImage: "radial-gradient(circle, transparent 55%, #000 56%)" }} />
-                <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "1px solid rgba(255,255,255,.75)", boxShadow: "0 24px 60px rgba(17,17,17,.14)" }} />
-                <div style={{ position: "absolute", inset: "22%", borderRadius: "50%", border: "1px solid rgba(255,255,255,.65)" }} />
-              </div>
+            {/* 유리 조각 — rayraylab풍 추상 유기 오브제. 크게, 옅게, 빈 공간 위주 (꾸밈요소) */}
+            <div aria-hidden="true" style={{ position: "absolute", top: "-4vh", right: "-6vw", width: "min(56vw,880px)", height: "min(58vh,560px)", zIndex: 4, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*20px), calc(var(--p,0)*-8vh + var(--emy,0)*12px), 0)" }}>
+              <div style={{ width: "100%", height: "100%", borderRadius: "58% 42% 47% 53% / 46% 55% 45% 54%", background: "linear-gradient(140deg, rgba(255,255,255,.26), rgba(255,255,255,.05) 52%, rgba(255,255,255,.16))", backdropFilter: "blur(3.5px) brightness(1.02)", WebkitBackdropFilter: "blur(3.5px) brightness(1.02)", border: "1px solid rgba(255,255,255,.5)", boxShadow: "0 34px 90px rgba(17,17,17,.06), inset 0 1px 0 rgba(255,255,255,.55), inset -22px -26px 60px rgba(17,17,17,.025)", animation: "heroFloatA 30s ease-in-out infinite" }} />
             </div>
-            <div aria-hidden="true" style={{ position: "absolute", top: "6vh", right: "22vw", width: "min(17vw,250px)", height: "min(11vw,165px)", zIndex: 4, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*-16px), calc(var(--p,0)*-6vh + var(--emy,0)*-10px), 0)" }}>
-              <div style={{ width: "100%", height: "100%", borderRadius: 22, transform: "perspective(700px) rotateX(10deg) rotate(-13deg)", backdropFilter: "blur(10px) brightness(1.04)", WebkitBackdropFilter: "blur(10px) brightness(1.04)", background: "linear-gradient(128deg, rgba(255,255,255,.45), rgba(255,255,255,.10) 52%, rgba(255,255,255,.30))", border: "1px solid rgba(255,255,255,.7)", boxShadow: "0 22px 55px rgba(17,17,17,.13), inset 0 1px 0 rgba(255,255,255,.7), inset 0 -14px 26px rgba(17,17,17,.05)", animation: "heroDrift1 20s ease-in-out infinite" }} />
-            </div>
-            <div aria-hidden="true" style={{ position: "absolute", top: "13vh", left: "34vw", width: "min(12vw,170px)", height: "min(11vw,155px)", zIndex: 4, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*-28px), calc(var(--p,0)*-4vh + var(--emy,0)*-18px), 0)", filter: "drop-shadow(0 18px 34px rgba(17,17,17,.14))" }}>
-              <div style={{ width: "100%", height: "100%", clipPath: "polygon(50% 0, 100% 100%, 0 100%)", backdropFilter: "blur(7px) brightness(1.05)", WebkitBackdropFilter: "blur(7px) brightness(1.05)", background: "linear-gradient(160deg, rgba(255,255,255,.5), rgba(255,255,255,.12) 55%, rgba(255,255,255,.3))", animation: "heroDrift2 24s ease-in-out infinite" }} />
+            <div aria-hidden="true" style={{ position: "absolute", top: "8vh", left: "4vw", width: "min(26vw,400px)", height: "min(26vh,250px)", zIndex: 4, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*-26px), calc(var(--p,0)*-5vh + var(--emy,0)*-15px), 0)" }}>
+              <div style={{ width: "100%", height: "100%", borderRadius: "42% 58% 62% 38% / 55% 44% 56% 45%", background: "linear-gradient(155deg, rgba(255,255,255,.24), rgba(255,255,255,.05) 55%, rgba(255,255,255,.14))", backdropFilter: "blur(3px) brightness(1.02)", WebkitBackdropFilter: "blur(3px) brightness(1.02)", border: "1px solid rgba(255,255,255,.45)", boxShadow: "0 24px 60px rgba(17,17,17,.05), inset 0 1px 0 rgba(255,255,255,.5)", animation: "heroFloatB 24s ease-in-out infinite" }} />
             </div>
           </div>
         </section>
@@ -1060,7 +1056,7 @@ const Portfolio = () => {
                     style={{ display: "flex", alignItems: "baseline", gap: "2.5vw", padding: "2.2vh 0", borderTop: "1px solid rgba(17,17,17,.18)", cursor: expandable ? "pointer" : undefined }}
                   >
                     <span style={{ fontFamily: MONO, fontSize: 11, color: "#999", width: "9ch", flex: "none" }}>{a.yr}</span>
-                    <span style={{ fontFamily: ANTON, fontSize: "clamp(20px,2.2vw,38px)", lineHeight: 1, textTransform: "uppercase", perspective: 600 }}>{flipTxt(a.name)}</span>
+                    <span style={{ fontFamily: ANTON, fontSize: "clamp(20px,2.2vw,38px)", lineHeight: 1, textTransform: "uppercase" }}>{a.name}</span>
                     <span style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 10, letterSpacing: ".14em", color: "#999" }}>
                       {a.meta}
                       {expandable && (
@@ -1071,21 +1067,37 @@ const Portfolio = () => {
                     </span>
                   </div>
                   {expandable && (
-                    <div style={{ display: "grid", gridTemplateRows: openArcs.includes(i) ? "1fr" : "0fr", transition: "grid-template-rows .5s cubic-bezier(.2,.7,.2,1)" }}>
+                    <div style={{ display: "grid", gridTemplateRows: openArcs.includes(i) ? "1fr" : "0fr", transition: "grid-template-rows .6s cubic-bezier(.3,.8,.25,1)" }}>
                       <div style={{ overflow: "hidden" }}>
-                        <div style={{ padding: "0.6vh 0 2.6vh calc(9ch + 2.5vw)" }}>
-                          {a.desc && (
-                            <div style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.8, color: "#3a3a3a", maxWidth: "72ch", padding: "6px 0 10px" }}>{a.desc}</div>
-                          )}
-                          {a.sub && a.sub.map((s, j) => (
-                            <div key={j} style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "baseline", padding: "7px 0", borderTop: j === 0 && !a.desc ? "none" : "1px dashed rgba(17,17,17,.12)" }}>
-                              <span style={{ fontSize: 13.5, fontWeight: 600, color: "#333" }}>
-                                <span style={{ fontFamily: MONO, fontSize: 10, color: "#999", marginRight: 12 }}>{String(j + 1).padStart(2, "0")}</span>
-                                {s.n}
-                              </span>
-                              <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".08em", color: "#999", whiteSpace: "nowrap" }}>{s.p}</span>
+                        {/* 영수증 — 클릭하면 종이가 인쇄되듯 뽑혀 나옴 */}
+                        <div style={{ padding: "1.4vh 0 3.2vh calc(9ch + 2.5vw)" }}>
+                          <div style={{ maxWidth: 580, transform: "rotate(.4deg)" }}>
+                            <div style={{ background: "#fff", padding: "15px 20px 16px", borderTop: "2px dashed rgba(17,17,17,.3)", boxShadow: "0 20px 46px rgba(17,17,17,.11)" }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", fontFamily: MONO, fontSize: 9, letterSpacing: ".18em", color: "#999" }}>
+                                <span>RECEIPT — {a.name.split(" —")[0]}</span><span>{a.yr}</span>
+                              </div>
+                              {a.desc && (
+                                <div style={{ fontSize: 12.5, fontWeight: 500, lineHeight: 1.75, color: "#333", margin: "10px 0 2px" }}>{a.desc}</div>
+                              )}
+                              {a.sub && (
+                                <div style={{ borderTop: "1px dashed #ddd", marginTop: 10, paddingTop: 4 }}>
+                                  {a.sub.map((s, j) => (
+                                    <div key={j} style={{ display: "flex", justifyContent: "space-between", gap: 14, alignItems: "baseline", padding: "6px 0", borderBottom: j === a.sub!.length - 1 ? "none" : "1px dashed #eee" }}>
+                                      <span style={{ fontSize: 12.5, fontWeight: 600, color: "#222" }}>
+                                        <span style={{ fontFamily: MONO, fontSize: 9.5, color: "#aaa", marginRight: 10 }}>{String(j + 1).padStart(2, "0")}</span>
+                                        {s.n}
+                                      </span>
+                                      <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".06em", color: "#999", whiteSpace: "nowrap" }}>{s.p}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              <div style={{ display: "flex", justifyContent: "space-between", fontFamily: MONO, fontSize: 9, letterSpacing: ".16em", color: "#999", borderTop: "1px dashed #ddd", marginTop: 10, paddingTop: 10 }}>
+                                <span>{a.sub ? `TOTAL — ${a.sub.length} PROJECTS` : "12 YEARS OF FLOOR"}</span><span>YANG SOONMIN</span>
+                              </div>
                             </div>
-                          ))}
+                            <div style={{ height: 9, background: "linear-gradient(45deg,#fff 6px,transparent 0),linear-gradient(-45deg,#fff 6px,transparent 0)", backgroundSize: "12px 12px", backgroundRepeat: "repeat-x", filter: "drop-shadow(0 8px 12px rgba(17,17,17,.07))" }} />
+                          </div>
                         </div>
                       </div>
                     </div>
