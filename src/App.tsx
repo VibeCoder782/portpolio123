@@ -364,6 +364,7 @@ const Portfolio = () => {
       cs: 1, ecs: 1, lastSt: undefined as number | undefined, dashSt: 0, skew: 0,
       curRow: null as HTMLElement | null,
       introDone: false, raf: 0, dead: false, opInteracted: false,
+      prevPx: undefined as number | undefined, prevPy: undefined as number | undefined, opAcc: 0,
       dash: null as null | { x: number; y: number; vx: number; vy: number; r: number },
     };
 
@@ -562,12 +563,19 @@ const Portfolio = () => {
         }
       });
 
-      // 스포트라이트 씬 — 커서가 닿기 전엔 조명이 스스로 훑고 다님 (유도 + 모바일 대응)
+      // 커서 이동량 (프레임 간) — 스포트라이트 상호작용 판정용
+      const mvd = Math.hypot(S.px - (S.prevPx ?? S.px), S.py - (S.prevPy ?? S.py));
+      S.prevPx = S.px; S.prevPy = S.py;
+
+      // 스포트라이트 씬 — 커서가 "실제로 움직이기" 전엔 조명이 스스로 훑고 다님 (유도 + 모바일 대응)
       root.querySelectorAll<HTMLElement>("[data-light]").forEach((el) => {
         const r = el.getBoundingClientRect();
         if (r.bottom < 0 || r.top > vh) return;
         const inside = S.px >= r.left && S.px <= r.right && S.py >= r.top && S.py <= r.bottom;
-        if (inside) S.opInteracted = true;
+        if (inside) {
+          S.opAcc += mvd; // 우연히 커서가 걸쳐 있는 건 무시, 누적 이동 140px부터 인계
+          if (S.opAcc > 140) S.opInteracted = true;
+        }
         let lx: number, ly: number;
         if (S.opInteracted) {
           lx = S.px - r.left; ly = S.py - r.top;
@@ -806,7 +814,10 @@ const Portfolio = () => {
         [data-row]:hover .w3spin{animation-play-state:running}
         @keyframes w3spin{from{transform:rotateX(-16deg) rotateY(0deg)}to{transform:rotateX(-16deg) rotateY(360deg)}}
 
-        @media (prefers-reduced-motion:reduce){.w3spin,.lens,[data-op-hint]{animation:none!important}}
+        @keyframes opBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+        @keyframes heroDrift1{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-16px) rotate(2.4deg)}}
+        @keyframes heroDrift2{0%,100%{transform:translateY(0)}50%{transform:translateY(20px)}}
+        @media (prefers-reduced-motion:reduce){.w3spin,.lens,[data-op-hint]{animation:none!important}[aria-hidden] > div{animation:none!important}}
         [data-row]:hover{color:#0a0a0a!important}
         .mono-btn{transition:border-color .25s,color .25s}
         .mono-btn:hover{border-color:${ACC}!important;color:${ACC}!important}
@@ -832,6 +843,13 @@ const Portfolio = () => {
               <span style={{ color: "#666" }}>PM/PO · BUSAN · <span data-clock>LOCAL --:--:-- KST</span></span>
             </div>
             <div style={{ position: "absolute", top: 27, left: "50%", transform: "translateX(-50%)", fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#999", zIndex: 5 }}>TYPE IS PHYSICAL — MOVE YOUR CURSOR</div>
+            {/* 유리 오브제 — 제도판 위의 문진(판)과 루페(렌즈). 격자와 12/3 사이 깊이층 */}
+            <div aria-hidden="true" style={{ position: "absolute", top: "7vh", right: "9vw", width: "min(30vw,500px)", height: "min(30vh,300px)", zIndex: 1, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*18px), calc(var(--p,0)*-9vh + var(--emy,0)*12px), 0)" }}>
+              <div style={{ width: "100%", height: "100%", borderRadius: "38% 62% 55% 45% / 48% 40% 60% 52%", background: "linear-gradient(135deg,rgba(255,255,255,.36),rgba(255,255,255,.10) 55%,rgba(255,255,255,.24))", backdropFilter: "blur(9px) saturate(1.05)", WebkitBackdropFilter: "blur(9px) saturate(1.05)", border: "1px solid rgba(255,255,255,.6)", boxShadow: "0 26px 70px rgba(17,17,17,.10), inset 0 1px 0 rgba(255,255,255,.65)", animation: "heroDrift1 22s ease-in-out infinite" }} />
+            </div>
+            <div aria-hidden="true" style={{ position: "absolute", top: "16vh", left: "36vw", width: 170, height: 170, zIndex: 1, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*-26px), calc(var(--p,0)*-5vh + var(--emy,0)*-16px), 0)" }}>
+              <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "radial-gradient(circle at 32% 28%, rgba(255,255,255,.4), rgba(255,255,255,.06) 62%)", backdropFilter: "blur(2.4px) brightness(1.05)", WebkitBackdropFilter: "blur(2.4px) brightness(1.05)", border: "1px solid rgba(255,255,255,.65)", boxShadow: "0 18px 50px rgba(17,17,17,.10), inset 0 0 26px rgba(255,255,255,.3), inset 0 1px 0 rgba(255,255,255,.6)", animation: "heroDrift2 26s ease-in-out infinite" }} />
+            </div>
             <div style={{ position: "absolute", top: "4vh", right: "1.5vw", fontFamily: ANTON, fontSize: "46vh", lineHeight: 1, color: "transparent", WebkitTextStroke: "1.5px rgba(17,17,17,.13)", zIndex: 1, transform: "translateY(calc(var(--p,0)*-24vh))" }}>12/3</div>
             <div style={{ position: "absolute", left: "3.5vw", bottom: "12vh", zIndex: 2, transform: "perspective(950px) rotateX(calc(var(--emy,0)*var(--tilt,0)*4deg)) rotateY(calc(var(--emx,0)*var(--tilt,0)*-6deg))", transformStyle: "preserve-3d" }}>
               <div data-split style={{ ...heroLine, transform: "translateX(calc(var(--p,0)*-5vw))" }}>{split("12 YEARS ON THE FLOOR,")}</div>
@@ -911,7 +929,7 @@ const Portfolio = () => {
         <section data-light data-scene="flow" style={{ position: "relative", background: "#050505", color: "#f4f3f0", height: "100vh", overflow: "hidden" }}>
           <div style={{ position: "absolute", inset: 0, pointerEvents: "none", backgroundImage: "linear-gradient(rgba(244,243,240,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(244,243,240,.13) 1px,transparent 1px)", backgroundSize: "72px 72px", WebkitMaskImage: "radial-gradient(360px circle at var(--lx,50%) var(--ly,55%),#000,transparent 70%)", maskImage: "radial-gradient(360px circle at var(--lx,50%) var(--ly,55%),#000,transparent 70%)" }} />
           <div data-scramble style={{ position: "absolute", top: 26, left: "3.5vw", ...label, color: "#777", zIndex: 4 }}>03 — THE OPERATOR</div>
-          <div style={{ position: "absolute", top: 26, right: "3.5vw", fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#555", zIndex: 4 }}>CURSOR IS THE LIGHT</div>
+          <div style={{ position: "absolute", top: 26, right: "3.5vw", fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: ACC, opacity: 0.85, zIndex: 4 }}>● CURSOR IS THE LIGHT</div>
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 6vw", gap: "4vw" }}>
             <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
               <div style={{ fontFamily: ANTON, fontSize: "clamp(56px,9vw,160px)", lineHeight: 0.95, textTransform: "uppercase", color: "transparent", WebkitTextStroke: "1px rgba(244,243,240,.13)" }}>YANG<br />SOONMIN<br />PM/PO</div>
@@ -919,7 +937,7 @@ const Portfolio = () => {
               <div style={{ overflow: "hidden", marginTop: "3.5vh" }}>
                 <div data-reveal="0" style={{ fontSize: 15, lineHeight: 1.8, fontWeight: 500, color: "#9a9a9a", transform: "translateY(110%)", opacity: 0, maxWidth: "44ch" }}>현장을 아는 프로덕트 오너.<br />부산에서 만들고, 결과로 증명한다.</div>
               </div>
-              <div data-op-hint style={{ marginTop: "3vh", display: "inline-flex", alignItems: "center", gap: 10, fontFamily: MONO, fontSize: 11, letterSpacing: ".14em", background: ACC, color: "#0a0a0a", padding: "8px 14px", transition: "opacity .6s ease", animation: "opPulse 1.8s ease-in-out infinite" }}>커서를 움직여 조명을 비춰보세요</div>
+              <div data-op-hint style={{ marginTop: "3.5vh", display: "inline-flex", alignItems: "center", gap: 12, fontFamily: MONO, fontSize: 13, fontWeight: 500, letterSpacing: ".14em", background: ACC, color: "#0a0a0a", padding: "13px 22px", transition: "opacity .6s ease", animation: "opPulse 1.6s ease-in-out infinite, opBob 2.8s ease-in-out infinite", boxShadow: "0 0 34px rgba(200,255,22,.35)" }}>✦ 커서를 움직여 조명을 비춰보세요</div>
             </div>
             <div style={{ position: "relative", flex: "none", width: "clamp(240px,23vw,360px)" }}>
               <div style={{ position: "relative", aspectRatio: "4/5", overflow: "hidden", border: "1px solid #2c2c2c" }}>
