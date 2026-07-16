@@ -988,16 +988,16 @@ const Portfolio = () => {
             {/* ⚠ 래퍼에 filter(drop-shadow 등) 절대 금지 — 조상 filter가 backdrop-root 경계를 만들어
                 backdrop-filter가 바깥 콘텐츠(타이포)를 샘플링하지 못하게 됨 = 유리 무효.
                 그림자는 유리 뒤 SVG 블러 패스로 대체 */}
-            <div aria-hidden="true" className="gchunk-wrap" style={{ position: "absolute", top: "6vh", right: "6vw", width: 560, height: 580, zIndex: 4, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*20px), calc(var(--p,0)*-8vh + var(--emy,0)*12px), 0) scale(.82)" }}>
+            <div aria-hidden="true" className="gchunk-wrap" style={{ position: "absolute", top: "2vh", right: "3vw", width: 940, height: 720, zIndex: 4, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*20px), calc(var(--p,0)*-8vh + var(--emy,0)*12px), 0)" }}>
               <div style={{ position: "absolute", inset: 0, animation: "heroFloatA 30s ease-in-out infinite" }}>
-                <svg viewBox="0 0 560 580" width="100%" height="100%" style={{ position: "absolute", inset: 0, overflow: "visible" }}>
+                <svg viewBox="0 0 940 720" width="100%" height="100%" style={{ position: "absolute", inset: 0, overflow: "visible" }}>
                   <defs><filter id="chunkShA" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="16" /></filter></defs>
-                  <path d="M115,0 H445 A115,115 0 0 1 560,115 V465 A115,115 0 0 1 445,580 H360 V300 A80,80 0 0 0 200,300 V580 H115 A115,115 0 0 1 0,465 V115 A115,115 0 0 1 115,0 Z" fill="rgba(17,17,17,.15)" filter="url(#chunkShA)" transform="translate(8,30)" />
+                  <path d="M690,0 H850 Q920,0 905,55 L490,450 Q460,485 480,520 L390,690 Q370,720 330,720 H160 Q95,720 115,660 L295,395 Q315,362 355,345 L640,55 Q655,20 690,0 Z" fill="rgba(17,17,17,.15)" filter="url(#chunkShA)" transform="translate(8,30)" />
                 </svg>
-                <div className="gchunk" style={{ position: "absolute", inset: 0, clipPath: 'path("M115,0 H445 A115,115 0 0 1 560,115 V465 A115,115 0 0 1 445,580 H360 V300 A80,80 0 0 0 200,300 V580 H115 A115,115 0 0 1 0,465 V115 A115,115 0 0 1 115,0 Z")', background: "linear-gradient(140deg, rgba(255,255,255,.30), rgba(240,239,235,.07) 40%, rgba(17,17,17,.03) 62%, rgba(255,255,255,.18) 92%)", backdropFilter: "blur(4px) saturate(1.12) brightness(1.03)", WebkitBackdropFilter: "blur(4px) saturate(1.12) brightness(1.03)" }} />
-                <svg viewBox="0 0 560 580" width="100%" height="100%" style={{ position: "absolute", inset: 0, overflow: "visible" }}>
-                  <path d="M115,0 H445 A115,115 0 0 1 560,115 V465 A115,115 0 0 1 445,580 H360 V300 A80,80 0 0 0 200,300 V580 H115 A115,115 0 0 1 0,465 V115 A115,115 0 0 1 115,0 Z" fill="none" stroke="rgba(17,17,17,.13)" strokeWidth="1" transform="translate(1.5,2.5)" />
-                  <path d="M115,0 H445 A115,115 0 0 1 560,115 V465 A115,115 0 0 1 445,580 H360 V300 A80,80 0 0 0 200,300 V580 H115 A115,115 0 0 1 0,465 V115 A115,115 0 0 1 115,0 Z" fill="none" stroke="rgba(255,255,255,.85)" strokeWidth="1.5" />
+                <div className="gchunk" style={{ position: "absolute", inset: 0, clipPath: 'path("M690,0 H850 Q920,0 905,55 L490,450 Q460,485 480,520 L390,690 Q370,720 330,720 H160 Q95,720 115,660 L295,395 Q315,362 355,345 L640,55 Q655,20 690,0 Z")', background: "linear-gradient(140deg, rgba(255,255,255,.30), rgba(240,239,235,.07) 40%, rgba(17,17,17,.03) 62%, rgba(255,255,255,.18) 92%)", backdropFilter: "blur(4px) saturate(1.12) brightness(1.03)", WebkitBackdropFilter: "blur(4px) saturate(1.12) brightness(1.03)" }} />
+                <svg viewBox="0 0 940 720" width="100%" height="100%" style={{ position: "absolute", inset: 0, overflow: "visible" }}>
+                  <path d="M690,0 H850 Q920,0 905,55 L490,450 Q460,485 480,520 L390,690 Q370,720 330,720 H160 Q95,720 115,660 L295,395 Q315,362 355,345 L640,55 Q655,20 690,0 Z" fill="none" stroke="rgba(17,17,17,.13)" strokeWidth="1" transform="translate(1.5,2.5)" />
+                  <path d="M690,0 H850 Q920,0 905,55 L490,450 Q460,485 480,520 L390,690 Q370,720 330,720 H160 Q95,720 115,660 L295,395 Q315,362 355,345 L640,55 Q655,20 690,0 Z" fill="none" stroke="rgba(255,255,255,.85)" strokeWidth="1.5" />
                 </svg>
               </div>
             </div>
