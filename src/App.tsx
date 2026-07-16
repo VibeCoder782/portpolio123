@@ -16,7 +16,8 @@ const ANTON = "Anton,sans-serif";
 const SHADOW =
   "2px 2px 0 #cfcbc1,4px 4px 0 #cec9bf,6px 6px 0 #ccc7bc,8px 8px 0 #cac5b9,10px 10px 0 #c8c2b6,12px 12px 0 #c5bfb3,14px 14px 0 #c2bcb0,16px 16px 0 #bfb9ad";
 
-let introPlayed = false; // StrictMode 이중 마운트 가드
+let introPlayed = false; // 재생 완료 가드 (SPA 재마운트 시 재생 방지)
+let introSeqStarted = false; // 실행 중 가드 — 어떤 경로로든 낙하 시퀀스가 두 번 돌 수 없게
 
 // 히어로 타이포를 물리 반응용 글자 스팬으로 분해
 const split = (txt: string) =>
@@ -203,6 +204,56 @@ const WireShape = ({ type }: { type: string }) => {
   );
 };
 
+// 호버 플립 — 행 제목이 마디마디 젖혀지며 일어남 (split-flap)
+const flipTxt = (txt: string) =>
+  [...txt].map((ch, i) => (
+    <span key={i} className="fl" style={{ ["--i" as string]: i } as React.CSSProperties}>
+      {ch}
+    </span>
+  ));
+
+// 콘택트 파티클 — "LET'S BUILD" 위로 피어오르는 작업장의 불씨
+const Sparks = () => {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const cv = ref.current; if (!cv) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const ctx = cv.getContext("2d"); if (!ctx) return;
+    let w = 0, h = 0, raf = 0;
+    const resize = () => {
+      const r = cv.parentElement!.getBoundingClientRect();
+      w = cv.width = Math.floor(r.width); h = cv.height = Math.floor(r.height);
+    };
+    resize();
+    const N = 110;
+    const P = Array.from({ length: N }, () => ({
+      x: Math.random(), y: Math.random(), r: 0.7 + Math.random() * 1.6,
+      vy: 0.18 + Math.random() * 0.5, sway: Math.random() * 6.28, sa: 0.15 + Math.random() * 0.35,
+      a: 0.12 + Math.random() * 0.45, lime: Math.random() < 0.24,
+    }));
+    let t = 0;
+    const loop = () => {
+      t += 0.016;
+      ctx.clearRect(0, 0, w, h);
+      for (const p of P) {
+        p.y -= (p.vy / h) * 1.6;
+        if (p.y < -0.02) { p.y = 1.02; p.x = Math.random(); }
+        const x = (p.x + Math.sin(t * p.sa + p.sway) * 0.012) * w;
+        const fade = p.y < 0.25 ? p.y / 0.25 : 1; // 위로 갈수록 소멸
+        ctx.beginPath();
+        ctx.arc(x, p.y * h, p.r, 0, 6.283);
+        ctx.fillStyle = p.lime ? `rgba(200,255,22,${(p.a * fade).toFixed(3)})` : `rgba(244,243,240,${(p.a * 0.7 * fade).toFixed(3)})`;
+        ctx.fill();
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    window.addEventListener("resize", resize);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
+  }, []);
+  return <canvas ref={ref} aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none" }} />;
+};
+
 // Builds 행 — 호버 시 라임 스윕 + 유리 패널 프리뷰(스크린샷 있으면 이미지, 없으면 와이어프레임 도형)
 const BuildRow = ({ b, i }: { b: Build; i: number }) => {
   const [shotOk, setShotOk] = useState(true);
@@ -212,7 +263,7 @@ const BuildRow = ({ b, i }: { b: Build; i: number }) => {
     <div data-row data-hover style={{ position: "relative", display: "flex", alignItems: "center", gap: "2.5vw", padding: "2.2vh 3.5vw", borderTop: "1px solid #242424", color: "#f4f3f0", transition: "color .2s ease", transformOrigin: "center bottom", opacity: vis, transform: `translateY(calc((1 - ${vis})*40px)) rotateX(calc((1 - ${vis})*-32deg))` }}>
       <span style={{ position: "absolute", inset: 0, background: ACC, transform: "scaleX(var(--th,0))", transformOrigin: "left", transition: "transform .34s cubic-bezier(.2,.7,.2,1)", zIndex: 0 }} />
       <span style={{ fontFamily: MONO, fontSize: 11, width: "3ch", flex: "none", color: "inherit", opacity: 0.55, position: "relative", zIndex: 2 }}>{b.no}</span>
-      <span style={{ fontFamily: ANTON, fontSize: "clamp(26px,3.9vw,64px)", lineHeight: 1, position: "relative", zIndex: 2, transform: "skewY(var(--skew,0deg))" }}>{b.name}</span>
+      <span style={{ fontFamily: ANTON, fontSize: "clamp(26px,3.9vw,64px)", lineHeight: 1, position: "relative", zIndex: 2, transform: "skewY(var(--skew,0deg))", perspective: 700 }}>{flipTxt(b.name)}</span>
       <span style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 11, letterSpacing: ".14em", color: "inherit", opacity: 0.55, position: "relative", zIndex: 2 }}>{b.meta}</span>
       <span className="glass-d glassy" data-glass-track style={{ position: "absolute", right: "9vw", top: "50%", width: 270, height: 175, zIndex: 1, pointerEvents: "none", opacity: "var(--th,0)", transform: "translateY(-50%) perspective(750px) rotateY(calc(-24deg + var(--th,0)*10deg)) rotateX(7deg)", transition: "opacity .28s ease,transform .38s cubic-bezier(.2,.7,.2,1)", overflow: "hidden", borderRadius: 14 }}>
         {b.shot && shotOk ? (
@@ -662,11 +713,13 @@ const Portfolio = () => {
     const runIntro = () => {
       const ov = root.querySelector<HTMLElement>("[data-intro]");
       const num = root.querySelector<HTMLElement>("[data-intro-num]");
-      if (!ov || introPlayed || reduceMotion) {
+      if (!ov || introPlayed || introSeqStarted || reduceMotion) {
         if (ov) ov.style.display = "none";
         S.introDone = true;
         return;
       }
+      introSeqStarted = true;
+      startedIntroHere = true;
       const t0 = performance.now(), DUR = 1400;
       const tick = (t: number) => {
         if (S.dead) return; // 언마운트된 인스턴스의 잔여 틱 정지
@@ -682,6 +735,7 @@ const Portfolio = () => {
 
     type DropPart = { el: HTMLElement; dx: number; y: number; vy: number; floorY: number; rot: number; vr: number; rest: number; delay: number; homeDelay: number; squash: number; done: boolean };
     let dropParts: DropPart[] = [];
+    let startedIntroHere = false; // StrictMode: 미완주 인스턴스가 정리될 때 실행 가드 반납
 
     const prepDrop = () => {
       // 글자들이 각자 자기 자리 근처에서 화면 바닥으로 자유낙하 → 잠시 흩어져 있다 제자리로
@@ -756,6 +810,7 @@ const Portfolio = () => {
 
     return () => {
       S.dead = true;
+      if (startedIntroHere && !introPlayed) introSeqStarted = false; // 미완주 시 가드 반납
       cancelAnimationFrame(S.raf);
       window.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseover", onOver);
@@ -815,9 +870,16 @@ const Portfolio = () => {
         @keyframes w3spin{from{transform:rotateX(-16deg) rotateY(0deg)}to{transform:rotateX(-16deg) rotateY(360deg)}}
 
         @keyframes opBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-        @keyframes heroDrift1{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-16px) rotate(2.4deg)}}
-        @keyframes heroDrift2{0%,100%{transform:translateY(0)}50%{transform:translateY(20px)}}
-        @media (prefers-reduced-motion:reduce){.w3spin,.lens,[data-op-hint]{animation:none!important}[aria-hidden] > div{animation:none!important}}
+        @keyframes heroDrift1{0%,100%{transform:perspective(700px) rotateX(10deg) rotate(-13deg) translateY(0)}50%{transform:perspective(700px) rotateX(10deg) rotate(-10.5deg) translateY(-14px)}}
+        @keyframes heroDrift2{0%,100%{transform:translateY(0)}50%{transform:translateY(18px)}}
+        @keyframes heroSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+        /* 마디마디 플립 (split-flap) — 행 제목 글자 */
+        .fl{display:inline-block;white-space:pre;backface-visibility:hidden;transform-origin:50% 100%}
+        [data-row]:hover .fl,.arc-row:hover .fl{animation:flipCas .5s cubic-bezier(.2,.7,.25,1) both;animation-delay:calc(var(--i)*.026s)}
+        @keyframes flipCas{from{transform:rotateX(-86deg);opacity:.15}to{transform:rotateX(0deg);opacity:1}}
+
+        @media (prefers-reduced-motion:reduce){.w3spin,.lens,[data-op-hint],.fl{animation:none!important}[aria-hidden] > div{animation:none!important}}
         [data-row]:hover{color:#0a0a0a!important}
         .mono-btn{transition:border-color .25s,color .25s}
         .mono-btn:hover{border-color:${ACC}!important;color:${ACC}!important}
@@ -843,13 +905,6 @@ const Portfolio = () => {
               <span style={{ color: "#666" }}>PM/PO · BUSAN · <span data-clock>LOCAL --:--:-- KST</span></span>
             </div>
             <div style={{ position: "absolute", top: 27, left: "50%", transform: "translateX(-50%)", fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#999", zIndex: 5 }}>TYPE IS PHYSICAL — MOVE YOUR CURSOR</div>
-            {/* 유리 오브제 — 제도판 위의 문진(판)과 루페(렌즈). 격자와 12/3 사이 깊이층 */}
-            <div aria-hidden="true" style={{ position: "absolute", top: "7vh", right: "9vw", width: "min(30vw,500px)", height: "min(30vh,300px)", zIndex: 1, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*18px), calc(var(--p,0)*-9vh + var(--emy,0)*12px), 0)" }}>
-              <div style={{ width: "100%", height: "100%", borderRadius: "38% 62% 55% 45% / 48% 40% 60% 52%", background: "linear-gradient(135deg,rgba(255,255,255,.36),rgba(255,255,255,.10) 55%,rgba(255,255,255,.24))", backdropFilter: "blur(9px) saturate(1.05)", WebkitBackdropFilter: "blur(9px) saturate(1.05)", border: "1px solid rgba(255,255,255,.6)", boxShadow: "0 26px 70px rgba(17,17,17,.10), inset 0 1px 0 rgba(255,255,255,.65)", animation: "heroDrift1 22s ease-in-out infinite" }} />
-            </div>
-            <div aria-hidden="true" style={{ position: "absolute", top: "16vh", left: "36vw", width: 170, height: 170, zIndex: 1, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*-26px), calc(var(--p,0)*-5vh + var(--emy,0)*-16px), 0)" }}>
-              <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "radial-gradient(circle at 32% 28%, rgba(255,255,255,.4), rgba(255,255,255,.06) 62%)", backdropFilter: "blur(2.4px) brightness(1.05)", WebkitBackdropFilter: "blur(2.4px) brightness(1.05)", border: "1px solid rgba(255,255,255,.65)", boxShadow: "0 18px 50px rgba(17,17,17,.10), inset 0 0 26px rgba(255,255,255,.3), inset 0 1px 0 rgba(255,255,255,.6)", animation: "heroDrift2 26s ease-in-out infinite" }} />
-            </div>
             <div style={{ position: "absolute", top: "4vh", right: "1.5vw", fontFamily: ANTON, fontSize: "46vh", lineHeight: 1, color: "transparent", WebkitTextStroke: "1.5px rgba(17,17,17,.13)", zIndex: 1, transform: "translateY(calc(var(--p,0)*-24vh))" }}>12/3</div>
             <div style={{ position: "absolute", left: "3.5vw", bottom: "12vh", zIndex: 2, transform: "perspective(950px) rotateX(calc(var(--emy,0)*var(--tilt,0)*4deg)) rotateY(calc(var(--emx,0)*var(--tilt,0)*-6deg))", transformStyle: "preserve-3d" }}>
               <div data-split style={{ ...heroLine, transform: "translateX(calc(var(--p,0)*-5vw))" }}>{split("12 YEARS ON THE FLOOR,")}</div>
@@ -866,6 +921,21 @@ const Portfolio = () => {
               현장에서 12년, 프로덕트에서 3년.<br />이제는 직접 만들어 증명한다.<br /><b style={{ color: "#111", fontWeight: 800 }}>"안 되는 건 없다, 방법이 다를 뿐."</b>
             </div>
             <div data-magnetic data-hover style={{ position: "absolute", left: "3.5vw", bottom: "3.5vh", zIndex: 4, fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#555", border: "1px solid rgba(17,17,17,.25)", padding: "10px 16px" }}>SCROLL</div>
+
+            {/* 유리 오브제 — OBJ 도형들의 유리 버전, 타이포 "앞"에 떠서 뒤를 굴절 (rayraylab 문법) */}
+            <div aria-hidden="true" style={{ position: "absolute", top: "26vh", right: "10vw", width: "min(24vw,360px)", height: "min(24vw,360px)", zIndex: 4, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*22px), calc(var(--p,0)*-10vh + var(--emy,0)*14px), 0)" }}>
+              <div style={{ position: "relative", width: "100%", height: "100%", animation: "heroSpin 46s linear infinite" }}>
+                <div style={{ position: "absolute", inset: 0, borderRadius: "50%", backdropFilter: "blur(11px) saturate(1.08) brightness(1.03)", WebkitBackdropFilter: "blur(11px) saturate(1.08) brightness(1.03)", background: "conic-gradient(from 210deg, rgba(255,255,255,.42), rgba(255,255,255,.06) 35%, rgba(255,255,255,.30) 60%, rgba(255,255,255,.10) 85%, rgba(255,255,255,.42))", WebkitMaskImage: "radial-gradient(circle, transparent 55%, #000 56%)", maskImage: "radial-gradient(circle, transparent 55%, #000 56%)" }} />
+                <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "1px solid rgba(255,255,255,.75)", boxShadow: "0 24px 60px rgba(17,17,17,.14)" }} />
+                <div style={{ position: "absolute", inset: "22%", borderRadius: "50%", border: "1px solid rgba(255,255,255,.65)" }} />
+              </div>
+            </div>
+            <div aria-hidden="true" style={{ position: "absolute", top: "6vh", right: "22vw", width: "min(17vw,250px)", height: "min(11vw,165px)", zIndex: 4, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*-16px), calc(var(--p,0)*-6vh + var(--emy,0)*-10px), 0)" }}>
+              <div style={{ width: "100%", height: "100%", borderRadius: 22, transform: "perspective(700px) rotateX(10deg) rotate(-13deg)", backdropFilter: "blur(10px) brightness(1.04)", WebkitBackdropFilter: "blur(10px) brightness(1.04)", background: "linear-gradient(128deg, rgba(255,255,255,.45), rgba(255,255,255,.10) 52%, rgba(255,255,255,.30))", border: "1px solid rgba(255,255,255,.7)", boxShadow: "0 22px 55px rgba(17,17,17,.13), inset 0 1px 0 rgba(255,255,255,.7), inset 0 -14px 26px rgba(17,17,17,.05)", animation: "heroDrift1 20s ease-in-out infinite" }} />
+            </div>
+            <div aria-hidden="true" style={{ position: "absolute", top: "13vh", left: "34vw", width: "min(12vw,170px)", height: "min(11vw,155px)", zIndex: 4, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*-28px), calc(var(--p,0)*-4vh + var(--emy,0)*-18px), 0)", filter: "drop-shadow(0 18px 34px rgba(17,17,17,.14))" }}>
+              <div style={{ width: "100%", height: "100%", clipPath: "polygon(50% 0, 100% 100%, 0 100%)", backdropFilter: "blur(7px) brightness(1.05)", WebkitBackdropFilter: "blur(7px) brightness(1.05)", background: "linear-gradient(160deg, rgba(255,255,255,.5), rgba(255,255,255,.12) 55%, rgba(255,255,255,.3))", animation: "heroDrift2 24s ease-in-out infinite" }} />
+            </div>
           </div>
         </section>
 
@@ -874,6 +944,15 @@ const Portfolio = () => {
           <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden" }}>
             <div style={{ position: "absolute", inset: 0, background: "#f4f3f0", color: "#111" }}>
               <div data-scramble style={{ position: "absolute", top: 26, left: "3.5vw", ...label, color: "#666" }}>01 — THE PIVOT</div>
+              <div aria-hidden="true" style={{ position: "absolute", top: "5vh", right: "2vw", fontFamily: ANTON, fontSize: "26vh", lineHeight: 0.92, textTransform: "uppercase", color: "transparent", WebkitTextStroke: "1.5px rgba(17,17,17,.09)", textAlign: "right", transform: "translateY(calc(var(--p,0)*-6vh))" }}>THE<br />FLOOR</div>
+              <div aria-hidden="true" style={{ position: "absolute", right: "3.5vw", top: "44vh", display: "flex", flexDirection: "column", gap: "4vh", alignItems: "flex-end" }}>
+                {[2009, 2012, 2015, 2018, 2021].map((y) => (
+                  <div key={y} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".14em", color: "rgba(17,17,17,.38)" }}>{y}</span>
+                    <span style={{ width: 34, height: 1, background: "rgba(17,17,17,.28)" }} />
+                  </div>
+                ))}
+              </div>
               <div style={{ position: "absolute", left: "3.5vw", right: "3.5vw", bottom: "10vh", display: "flex", alignItems: "flex-end", gap: "4vw", flexWrap: "wrap" }}>
                 <div data-count="12" style={{ fontFamily: ANTON, fontSize: "36vh", lineHeight: 0.82, transform: "scale(calc(.94 + var(--p,0)*.12))", transformOrigin: "bottom left" }}>12</div>
                 <div style={{ paddingBottom: "3vh", maxWidth: "38ch" }}>
@@ -886,6 +965,15 @@ const Portfolio = () => {
             </div>
             <div style={{ position: "absolute", inset: 0, background: "#0a0a0a", color: "#f4f3f0", clipPath: "inset(calc(100% - clamp(0%, calc((var(--p,0) - 0.18)*180%), 100%)) 0 0 0)" }}>
               <div data-scramble style={{ position: "absolute", top: 26, left: "3.5vw", ...label, color: "#777" }}>01 — THE PIVOT</div>
+              <div aria-hidden="true" style={{ position: "absolute", top: "5vh", right: "2vw", fontFamily: ANTON, fontSize: "26vh", lineHeight: 0.92, textTransform: "uppercase", color: "transparent", WebkitTextStroke: "1.5px rgba(244,243,240,.09)", textAlign: "right", transform: "translateY(calc(var(--p,0)*-6vh))" }}>THE<br />PIVOT</div>
+              <div aria-hidden="true" style={{ position: "absolute", right: "3.5vw", top: "44vh", display: "flex", flexDirection: "column", gap: "5vh", alignItems: "flex-end" }}>
+                {[2022, 2023, 2024, 2025].map((y, i) => (
+                  <div key={y} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".14em", color: i === 3 ? ACC : "rgba(244,243,240,.4)" }}>{y}</span>
+                    <span style={{ width: 34, height: 1, background: i === 3 ? ACC : "rgba(244,243,240,.3)" }} />
+                  </div>
+                ))}
+              </div>
               <div style={{ position: "absolute", left: "3.5vw", right: "3.5vw", bottom: "10vh", display: "flex", alignItems: "flex-end", gap: "4vw", flexWrap: "wrap" }}>
                 <div style={{ fontFamily: ANTON, fontSize: "36vh", lineHeight: 0.82, transform: "scale(calc(.94 + var(--p,0)*.12))", transformOrigin: "bottom left" }}>34</div>
                 <div style={{ paddingBottom: "3vh", maxWidth: "40ch" }}>
@@ -972,7 +1060,7 @@ const Portfolio = () => {
                     style={{ display: "flex", alignItems: "baseline", gap: "2.5vw", padding: "2.2vh 0", borderTop: "1px solid rgba(17,17,17,.18)", cursor: expandable ? "pointer" : undefined }}
                   >
                     <span style={{ fontFamily: MONO, fontSize: 11, color: "#999", width: "9ch", flex: "none" }}>{a.yr}</span>
-                    <span style={{ fontFamily: ANTON, fontSize: "clamp(20px,2.2vw,38px)", lineHeight: 1, textTransform: "uppercase" }}>{a.name}</span>
+                    <span style={{ fontFamily: ANTON, fontSize: "clamp(20px,2.2vw,38px)", lineHeight: 1, textTransform: "uppercase", perspective: 600 }}>{flipTxt(a.name)}</span>
                     <span style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 10, letterSpacing: ".14em", color: "#999" }}>
                       {a.meta}
                       {expandable && (
@@ -1069,6 +1157,7 @@ const Portfolio = () => {
         {/* ============ 07 CONTACT ============ */}
         <section data-scene="flow" style={{ position: "relative", background: "#050505", color: "#f4f3f0", height: "100vh", overflow: "hidden", display: "flex", flexDirection: "column" }}>
           <div style={{ position: "absolute", inset: 0, pointerEvents: "none", backgroundImage: "linear-gradient(rgba(244,243,240,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(244,243,240,.055) 1px,transparent 1px)", backgroundSize: "72px 72px" }} />
+          <Sparks />
           <div style={{ display: "flex", justifyContent: "space-between", ...label, color: "#777", padding: "26px 3.5vw", position: "relative", zIndex: 2 }}>
             <span data-scramble>07 — CONTACT</span><span>BUSAN · OPEN TO BUILD</span>
           </div>
