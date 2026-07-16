@@ -26,16 +26,22 @@ const split = (txt: string) =>
     </span>
   ));
 
-const BUILDS = [
-  { no: "01", name: "AI AUTOMATION", meta: "N8N · IN USE", drop: "DROP — N8N CANVAS" },
-  { no: "02", name: "BOOGION", meta: "TEAM OF 4 · TOP CONTRIBUTOR", drop: "DROP — APP SHOT" },
-  { no: "03", name: "MOUNTAINON", meta: "APP BUILD", drop: "DROP — APP SHOT" },
-  { no: "04", name: "BOOKITDA", meta: "STORE-READY", drop: "DROP — APP SHOT" },
-  { no: "05", name: "CASETALK", meta: "AI SELF-CHECK", drop: "DROP — CHAT UI" },
-  { no: "06", name: "AI INSIGHT OS", meta: "35 SPECS · PRE-MVP", drop: "DROP — SPEC DOC" },
+type Build = { no: string; name: string; meta: string; drop: string; shot: string | null };
+const BUILDS: Build[] = [
+  { no: "01", name: "AI AUTOMATION", meta: "N8N · IN USE", drop: "DROP — N8N CANVAS", shot: "/shots/n8n.png" },
+  { no: "02", name: "BOOGION", meta: "TEAM OF 4 · TOP CONTRIBUTOR", drop: "DROP — APP SHOT", shot: "/shots/boogion.png" },
+  { no: "03", name: "MOUNTAINON", meta: "APP BUILD", drop: "DROP — APP SHOT", shot: "/shots/mountainon.png" },
+  { no: "04", name: "BOOKITDA", meta: "STORE-READY", drop: "DROP — APP SHOT", shot: "/shots/bookitda.png" },
+  { no: "05", name: "CASETALK", meta: "AI SELF-CHECK", drop: "DROP — CHAT UI", shot: "/shots/casetalk.png" },
+  { no: "06", name: "AI INSIGHT OS", meta: "35 SPECS · PRE-MVP", drop: "DROP — SPEC DOC", shot: "/shots/insightos.png" },
+  { no: "07", name: "CONTENT PLATFORM ※", meta: "IN SERVICE · ANONYMOUS", drop: "ANONYMOUS — 익명 유지", shot: null },
+  { no: "08", name: "WEBOPS BUILDER", meta: "OPS CONSOLE · IN DESIGN", drop: "DROP — CONSOLE UI", shot: "/shots/webops.png" },
+  { no: "09", name: "FLOWON", meta: "3D WEB · SHIPPED", drop: "DROP — WEB SHOT", shot: "/shots/flowon.png" },
+  { no: "10", name: "CITIZEN'S TURN", meta: "UNITY 2D · IN DEV", drop: "DROP — GAME SHOT", shot: "/shots/citizensturn.png" },
 ];
 
-const ARCHIVE = [
+type ArchiveRow = { yr: string; name: string; meta: string; sub?: { n: string; p: string }[] };
+const ARCHIVE: ArchiveRow[] = [
   { yr: "2026 —", name: "AI AUTOMATION (N8N)", meta: "IN USE — 회의록·OCR·트렌드" },
   { yr: "2026 —", name: "AI INSIGHT OS", meta: "35 SPECS · PRE-MVP" },
   { yr: "2026", name: "CASETALK", meta: "AI SELF-CHECK · NEXT.JS" },
@@ -44,8 +50,34 @@ const ARCHIVE = [
   { yr: "2026", name: "BOOKITDA", meta: "STORE-READY · FLUTTER" },
   { yr: "2026 —", name: "MOUNTAINON", meta: "SOLO BUILD · GPS·RLS" },
   { yr: "2026", name: "BOOGION — TEAM OF 4", meta: "TOP CONTRIBUTOR" },
-  { yr: "2024–25", name: "HANDY — 이사 · PO/팀장", meta: "CMS · 아르피나 예약 전환" },
-  { yr: "2022–24", name: "ARIMOA — PM/PL", meta: "사원→대리→과장 · 70+ SITES" },
+  {
+    yr: "2024–25", name: "HANDY — 이사 · PO/팀장", meta: "CMS · 아르피나 예약 전환",
+    sub: [
+      { n: "홈페이지 관리 CMS 기획·UI/UX 디자인", p: "2024.08 – 2025.05 · 자체 서비스" },
+      { n: "부산경상대 창업가꿈 홈페이지 구축", p: "2024 · 신규" },
+      { n: "아르피나 수영장 선착순 예약 시스템 + 리뉴얼", p: "2024 – 25 · 예약" },
+      { n: "허치슨 홈페이지 리뉴얼", p: "2024 – 25 · 리뉴얼" },
+      { n: "부산경상대 메이커스페이스 신규 구축", p: "2024 – 25 · 신규" },
+      { n: "울산과학대 EPL 신규 구축 (선착순 예약)", p: "2025 · 예약" },
+    ],
+  },
+  {
+    yr: "2022–24", name: "ARIMOA — PM/PL", meta: "사원→대리→과장 · 70+ SITES",
+    sub: [
+      { n: "경성대 LINC 3.0 사업단 구축 (11개 프로그램)", p: "2022 – 23 · 신규" },
+      { n: "한국기술교육대 산학협력단 고도화", p: "2023 · 고도화" },
+      { n: "상지건축 50주년 리뉴얼", p: "2023 · 리뉴얼" },
+      { n: "동아대 교내 홈페이지 고도화", p: "2023 · 고도화" },
+      { n: "울산과학대 통합 구축 (40개+, PHP→JAVA)", p: "2023 – 24 · 대규모" },
+      { n: "경성대 LINC 3.0 공유형 콘텐츠 다중활용", p: "2023 – 24 · 신규" },
+      { n: "전국 기술사교육원 구축", p: "2023 – 24 · 신규" },
+      { n: "철강산업 인적양성 부트캠프", p: "2023 – 24 · 신규" },
+      { n: "한진 공식 홈페이지 메인 리뉴얼", p: "2024 · 리뉴얼" },
+      { n: "대동대 통합 구축 (30개)", p: "2024 · 대규모" },
+      { n: "영렘브란트 신규 구축", p: "2024 · 신규" },
+      { n: "울산과학대 진로진학지원센터 외 부속", p: "2023 – 24 · 다수" },
+    ],
+  },
   { yr: "2009–21", name: "DOMINO'S — STORE MANAGER", meta: "12 YEARS" },
 ];
 
@@ -78,7 +110,44 @@ const CASES = [
     body: "핸디 스크럼 조직에 Gemini·Claude·Gamma를 도입해 제안서·기획 문서 작성 시간을 단축. 새 도구를 팀에 정착시키는 일은 도입보다 설득이 어렵다는 걸 배운 프로젝트.",
     tag: "HANDY · AI 정착",
   },
+  {
+    no: "05",
+    title: "2개월 안에 11개 프로그램",
+    accent: "— 경성대 LINC 3.0",
+    body: "11개 신청·관리 프로그램을 2개월 안에 오픈해야 하는 일정. 공통 프로세스 설계로 개발 부담을 줄이고 핵심 프로그램에 집중해 일정 내 안정 오픈 — 유지보수를 거쳐 지금도 다수 사용자가 이용 중.",
+    tag: "ARIMOA · 11 PROGRAMS",
+  },
+  {
+    no: "06",
+    title: "레퍼런스 없이 CMS를 제로부터",
+    accent: "— 자체 CMS 설계",
+    body: "기존에 없던 홈페이지 관리 CMS를 IA 구조도 → 스토리보드 → 플로우차트 → UI/UX까지 약 9개월간 Figma로 전 과정 설계. 이후 모든 웹 프로젝트의 관리 기반이 됐다.",
+    tag: "HANDY · 9 MONTHS",
+  },
 ];
+
+// Builds 행 — 호버 시 라임 스윕 + 3D 프리뷰(스크린샷 있으면 이미지, 없으면 스트라이프)
+const BuildRow = ({ b, i }: { b: Build; i: number }) => {
+  const [shotOk, setShotOk] = useState(true);
+  const th = (0.16 + i * 0.09).toFixed(2);
+  const vis = `clamp(0, calc(var(--p,0)*4 - ${th}), 1)`;
+  return (
+    <div data-row data-hover style={{ position: "relative", display: "flex", alignItems: "center", gap: "2.5vw", padding: "2.2vh 3.5vw", borderTop: "1px solid #242424", color: "#f4f3f0", transition: "color .2s ease", transformOrigin: "center bottom", opacity: vis, transform: `translateY(calc((1 - ${vis})*40px)) rotateX(calc((1 - ${vis})*-32deg))` }}>
+      <span style={{ position: "absolute", inset: 0, background: ACC, transform: "scaleX(var(--th,0))", transformOrigin: "left", transition: "transform .34s cubic-bezier(.2,.7,.2,1)", zIndex: 0 }} />
+      <span style={{ fontFamily: MONO, fontSize: 11, width: "3ch", flex: "none", color: "inherit", opacity: 0.55, position: "relative", zIndex: 2 }}>{b.no}</span>
+      <span style={{ fontFamily: ANTON, fontSize: "clamp(26px,3.9vw,64px)", lineHeight: 1, position: "relative", zIndex: 2, transform: "skewY(var(--skew,0deg))" }}>{b.name}</span>
+      <span style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 11, letterSpacing: ".14em", color: "inherit", opacity: 0.55, position: "relative", zIndex: 2 }}>{b.meta}</span>
+      <span style={{ position: "absolute", right: "9vw", top: "50%", width: 270, height: 175, zIndex: 1, pointerEvents: "none", opacity: "var(--th,0)", transform: "translateY(-50%) perspective(750px) rotateY(calc(-24deg + var(--th,0)*10deg)) rotateX(7deg)", transition: "opacity .28s ease,transform .38s cubic-bezier(.2,.7,.2,1)", overflow: "hidden" }}>
+        {b.shot && shotOk ? (
+          <img src={b.shot} alt="" onError={() => setShotOk(false)} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", border: "1px solid #0a0a0a" }} />
+        ) : (
+          <span style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(-45deg,#0a0a0a,#0a0a0a 9px,#f4f3f0 9px,#f4f3f0 19px)", border: "1px solid #0a0a0a" }} />
+        )}
+        <span style={{ position: "absolute", left: 10, bottom: 8, fontFamily: MONO, fontSize: 10, letterSpacing: ".1em", background: "#0a0a0a", color: ACC, padding: "4px 7px" }}>{b.drop}</span>
+      </span>
+    </div>
+  );
+};
 
 // ─────────────────────────────────────────────────────────────
 // AI 챗봇 (기존 기능 유지 — 새 룩으로 재스타일)
@@ -196,6 +265,7 @@ const Chatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
 const Portfolio = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [imgOk, setImgOk] = useState(true);
+  const [openArc, setOpenArc] = useState<number | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const reduceMotion = typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -684,25 +754,9 @@ const Portfolio = () => {
             <span data-scramble>02 — BUILDS (10+)</span><span>COLOR ON HOVER ONLY</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", marginTop: "7vh", borderBottom: "1px solid #242424", perspective: 1100 }}>
-            {BUILDS.map((b, i) => {
-              const th = (0.2 + i * 0.14).toFixed(2);
-              const vis = `clamp(0, calc(var(--p,0)*4 - ${th}), 1)`;
-              return (
-                <div key={b.no} data-row data-hover style={{ position: "relative", display: "flex", alignItems: "center", gap: "2.5vw", padding: "3vh 3.5vw", borderTop: "1px solid #242424", color: "#f4f3f0", transition: "color .2s ease", transformOrigin: "center bottom", opacity: vis, transform: `translateY(calc((1 - ${vis})*40px)) rotateX(calc((1 - ${vis})*-32deg))` }}>
-                  <span style={{ position: "absolute", inset: 0, background: ACC, transform: "scaleX(var(--th,0))", transformOrigin: "left", transition: "transform .34s cubic-bezier(.2,.7,.2,1)", zIndex: 0 }} />
-                  <span style={{ fontFamily: MONO, fontSize: 11, width: "3ch", flex: "none", color: "inherit", opacity: 0.55, position: "relative", zIndex: 2 }}>{b.no}</span>
-                  <span style={{ fontFamily: ANTON, fontSize: "clamp(30px,4.6vw,80px)", lineHeight: 1, position: "relative", zIndex: 2, transform: "skewY(var(--skew,0deg))" }}>{b.name}</span>
-                  <span style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 11, letterSpacing: ".14em", color: "inherit", opacity: 0.55, position: "relative", zIndex: 2 }}>{b.meta}</span>
-                  <span style={{ position: "absolute", right: "9vw", top: "50%", width: 270, height: 175, zIndex: 1, pointerEvents: "none", opacity: "var(--th,0)", transform: "translateY(-50%) perspective(750px) rotateY(calc(-24deg + var(--th,0)*10deg)) rotateX(7deg)", transition: "opacity .28s ease,transform .38s cubic-bezier(.2,.7,.2,1)" }}>
-                    <span style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(-45deg,#0a0a0a,#0a0a0a 9px,#f4f3f0 9px,#f4f3f0 19px)", border: "1px solid #0a0a0a" }} />
-                    <span style={{ position: "absolute", left: 10, bottom: 8, fontFamily: MONO, fontSize: 10, letterSpacing: ".1em", background: "#0a0a0a", color: ACC, padding: "4px 7px" }}>{b.drop}</span>
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-          <div style={{ marginTop: "7vh", display: "flex", justifyContent: "center", opacity: "clamp(0, calc(var(--p,0)*4 - 1.02), 1)" }}>
-            <div data-magnetic data-hover className="mono-btn" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: ".18em", border: "1px solid #3a3a3a", padding: "18px 34px" }}>VIEW ALL — 10+ BUILDS</div>
+            {BUILDS.map((b, i) => (
+              <BuildRow key={b.no} b={b} i={i} />
+            ))}
           </div>
         </section>
 
@@ -742,10 +796,41 @@ const Portfolio = () => {
           </div>
           <div style={{ marginTop: "6vh", borderBottom: "1px solid rgba(17,17,17,.18)" }}>
             {ARCHIVE.map((a, i) => (
-              <div key={i} className="arc-row" style={{ display: "flex", alignItems: "baseline", gap: "2.5vw", padding: "2.2vh 0", borderTop: "1px solid rgba(17,17,17,.18)" }}>
-                <span style={{ fontFamily: MONO, fontSize: 11, color: "#999", width: "9ch", flex: "none" }}>{a.yr}</span>
-                <span style={{ fontFamily: ANTON, fontSize: "clamp(20px,2.2vw,38px)", lineHeight: 1, textTransform: "uppercase" }}>{a.name}</span>
-                <span style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 10, letterSpacing: ".14em", color: "#999" }}>{a.meta}</span>
+              <div key={i}>
+                <div
+                  className="arc-row"
+                  data-hover={a.sub ? true : undefined}
+                  onClick={a.sub ? () => setOpenArc(openArc === i ? null : i) : undefined}
+                  style={{ display: "flex", alignItems: "baseline", gap: "2.5vw", padding: "2.2vh 0", borderTop: "1px solid rgba(17,17,17,.18)", cursor: a.sub ? "pointer" : undefined }}
+                >
+                  <span style={{ fontFamily: MONO, fontSize: 11, color: "#999", width: "9ch", flex: "none" }}>{a.yr}</span>
+                  <span style={{ fontFamily: ANTON, fontSize: "clamp(20px,2.2vw,38px)", lineHeight: 1, textTransform: "uppercase" }}>{a.name}</span>
+                  <span style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 10, letterSpacing: ".14em", color: "#999" }}>
+                    {a.meta}
+                    {a.sub && (
+                      <span style={{ marginLeft: 14, color: "#111", background: ACC, padding: "3px 8px", letterSpacing: ".1em" }}>
+                        {openArc === i ? "− CLOSE" : `+ ${a.sub.length} PROJECTS`}
+                      </span>
+                    )}
+                  </span>
+                </div>
+                {a.sub && (
+                  <div style={{ display: "grid", gridTemplateRows: openArc === i ? "1fr" : "0fr", transition: "grid-template-rows .5s cubic-bezier(.2,.7,.2,1)" }}>
+                    <div style={{ overflow: "hidden" }}>
+                      <div style={{ padding: "0.6vh 0 2.6vh calc(9ch + 2.5vw)" }}>
+                        {a.sub.map((s, j) => (
+                          <div key={j} style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "baseline", padding: "7px 0", borderTop: j === 0 ? "none" : "1px dashed rgba(17,17,17,.12)" }}>
+                            <span style={{ fontSize: 13.5, fontWeight: 600, color: "#333" }}>
+                              <span style={{ fontFamily: MONO, fontSize: 10, color: "#999", marginRight: 12 }}>{String(j + 1).padStart(2, "0")}</span>
+                              {s.n}
+                            </span>
+                            <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".08em", color: "#999", whiteSpace: "nowrap" }}>{s.p}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -787,6 +872,23 @@ const Portfolio = () => {
                 <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".18em", color: "#111", background: ACC, alignSelf: "flex-start", padding: "4px 9px" }}>{s.tag}</div>
                 <div style={{ fontFamily: ANTON, fontSize: "clamp(26px,2.6vw,44px)", lineHeight: 1.05, textTransform: "uppercase", marginTop: 14 }}>{s.title}</div>
                 <div style={{ fontSize: 14, lineHeight: 1.85, color: "#555", marginTop: "auto", fontWeight: 500 }}>{s.body}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: "8vh", display: "flex", justifyContent: "space-between", ...label, color: "#666" }}>
+            <span>CREDENTIALS</span><span>EDU · CERT · AWARDS</span>
+          </div>
+          <div style={{ marginTop: "2vh", borderBottom: "1px solid rgba(17,17,17,.18)" }}>
+            {[
+              { yr: "2011–19", name: "경성대학교 경영학과", meta: "편입 / 졸업" },
+              { yr: "2024.09", name: "웹디자인개발기능사", meta: "한국산업인력공단" },
+              { yr: "2018", name: "서비스 디자인 청사진 — 최우수상", meta: "경성대 우수과제공모전" },
+              { yr: "2011", name: "KT&G 마케팅 캠프 — 팀워크상", meta: "롯데 에비뉴몰 전략 공모전" },
+            ].map((c, i) => (
+              <div key={i} className="arc-row" style={{ display: "flex", alignItems: "baseline", gap: "2.5vw", padding: "1.8vh 0", borderTop: "1px solid rgba(17,17,17,.18)" }}>
+                <span style={{ fontFamily: MONO, fontSize: 11, color: "#999", width: "9ch", flex: "none" }}>{c.yr}</span>
+                <span style={{ fontSize: "clamp(15px,1.4vw,19px)", fontWeight: 800, letterSpacing: "-.01em" }}>{c.name}</span>
+                <span style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 10, letterSpacing: ".14em", color: "#999" }}>{c.meta}</span>
               </div>
             ))}
           </div>
