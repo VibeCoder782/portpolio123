@@ -413,10 +413,6 @@ const Portfolio = () => {
       curRow: null as HTMLElement | null,
       introDone: false, raf: 0, dead: false, opInteracted: false,
       prevPx: undefined as number | undefined, prevPy: undefined as number | undefined, opAcc: 0,
-      lastT: 0, frameDX: 0, frameDY: 0,
-      dragEl: null as (HTMLElement & { _s?: { x: number; y: number; r: number; s: number; rx: number; ry: number; z: number }; _fling?: { vx: number; vy: number } | null }) | null,
-      physOn: false, // 드래그·플링 활성 여부 (유리 블러 일시정지용)
-      dragHomeX: 0, dragHomeY: 0, dragVX: 0, dragVY: 0,
       dash: null as null | { x: number; y: number; vx: number; vy: number; r: number },
     };
 
@@ -441,35 +437,6 @@ const Portfolio = () => {
       }
     };
     document.addEventListener("mouseover", onOver);
-
-    // 글자 드래그 & 던지기 (데스크톱 전용) — TYPE IS PHYSICAL
-    const fine = window.matchMedia("(pointer:fine)").matches;
-    const onLtrDown = (e: PointerEvent) => {
-      if (!fine || reduceMotion || !S.introDone || e.button !== 0) return;
-      const t = e.target instanceof HTMLElement ? e.target : null;
-      const ltr = t?.closest("[data-split] [data-ltr]") as typeof S.dragEl;
-      if (!ltr) return;
-      e.preventDefault();
-      const st = ltr._s || (ltr._s = { x: 0, y: 0, r: 0, s: 1, rx: 0, ry: 0, z: 0 });
-      const r = ltr.getBoundingClientRect();
-      ltr._fling = null;
-      S.dragEl = ltr;
-      S.dragHomeX = r.left + r.width / 2 - st.x;
-      S.dragHomeY = r.top + r.height / 2 - st.y;
-      S.dragVX = 0; S.dragVY = 0;
-    };
-    const onLtrUp = () => {
-      const el = S.dragEl;
-      if (!el) return;
-      el._fling = {
-        vx: Math.max(-1500, Math.min(1500, S.dragVX)),
-        vy: Math.max(-1500, Math.min(1500, S.dragVY)),
-      };
-      S.dragEl = null;
-    };
-    root.addEventListener("pointerdown", onLtrDown);
-    window.addEventListener("pointerup", onLtrUp);
-    window.addEventListener("pointercancel", onLtrUp);
 
     const loopBody = () => {
       const vh = window.innerHeight;
@@ -562,20 +529,9 @@ const Portfolio = () => {
         el.style.opacity = "1";
       });
 
-      // 프레임 시간·커서 이동량 — 물리(드래그·플링)와 스포트라이트 판정용. 반드시 글자 물리보다 먼저 계산 (fdt 참조 순서)
-      const nowT = performance.now();
-      const fdt = Math.min(0.05, (nowT - (S.lastT || nowT)) / 1000) || 0.016;
-      S.lastT = nowT;
-      S.frameDX = S.px - (S.prevPx ?? S.px);
-      S.frameDY = S.py - (S.prevPy ?? S.py);
-      const mvd = Math.hypot(S.frameDX, S.frameDY);
+      // 커서 이동량 — 스포트라이트 "실제 사용" 판정용
+      const mvd = Math.hypot(S.px - (S.prevPx ?? S.px), S.py - (S.prevPy ?? S.py));
       S.prevPx = S.px; S.prevPy = S.py;
-      if (S.dragEl) {
-        S.dragVX = L(S.dragVX, S.frameDX / fdt, 0.35);
-        S.dragVY = L(S.dragVY, S.frameDY / fdt, 0.35);
-        S.cs = Math.max(S.cs, 2.4); // 잡는 동안 렌즈 확대
-      }
-      let physActive = !!S.dragEl;
 
       // 글자 물리 (pop3d / wave / repel)
       const K = CONFIG.repelStrength;
@@ -583,27 +539,9 @@ const Portfolio = () => {
       const R = mode === "pop3d" ? 210 : mode === "wave" ? 200 : 150;
       type LtrState = { x: number; y: number; r: number; s: number; rx: number; ry: number; z: number };
       if (S.introDone && !reduceMotion && mode !== "light")
-        root.querySelectorAll<HTMLElement & { _s?: LtrState; _fling?: { vx: number; vy: number } | null }>("[data-ltr]").forEach((el) => {
+        root.querySelectorAll<HTMLElement & { _s?: LtrState }>("[data-ltr]").forEach((el) => {
           const st = el._s || (el._s = { x: 0, y: 0, r: 0, s: 1, rx: 0, ry: 0, z: 0 });
-          if (el === S.dragEl) {
-            // 드래그 — 커서를 따라옴 (살짝 무게감 + 진행 방향으로 기욺)
-            st.x = L(st.x, S.px - S.dragHomeX, 0.5);
-            st.y = L(st.y, S.py - S.dragHomeY, 0.5);
-            st.r = L(st.r, Math.max(-26, Math.min(26, S.dragVX * 0.02)), 0.25);
-            st.s = L(st.s, 1.08, 0.2); st.rx = L(st.rx, 0, 0.2); st.ry = L(st.ry, 0, 0.2); st.z = L(st.z, 30, 0.2);
-          } else if (el._fling) {
-            // 던져짐 — 관성으로 날아갔다가 스프링처럼 제자리로 부메랑
-            physActive = true;
-            const f = el._fling;
-            f.vx += (-st.x * 42 - f.vx * 5.2) * fdt;
-            f.vy += (-st.y * 42 - f.vy * 5.2) * fdt;
-            st.x += f.vx * fdt; st.y += f.vy * fdt;
-            st.r = L(st.r, f.vx * 0.03, 0.2);
-            st.s = L(st.s, 1, 0.15); st.rx = L(st.rx, 0, 0.15); st.ry = L(st.ry, 0, 0.15); st.z = L(st.z, 0, 0.15);
-            if (Math.abs(st.x) < 0.7 && Math.abs(st.y) < 0.7 && Math.abs(f.vx) < 10 && Math.abs(f.vy) < 10) {
-              el._fling = null; st.x = 0; st.y = 0; st.r = 0;
-            }
-          } else {
+          {
             const rc = el.getBoundingClientRect();
             const dx0 = rc.left + rc.width / 2 - S.px;
             const dy0 = rc.top + rc.height / 2 - S.py;
@@ -678,13 +616,6 @@ const Portfolio = () => {
           }
         }
       });
-
-      // 드래그·플링 중엔 유리 블러 일시 정지 (글자가 유리 밑을 지나며 매 프레임 재블러되는 비용 차단)
-      if (physActive !== S.physOn) {
-        S.physOn = physActive;
-        if (physActive) root.setAttribute("data-dragging", "1");
-        else root.removeAttribute("data-dragging");
-      }
 
       // 스포트라이트 씬 — 커서가 "실제로 움직이기" 전엔 조명이 스스로 훑고 다님 (유도 + 모바일 대응)
       root.querySelectorAll<HTMLElement>("[data-light]").forEach((el) => {
@@ -863,9 +794,6 @@ const Portfolio = () => {
       cancelAnimationFrame(S.raf);
       window.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseover", onOver);
-      root.removeEventListener("pointerdown", onLtrDown);
-      window.removeEventListener("pointerup", onLtrUp);
-      window.removeEventListener("pointercancel", onLtrUp);
     };
   }, [reduceMotion]);
 
@@ -925,11 +853,10 @@ const Portfolio = () => {
         @keyframes heroFloatA{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-18px) rotate(1.6deg)}}
         @keyframes heroFloatB{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(16px) rotate(-1.8deg)}}
 
-        /* 히어로 타이포 — 드래그 가능한 물리 글자 */
+        /* 히어로 타이포 — 커서에 반응하는 물리 글자 */
         [data-split]{user-select:none;-webkit-user-select:none}
-        /* 드래그·플링 중 유리 블러 정지 (성능) + 좁은 화면에선 유리 조각 숨김 */
-        [data-dragging] .gchunk{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-        @media (max-width:900px){.gchunk-wrap{display:none}}
+        /* 좁은 화면에선 히어로 오브제 숨김 */
+        @media (max-width:900px){.gchunk-wrap,.hero-obj{display:none}}
 
         /* 영수증 펄럭임 — 출력 직후 2회 흔들리고 정지 */
         .paper-flutter{animation:paperWave 1.9s ease-in-out .8s 2}
@@ -964,7 +891,7 @@ const Portfolio = () => {
               <span>YANG SOONMIN — PORTFOLIO</span>
               <span style={{ color: "#666" }}>PM/PO · BUSAN · <span data-clock>LOCAL --:--:-- KST</span></span>
             </div>
-            <div style={{ position: "absolute", top: 27, left: "50%", transform: "translateX(-50%)", fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#999", zIndex: 5 }}>TYPE IS PHYSICAL — DRAG THE LETTERS</div>
+            <div style={{ position: "absolute", top: 27, left: "50%", transform: "translateX(-50%)", fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#999", zIndex: 5 }}>TYPE IS PHYSICAL</div>
             <div style={{ position: "absolute", top: "4vh", right: "1.5vw", fontFamily: ANTON, fontSize: "46vh", lineHeight: 1, color: "transparent", WebkitTextStroke: "1.5px rgba(17,17,17,.13)", zIndex: 1, transform: "translateY(calc(var(--p,0)*-24vh))" }}>12/3</div>
             <div style={{ position: "absolute", left: "3.5vw", bottom: "12vh", zIndex: 2, transform: "perspective(950px) rotateX(calc(var(--emy,0)*var(--tilt,0)*4deg)) rotateY(calc(var(--emx,0)*var(--tilt,0)*-6deg))", transformStyle: "preserve-3d" }}>
               <div data-split style={{ ...heroLine, transform: "translateX(calc(var(--p,0)*-5vw))" }}>{split("12 YEARS ON THE FLOOR,")}</div>
@@ -977,40 +904,67 @@ const Portfolio = () => {
                 </span>
               </div>
             </div>
-            <div style={{ position: "absolute", right: "3.5vw", bottom: "12vh", zIndex: 3, maxWidth: 280, textAlign: "right", fontSize: 15, lineHeight: 1.75, fontWeight: 500, color: "#3a3a3a", transform: "translateY(calc(var(--p,0)*-6vh))" }}>
-              현장에서 12년, 프로덕트에서 3년.<br />이제는 직접 만들어 증명한다.<br /><b style={{ color: "#111", fontWeight: 800 }}>"안 되는 건 없다, 방법이 다를 뿐."</b>
-            </div>
             <div data-magnetic data-hover style={{ position: "absolute", left: "3.5vw", bottom: "3.5vh", zIndex: 4, fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#555", border: "1px solid rgba(17,17,17,.25)", padding: "10px 16px" }}>SCROLL</div>
 
-            {/* 유리 조각 — 글자에서 떼어낸 듯한 커스텀 실루엣 (아치 대형 + 슬래시 소형, 꾸밈요소).
-                반드시 타이포 "위"에 겹칠 것 — 유리 블러는 뒤에 콘텐츠가 있어야 비로소 보인다 (빈 배경 위 유리 = 투명).
-                clip-path는 인라인 path() 고정 좌표 — SVG url() 참조는 크롬에서 backdrop-filter를 죽이는 버그가 있어 사용 금지 */}
-            {/* ⚠ 래퍼에 filter(drop-shadow 등) 절대 금지 — 조상 filter가 backdrop-root 경계를 만들어
-                backdrop-filter가 바깥 콘텐츠(타이포)를 샘플링하지 못하게 됨 = 유리 무효.
-                그림자는 유리 뒤 SVG 블러 패스로 대체 */}
-            <div aria-hidden="true" className="gchunk-wrap" style={{ position: "absolute", top: "2vh", right: "3vw", width: 940, height: 720, zIndex: 4, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*20px), calc(var(--p,0)*-8vh + var(--emy,0)*12px), 0)" }}>
+            {/* ── 히어로 오브제: 조명 셰이딩된 입체 오브젝트 + 유리 카드 (유리 "뒤"에 입체물이 있어야 유리가 산다) ──
+                ⚠ backdrop-filter 요소의 조상에 filter 금지 (backdrop-root 경계 → 유리 무효) */}
+
+            {/* 토러스 — 심도 흐림으로 뒤판 느낌 */}
+            <div aria-hidden="true" className="hero-obj" style={{ position: "absolute", top: "4vh", right: "32vw", width: 185, height: 185, zIndex: 1, pointerEvents: "none", filter: "blur(1.6px)", transform: "translate3d(calc(var(--emx,0)*-14px), calc(var(--p,0)*-4vh + var(--emy,0)*-9px), 0)" }}>
+              <div style={{ position: "absolute", inset: 0, animation: "heroFloatB 26s ease-in-out infinite" }}>
+                <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "conic-gradient(from 210deg, #232321, #77746e 80deg, #99968e 115deg, #45443f 195deg, #191918 265deg, #232321)", WebkitMaskImage: "radial-gradient(circle, transparent 32%, #000 34%, #000 62%, transparent 64%)", maskImage: "radial-gradient(circle, transparent 32%, #000 34%, #000 62%, transparent 64%)", transform: "rotate(-14deg)" }} />
+              </div>
+            </div>
+
+            {/* 메인 스피어 — 스튜디오 조명 셰이딩 (하이라이트→코어섀도→바닥 반사광) */}
+            <div aria-hidden="true" className="hero-obj" style={{ position: "absolute", top: "12vh", right: "5vw", width: 330, height: 330, zIndex: 1, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*22px), calc(var(--p,0)*-7vh + var(--emy,0)*14px), 0)" }}>
               <div style={{ position: "absolute", inset: 0, animation: "heroFloatA 30s ease-in-out infinite" }}>
-                <svg viewBox="0 0 940 720" width="100%" height="100%" style={{ position: "absolute", inset: 0, overflow: "visible" }}>
-                  <defs><filter id="chunkShA" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="16" /></filter></defs>
-                  <path d="M690,0 H850 Q920,0 905,55 L490,450 Q460,485 480,520 L390,690 Q370,720 330,720 H160 Q95,720 115,660 L295,395 Q315,362 355,345 L640,55 Q655,20 690,0 Z" fill="rgba(17,17,17,.15)" filter="url(#chunkShA)" transform="translate(8,30)" />
-                </svg>
-                <div className="gchunk" style={{ position: "absolute", inset: 0, clipPath: 'path("M690,0 H850 Q920,0 905,55 L490,450 Q460,485 480,520 L390,690 Q370,720 330,720 H160 Q95,720 115,660 L295,395 Q315,362 355,345 L640,55 Q655,20 690,0 Z")', background: "linear-gradient(140deg, rgba(255,255,255,.30), rgba(240,239,235,.07) 40%, rgba(17,17,17,.03) 62%, rgba(255,255,255,.18) 92%)", backdropFilter: "blur(4px) saturate(1.12) brightness(1.03)", WebkitBackdropFilter: "blur(4px) saturate(1.12) brightness(1.03)" }} />
-                <svg viewBox="0 0 940 720" width="100%" height="100%" style={{ position: "absolute", inset: 0, overflow: "visible" }}>
-                  <path d="M690,0 H850 Q920,0 905,55 L490,450 Q460,485 480,520 L390,690 Q370,720 330,720 H160 Q95,720 115,660 L295,395 Q315,362 355,345 L640,55 Q655,20 690,0 Z" fill="none" stroke="rgba(17,17,17,.13)" strokeWidth="1" transform="translate(1.5,2.5)" />
-                  <path d="M690,0 H850 Q920,0 905,55 L490,450 Q460,485 480,520 L390,690 Q370,720 330,720 H160 Q95,720 115,660 L295,395 Q315,362 355,345 L640,55 Q655,20 690,0 Z" fill="none" stroke="rgba(255,255,255,.85)" strokeWidth="1.5" />
+                <svg viewBox="0 0 100 100" width="100%" height="100%">
+                  <defs>
+                    <radialGradient id="orbA" cx="35%" cy="27%" r="78%">
+                      <stop offset="0%" stopColor="#918f89" />
+                      <stop offset="32%" stopColor="#5e5c56" />
+                      <stop offset="66%" stopColor="#302f2c" />
+                      <stop offset="100%" stopColor="#131312" />
+                    </radialGradient>
+                    <radialGradient id="orbARim" cx="50%" cy="90%" r="58%">
+                      <stop offset="0%" stopColor="rgba(244,243,240,.30)" />
+                      <stop offset="55%" stopColor="rgba(244,243,240,.07)" />
+                      <stop offset="100%" stopColor="rgba(244,243,240,0)" />
+                    </radialGradient>
+                    <filter id="orbASpec" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.7" /></filter>
+                  </defs>
+                  <circle cx="50" cy="50" r="46" fill="url(#orbA)" />
+                  <circle cx="50" cy="50" r="46" fill="url(#orbARim)" />
+                  <ellipse cx="37" cy="26" rx="11" ry="7.5" fill="rgba(255,255,255,.5)" filter="url(#orbASpec)" />
                 </svg>
               </div>
             </div>
-            <div aria-hidden="true" className="gchunk-wrap" style={{ position: "absolute", top: "19vh", left: "13vw", width: 260, height: 310, zIndex: 4, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*-26px), calc(var(--p,0)*-5vh + var(--emy,0)*-15px), 0)" }}>
-              <div style={{ position: "absolute", inset: 0, animation: "heroFloatB 24s ease-in-out infinite" }}>
-                <svg viewBox="0 0 260 310" width="100%" height="100%" style={{ position: "absolute", inset: 0, overflow: "visible" }}>
-                  <defs><filter id="chunkShB" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="12" /></filter></defs>
-                  <path d="M155,16 Q172,4 190,14 L248,40 Q264,50 256,70 L108,300 Q94,316 76,306 L14,280 Q-2,270 8,250 Z" fill="rgba(17,17,17,.14)" filter="url(#chunkShB)" transform="translate(6,22)" />
-                </svg>
-                <div className="gchunk" style={{ position: "absolute", inset: 0, clipPath: 'path("M155,16 Q172,4 190,14 L248,40 Q264,50 256,70 L108,300 Q94,316 76,306 L14,280 Q-2,270 8,250 Z")', background: "linear-gradient(155deg, rgba(255,255,255,.28), rgba(240,239,235,.07) 45%, rgba(17,17,17,.03) 65%, rgba(255,255,255,.16) 92%)", backdropFilter: "blur(3.5px) saturate(1.12) brightness(1.03)", WebkitBackdropFilter: "blur(3.5px) saturate(1.12) brightness(1.03)" }} />
-                <svg viewBox="0 0 260 310" width="100%" height="100%" style={{ position: "absolute", inset: 0, overflow: "visible" }}>
-                  <path d="M155,16 Q172,4 190,14 L248,40 Q264,50 256,70 L108,300 Q94,316 76,306 L14,280 Q-2,270 8,250 Z" fill="none" stroke="rgba(17,17,17,.13)" strokeWidth="1" transform="translate(1.2,2)" />
-                  <path d="M155,16 Q172,4 190,14 L248,40 Q264,50 256,70 L108,300 Q94,316 76,306 L14,280 Q-2,270 8,250 Z" fill="none" stroke="rgba(255,255,255,.85)" strokeWidth="1.5" />
+
+            {/* 유리 카드 — 선언문 (오브제·타이포를 굴절시키는 프론트 레이어) */}
+            <div style={{ position: "absolute", top: "44vh", right: "4.5vw", width: 370, zIndex: 4, pointerEvents: "none", transform: "rotate(-5deg) translate3d(calc(var(--emx,0)*10px), calc(var(--emy,0)*6px), 0)" }}>
+              <div style={{ borderRadius: 22, padding: "24px 28px", background: "linear-gradient(150deg, rgba(255,255,255,.38), rgba(255,255,255,.10) 55%, rgba(255,255,255,.24))", backdropFilter: "blur(9px) saturate(1.12) brightness(1.03)", WebkitBackdropFilter: "blur(9px) saturate(1.12) brightness(1.03)", border: "1px solid rgba(255,255,255,.65)", boxShadow: "0 34px 70px rgba(17,17,17,.14), inset 0 1px 0 rgba(255,255,255,.75)" }}>
+                <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#666", marginBottom: 13 }}>MANIFESTO</div>
+                <div style={{ fontSize: 15, lineHeight: 1.75, fontWeight: 500, color: "#2a2a28" }}>현장에서 12년, 프로덕트에서 3년.<br />이제는 직접 만들어 증명한다.</div>
+                <b style={{ display: "block", marginTop: 10, fontSize: 15.5, color: "#111", fontWeight: 800 }}>"안 되는 건 없다, 방법이 다를 뿐."</b>
+              </div>
+            </div>
+
+            {/* 소형 스피어 — 유리 카드 "앞"에 겹쳐 깊이 샌드위치 */}
+            <div aria-hidden="true" className="hero-obj" style={{ position: "absolute", top: "57vh", right: "22vw", width: 110, height: 110, zIndex: 5, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*30px), calc(var(--emy,0)*20px), 0)" }}>
+              <div style={{ position: "absolute", inset: 0, animation: "heroFloatB 22s ease-in-out infinite" }}>
+                <svg viewBox="0 0 100 100" width="100%" height="100%">
+                  <defs>
+                    <radialGradient id="orbB" cx="38%" cy="30%" r="76%">
+                      <stop offset="0%" stopColor="#9b9992" />
+                      <stop offset="35%" stopColor="#6a6862" />
+                      <stop offset="70%" stopColor="#383734" />
+                      <stop offset="100%" stopColor="#161615" />
+                    </radialGradient>
+                    <filter id="orbBSpec" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" /></filter>
+                  </defs>
+                  <circle cx="50" cy="50" r="46" fill="url(#orbB)" />
+                  <ellipse cx="39" cy="28" rx="12" ry="8" fill="rgba(255,255,255,.55)" filter="url(#orbBSpec)" />
                 </svg>
               </div>
             </div>
