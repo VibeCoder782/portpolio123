@@ -26,18 +26,20 @@ const split = (txt: string) =>
     </span>
   ));
 
-type Build = { no: string; name: string; meta: string; drop: string; shot: string | null };
+// shape: 호버 프리뷰의 블루프린트 와이어프레임 3D 도형 (프로젝트의 은유) / cap: 도형 캡션
+// shot: /public/shots/ 에 스크린샷이 생기면 자동으로 도형 대신 표시
+type Build = { no: string; name: string; meta: string; shape: string; cap: string; shot: string | null };
 const BUILDS: Build[] = [
-  { no: "01", name: "AI AUTOMATION", meta: "N8N · IN USE", drop: "DROP — N8N CANVAS", shot: "/shots/n8n.png" },
-  { no: "02", name: "BOOGION", meta: "TEAM OF 4 · TOP CONTRIBUTOR", drop: "DROP — APP SHOT", shot: "/shots/boogion.png" },
-  { no: "03", name: "MOUNTAINON", meta: "APP BUILD", drop: "DROP — APP SHOT", shot: "/shots/mountainon.png" },
-  { no: "04", name: "BOOKITDA", meta: "STORE-READY", drop: "DROP — APP SHOT", shot: "/shots/bookitda.png" },
-  { no: "05", name: "CASETALK", meta: "AI SELF-CHECK", drop: "DROP — CHAT UI", shot: "/shots/casetalk.png" },
-  { no: "06", name: "AI INSIGHT OS", meta: "35 SPECS · PRE-MVP", drop: "DROP — SPEC DOC", shot: "/shots/insightos.png" },
-  { no: "07", name: "CONTENT PLATFORM ※", meta: "IN SERVICE · ANONYMOUS", drop: "ANONYMOUS — 익명 유지", shot: null },
-  { no: "08", name: "WEBOPS BUILDER", meta: "OPS CONSOLE · IN DESIGN", drop: "DROP — CONSOLE UI", shot: "/shots/webops.png" },
-  { no: "09", name: "FLOWON", meta: "3D WEB · SHIPPED", drop: "DROP — WEB SHOT", shot: "/shots/flowon.png" },
-  { no: "10", name: "CITIZEN'S TURN", meta: "UNITY 2D · IN DEV", drop: "DROP — GAME SHOT", shot: "/shots/citizensturn.png" },
+  { no: "01", name: "AI AUTOMATION", meta: "N8N · IN USE", shape: "rings", cap: "AUTOMATION LOOP", shot: "/shots/n8n.png" },
+  { no: "02", name: "BOOGION", meta: "TEAM OF 4 · TOP CONTRIBUTOR", shape: "cube4", cap: "TEAM OF FOUR", shot: "/shots/boogion.png" },
+  { no: "03", name: "MOUNTAINON", meta: "APP BUILD", shape: "peak", cap: "THE PEAK", shot: "/shots/mountainon.png" },
+  { no: "04", name: "BOOKITDA", meta: "STORE-READY", shape: "pages", cap: "PAGES", shot: "/shots/bookitda.png" },
+  { no: "05", name: "CASETALK", meta: "AI SELF-CHECK", shape: "dialogue", cap: "DIALOGUE", shot: "/shots/casetalk.png" },
+  { no: "06", name: "AI INSIGHT OS", meta: "35 SPECS · PRE-MVP", shape: "stack", cap: "STACK OF 35", shot: "/shots/insightos.png" },
+  { no: "07", name: "CONTENT PLATFORM ※", meta: "IN SERVICE · ANONYMOUS", shape: "sealed", cap: "SEALED", shot: null },
+  { no: "08", name: "WEBOPS BUILDER", meta: "OPS CONSOLE · IN DESIGN", shape: "console", cap: "CONSOLE", shot: "/shots/webops.png" },
+  { no: "09", name: "FLOWON", meta: "3D WEB · SHIPPED", shape: "wave", cap: "THE WAVE", shot: "/shots/flowon.png" },
+  { no: "10", name: "CITIZEN'S TURN", meta: "UNITY 2D · IN DEV", shape: "die", cap: "THE DIE", shot: "/shots/citizensturn.png" },
 ];
 
 type ArchiveRow = { yr: string; name: string; meta: string; desc?: string; sub?: { n: string; p: string }[] };
@@ -131,7 +133,77 @@ const CASES = [
   },
 ];
 
-// Builds 행 — 호버 시 라임 스윕 + 3D 프리뷰(스크린샷 있으면 이미지, 없으면 스트라이프)
+// ─────────────────────────────────────────────────────────────
+// 블루프린트 와이어프레임 3D 도형 — 프로젝트의 은유 (스크린샷 오기 전 프리뷰)
+// ─────────────────────────────────────────────────────────────
+const WIRE = "1.5px solid rgba(200,255,22,.85)";
+const WIREBG = "rgba(200,255,22,.05)";
+const wf = (key: string | number, w: number, h: number, t: string, extra?: React.CSSProperties) => (
+  <span key={key} style={{ position: "absolute", left: "50%", top: "50%", width: w, height: h, marginLeft: -w / 2, marginTop: -h / 2, transform: t, border: WIRE, background: WIREBG, ...extra }} />
+);
+const WireShape = ({ type }: { type: string }) => {
+  let faces: React.ReactNode = null;
+  switch (type) {
+    case "rings": // 맞물려 도는 궤도 — 자동화 루프
+      faces = [wf(1, 86, 86, "rotateY(0deg)", { borderRadius: "50%" }), wf(2, 86, 86, "rotateY(90deg)", { borderRadius: "50%" }), wf(3, 86, 86, "rotateX(90deg)", { borderRadius: "50%", opacity: 0.5 })];
+      break;
+    case "cube4": // 4조각 큐브 — 4인 팀
+      faces = [
+        ...[0, 90, 180, 270].map((a) => wf(a, 64, 64, `rotateY(${a}deg) translateZ(32px)`)),
+        wf("t", 64, 64, "rotateX(90deg) translateZ(32px)"), wf("b", 64, 64, "rotateX(-90deg) translateZ(32px)"),
+        wf("h", 66, 1.5, "translateZ(33px)", { background: "rgba(200,255,22,.85)", border: "none" }),
+        wf("v", 1.5, 66, "translateZ(33px)", { background: "rgba(200,255,22,.85)", border: "none" }),
+      ];
+      break;
+    case "peak": // 쌓인 링의 원뿔 — 산
+      faces = [
+        wf(1, 84, 84, "rotateX(90deg) translateZ(-30px)", { borderRadius: "50%" }),
+        wf(2, 54, 54, "rotateX(90deg) translateZ(0px)", { borderRadius: "50%" }),
+        wf(3, 26, 26, "rotateX(90deg) translateZ(28px)", { borderRadius: "50%" }),
+        wf(4, 7, 7, "rotateX(90deg) translateZ(42px)", { borderRadius: "50%", background: "rgba(200,255,22,.9)" }),
+      ];
+      break;
+    case "pages": // 펼쳐지는 책장
+      faces = [-36, -18, 0, 18, 36].map((a) => wf(a, 60, 82, `rotateY(${a}deg)`, { transformOrigin: "left center", marginLeft: 0 }));
+      break;
+    case "dialogue": // 마주 보는 두 판 — 대화
+      faces = [wf(1, 50, 66, "translateX(-30px) rotateY(32deg)"), wf(2, 50, 66, "translateX(30px) rotateY(-32deg)")];
+      break;
+    case "stack": // 층층이 쌓인 레이어 — 35개 스펙
+      faces = [0, 1, 2, 3].map((i) => wf(i, 80, 52, `translateY(${(i - 1.5) * 18}px) rotateX(72deg)`));
+      break;
+    case "sealed": // 봉인된 큐브 — 익명
+      faces = [
+        ...[0, 90, 180, 270].map((a) => wf(a, 64, 64, `rotateY(${a}deg) translateZ(32px)`)),
+        wf("t", 64, 64, "rotateX(90deg) translateZ(32px)"), wf("b", 64, 64, "rotateX(-90deg) translateZ(32px)"),
+        wf("x1", 88, 1.5, "translateZ(33px) rotate(45deg)", { background: "rgba(200,255,22,.85)", border: "none" }),
+        wf("x2", 88, 1.5, "translateZ(33px) rotate(-45deg)", { background: "rgba(200,255,22,.85)", border: "none" }),
+      ];
+      break;
+    case "console": // 격자 콘솔 판 — 운영 대시보드
+      faces = [wf(1, 92, 64, "rotateX(55deg)", { backgroundImage: "repeating-linear-gradient(rgba(200,255,22,.45) 0 1px,transparent 1px 12px),repeating-linear-gradient(90deg,rgba(200,255,22,.45) 0 1px,transparent 1px 12px)" })];
+      break;
+    case "wave": // 얼어붙은 물결 — Flow
+      faces = [0, 1, 2, 3, 4, 5, 6].map((i) => wf(i, 8, 52, `translateX(${(i - 3) * 13}px) translateY(${(Math.sin(i * 1.05) * 14).toFixed(1)}px) rotateX(58deg)`));
+      break;
+    case "die": // 구르는 주사위 — 의사결정
+      faces = [
+        wf("f", 64, 64, "translateZ(32px)", { backgroundImage: "radial-gradient(circle 5px at 50% 50%, rgba(200,255,22,.95) 4px, transparent 5px)" }),
+        wf("k", 64, 64, "rotateY(180deg) translateZ(32px)", { backgroundImage: "radial-gradient(circle 4px at 30% 30%, rgba(200,255,22,.95) 3px, transparent 4px),radial-gradient(circle 4px at 70% 30%, rgba(200,255,22,.95) 3px, transparent 4px),radial-gradient(circle 4px at 30% 70%, rgba(200,255,22,.95) 3px, transparent 4px),radial-gradient(circle 4px at 70% 70%, rgba(200,255,22,.95) 3px, transparent 4px)" }),
+        wf("r", 64, 64, "rotateY(90deg) translateZ(32px)", { backgroundImage: "radial-gradient(circle 4px at 30% 30%, rgba(200,255,22,.95) 3px, transparent 4px),radial-gradient(circle 4px at 50% 50%, rgba(200,255,22,.95) 3px, transparent 4px),radial-gradient(circle 4px at 70% 70%, rgba(200,255,22,.95) 3px, transparent 4px)" }),
+        wf("l", 64, 64, "rotateY(-90deg) translateZ(32px)"),
+        wf("t", 64, 64, "rotateX(90deg) translateZ(32px)"), wf("b2", 64, 64, "rotateX(-90deg) translateZ(32px)"),
+      ];
+      break;
+  }
+  return (
+    <span className="w3" aria-hidden="true">
+      <span className="w3spin">{faces}</span>
+    </span>
+  );
+};
+
+// Builds 행 — 호버 시 라임 스윕 + 유리 패널 프리뷰(스크린샷 있으면 이미지, 없으면 와이어프레임 도형)
 const BuildRow = ({ b, i }: { b: Build; i: number }) => {
   const [shotOk, setShotOk] = useState(true);
   const th = (0.16 + i * 0.09).toFixed(2);
@@ -142,13 +214,15 @@ const BuildRow = ({ b, i }: { b: Build; i: number }) => {
       <span style={{ fontFamily: MONO, fontSize: 11, width: "3ch", flex: "none", color: "inherit", opacity: 0.55, position: "relative", zIndex: 2 }}>{b.no}</span>
       <span style={{ fontFamily: ANTON, fontSize: "clamp(26px,3.9vw,64px)", lineHeight: 1, position: "relative", zIndex: 2, transform: "skewY(var(--skew,0deg))" }}>{b.name}</span>
       <span style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 11, letterSpacing: ".14em", color: "inherit", opacity: 0.55, position: "relative", zIndex: 2 }}>{b.meta}</span>
-      <span style={{ position: "absolute", right: "9vw", top: "50%", width: 270, height: 175, zIndex: 1, pointerEvents: "none", opacity: "var(--th,0)", transform: "translateY(-50%) perspective(750px) rotateY(calc(-24deg + var(--th,0)*10deg)) rotateX(7deg)", transition: "opacity .28s ease,transform .38s cubic-bezier(.2,.7,.2,1)", overflow: "hidden" }}>
+      <span className="glass-d glassy" data-glass-track style={{ position: "absolute", right: "9vw", top: "50%", width: 270, height: 175, zIndex: 1, pointerEvents: "none", opacity: "var(--th,0)", transform: "translateY(-50%) perspective(750px) rotateY(calc(-24deg + var(--th,0)*10deg)) rotateX(7deg)", transition: "opacity .28s ease,transform .38s cubic-bezier(.2,.7,.2,1)", overflow: "hidden", borderRadius: 14 }}>
         {b.shot && shotOk ? (
-          <img src={b.shot} alt="" onError={() => setShotOk(false)} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", border: "1px solid #0a0a0a" }} />
+          <img src={b.shot} alt="" onError={() => setShotOk(false)} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
-          <span style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(-45deg,#0a0a0a,#0a0a0a 9px,#f4f3f0 9px,#f4f3f0 19px)", border: "1px solid #0a0a0a" }} />
+          <WireShape type={b.shape} />
         )}
-        <span style={{ position: "absolute", left: 10, bottom: 8, fontFamily: MONO, fontSize: 10, letterSpacing: ".1em", background: "#0a0a0a", color: ACC, padding: "4px 7px" }}>{b.drop}</span>
+        <span style={{ position: "absolute", left: 10, bottom: 8, fontFamily: MONO, fontSize: 10, letterSpacing: ".1em", background: "#0a0a0a", color: ACC, padding: "4px 7px", zIndex: 2 }}>
+          {b.shot && shotOk ? `FIG.${b.no} — ${b.name}` : `OBJ.${b.no} — ${b.cap}`}
+        </span>
       </span>
     </div>
   );
@@ -229,7 +303,7 @@ const Chatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
 
   if (!isOpen) return null;
   return (
-    <div style={{ position: "fixed", bottom: 92, right: 24, width: 380, maxWidth: "calc(100vw - 48px)", height: 520, maxHeight: "calc(100vh - 140px)", background: "#0f0f0f", border: "1px solid #2c2c2c", zIndex: 195, display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 25px 80px rgba(0,0,0,.6)" }}>
+    <div className="glass-d glassy" data-glass-track style={{ position: "fixed", bottom: 92, right: 24, width: 380, maxWidth: "calc(100vw - 48px)", height: 520, maxHeight: "calc(100vh - 140px)", zIndex: 195, display: "flex", flexDirection: "column", overflow: "hidden", borderRadius: 16 }}>
       <div style={{ padding: "14px 18px", borderBottom: "1px solid #2c2c2c", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
         <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".16em", color: "#f4f3f0" }}>
           ASK — PORTFOLIO AI <span style={{ color: ACC }}>●</span>
@@ -550,6 +624,15 @@ const Portfolio = () => {
         }
       }
 
+      // 유리 스펙큘러 — 커서 위치를 유리 요소 로컬 좌표로 전달 (라임 하이라이트)
+      root.querySelectorAll<HTMLElement>("[data-glass-track]").forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > vh || r.width === 0) return;
+        el.style.setProperty("--hx", (S.px - r.left).toFixed(0) + "px");
+        el.style.setProperty("--hy", (S.py - r.top).toFixed(0) + "px");
+      });
+      if (ring) ring.classList.toggle("hot", S.cs > 1);
+
       // 자석
       root.querySelectorAll<HTMLElement & { _m?: { x: number; y: number } }>("[data-magnetic]").forEach((el) => {
         const r = el.getBoundingClientRect();
@@ -687,6 +770,42 @@ const Portfolio = () => {
         ::selection{background:${ACC};color:#0a0a0a}
         @media (pointer:coarse){[data-cursor],[data-cursor-ring],[data-op-hint]{display:none!important}[data-root]{cursor:auto!important}}
         @keyframes opPulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+        /* ── 유리 시스템: 재질은 젖빛, 거동은 리퀴드, 라임은 하이라이트에만 ── */
+        .glass-d{background:linear-gradient(135deg,rgba(22,22,22,.52),rgba(22,22,22,.34));
+          backdrop-filter:blur(14px) saturate(1.12);-webkit-backdrop-filter:blur(14px) saturate(1.12);
+          border:1px solid rgba(255,255,255,.16);
+          box-shadow:0 18px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.14)}
+        .glassy{position:relative;overflow:hidden}
+        .glassy::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+          background:radial-gradient(130px circle at var(--hx,-999px) var(--hy,-999px),rgba(200,255,22,.18),rgba(255,255,255,.10) 45%,transparent 75%)}
+
+        /* 리퀴드 렌즈 커서 */
+        .lens{animation:blobMorph 7s ease-in-out infinite}
+        .lens.hot{box-shadow:0 0 26px rgba(200,255,22,.28), inset 0 1px 0 rgba(255,255,255,.4)}
+        @keyframes blobMorph{
+          0%,100%{border-radius:52% 48% 55% 45% / 48% 55% 45% 52%}
+          33%{border-radius:46% 54% 44% 56% / 56% 44% 58% 42%}
+          66%{border-radius:57% 43% 50% 50% / 44% 57% 43% 56%}
+        }
+
+        /* 리퀴드 라임 필 버튼 */
+        .liquid-btn{position:relative;overflow:hidden;transition:color .3s,border-color .3s}
+        .liquid-btn::before{content:"";position:absolute;left:-12%;right:-12%;bottom:-45%;height:165%;z-index:0;
+          background:${ACC};border-radius:44% 52% 0 0 / 95% 100% 0 0;
+          transform:translateY(101%);transition:transform .55s cubic-bezier(.2,.7,.2,1)}
+        .liquid-btn:hover::before{transform:translateY(16%)}
+        .liquid-btn:hover{color:#0a0a0a!important;border-color:${ACC}!important}
+        .liquid-btn>span{position:relative;z-index:2}
+
+        /* 블루프린트 와이어프레임 도형 */
+        .w3{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;perspective:640px}
+        .w3spin{width:100px;height:100px;position:relative;transform-style:preserve-3d;
+          animation:w3spin 10s linear infinite;animation-play-state:paused}
+        [data-row]:hover .w3spin{animation-play-state:running}
+        @keyframes w3spin{from{transform:rotateX(-16deg) rotateY(0deg)}to{transform:rotateX(-16deg) rotateY(360deg)}}
+
+        @media (prefers-reduced-motion:reduce){.w3spin,.lens,[data-op-hint]{animation:none!important}}
         [data-row]:hover{color:#0a0a0a!important}
         .mono-btn{transition:border-color .25s,color .25s}
         .mono-btn:hover{border-color:${ACC}!important;color:${ACC}!important}
@@ -943,7 +1062,7 @@ const Portfolio = () => {
               </span>
             </div>
             <div style={{ display: "flex", gap: 14, marginTop: "5vh", flexWrap: "wrap" }}>
-              <a href="mailto:swatsoonmin@gmail.com" data-magnetic data-hover className="mono-btn" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: ".18em", border: "1px solid #3a3a3a", padding: "18px 34px", display: "inline-block" }}>SWATSOONMIN@GMAIL.COM</a>
+              <a href="mailto:swatsoonmin@gmail.com" data-magnetic data-hover data-glass-track className="glass-d glassy liquid-btn" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: ".18em", padding: "18px 34px", display: "inline-block", borderRadius: 12 }}><span>SWATSOONMIN@GMAIL.COM</span></a>
             </div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12, fontFamily: MONO, fontSize: 10, letterSpacing: ".16em", color: "#4d4d4d", borderTop: "1px solid #1e1e1e", padding: "3vh 3.5vw", position: "relative", zIndex: 2 }}>
@@ -963,16 +1082,20 @@ const Portfolio = () => {
           <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#666", paddingBottom: "2vh", textAlign: "right", lineHeight: 1.9 }}>12 YEARS — 3 YEARS — 10+ BUILDS<br />BUSAN · PM/PO</div>
         </div>
         <div style={{ height: 6, background: "#1c1c1c", position: "relative" }}><span style={{ position: "absolute", inset: 0, background: ACC, transform: "scaleX(var(--ip,0))", transformOrigin: "left" }} /></div>
+        {/* 커튼 가장자리 유리 스캔라인 — 걷힐 때 화면을 한 번 쓸고 지나감 (피벗 씬과 같은 문법) */}
+        <div style={{ position: "absolute", left: 0, right: 0, bottom: -30, height: 60, backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", background: "linear-gradient(to bottom,transparent,rgba(200,255,22,.13),transparent)", pointerEvents: "none" }} />
       </div>
 
       {/* 라임 대시 컴패니언 + 커서 */}
       <div data-dash style={{ position: "fixed", left: 0, top: 0, zIndex: 198, pointerEvents: "none", width: 54, height: 11, background: ACC, transform: "translate3d(-300px,-300px,0)" }} />
-      {!reduceMotion && <div data-cursor-ring style={{ position: "fixed", left: 0, top: 0, zIndex: 200, pointerEvents: "none", width: 34, height: 34, margin: "-17px 0 0 -17px", border: `1px solid ${ACC}`, borderRadius: "50%", opacity: 0.65, transform: "translate3d(-200px,-200px,0)" }} />}
+      {!reduceMotion && (
+        <div data-cursor-ring className="lens" style={{ position: "fixed", left: 0, top: 0, zIndex: 200, pointerEvents: "none", width: 46, height: 46, margin: "-23px 0 0 -23px", border: "1px solid rgba(255,255,255,.38)", opacity: 0.92, transform: "translate3d(-200px,-200px,0)", backdropFilter: "blur(1.6px) brightness(1.07) contrast(1.03)", WebkitBackdropFilter: "blur(1.6px) brightness(1.07) contrast(1.03)", background: "radial-gradient(circle at 32% 28%, rgba(255,255,255,.16), rgba(255,255,255,.02) 62%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.32), inset 0 0 0 1px rgba(0,0,0,.07), 0 8px 26px rgba(0,0,0,.14)" }} />
+      )}
       {!reduceMotion && <div data-cursor style={{ position: "fixed", left: 0, top: 0, zIndex: 201, pointerEvents: "none", width: 8, height: 8, margin: "-4px 0 0 -4px", background: ACC, borderRadius: "50%", transform: "translate3d(-200px,-200px,0)" }} />}
 
       {/* AI 챗봇 */}
-      <button onClick={() => setChatOpen((o) => !o)} data-hover className="mono-btn" style={{ position: "fixed", bottom: 24, right: 24, zIndex: 190, fontFamily: MONO, fontSize: 11, letterSpacing: ".18em", background: "#0a0a0a", color: "#f4f3f0", border: "1px solid #3a3a3a", padding: "14px 22px", cursor: "pointer" }}>
-        {chatOpen ? "CLOSE ✕" : "ASK AI ▮"}
+      <button onClick={() => setChatOpen((o) => !o)} data-hover data-glass-track className="glass-d glassy liquid-btn" style={{ position: "fixed", bottom: 24, right: 24, zIndex: 190, fontFamily: MONO, fontSize: 11, letterSpacing: ".18em", color: "#f4f3f0", padding: "14px 22px", cursor: "pointer", borderRadius: 11 }}>
+        <span>{chatOpen ? "CLOSE ✕" : "ASK AI ▮"}</span>
       </button>
       <Chatbot isOpen={chatOpen} onClose={() => setChatOpen(false)} />
     </div>
