@@ -789,6 +789,10 @@ const Portfolio = () => {
       const num = root.querySelector<HTMLElement>("[data-intro-num]");
       if (!ov || introPlayed || introSeqStarted || reduceMotion) {
         if (ov) ov.style.display = "none";
+        // 스킵 시 글자 원위치 강제 복원 — HMR/재마운트로 흩어진 상태(prepAssemble)가 박제되는 것 방지
+        root.querySelectorAll<HTMLElement>("[data-split] [data-ltr]").forEach((el) => {
+          el.style.transition = ""; el.style.opacity = ""; el.style.transform = "";
+        });
         S.introDone = true;
         return;
       }
@@ -979,12 +983,36 @@ const Portfolio = () => {
             <div data-magnetic data-hover style={{ position: "absolute", left: "3.5vw", bottom: "3.5vh", zIndex: 4, fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#555", border: "1px solid rgba(17,17,17,.25)", padding: "10px 16px" }}>SCROLL</div>
 
             {/* 유리 조각 — 글자에서 떼어낸 듯한 커스텀 실루엣 (아치 대형 + 슬래시 소형, 꾸밈요소).
+                반드시 타이포 "위"에 겹칠 것 — 유리 블러는 뒤에 콘텐츠가 있어야 비로소 보인다 (빈 배경 위 유리 = 투명).
                 clip-path는 인라인 path() 고정 좌표 — SVG url() 참조는 크롬에서 backdrop-filter를 죽이는 버그가 있어 사용 금지 */}
-            <div aria-hidden="true" className="gchunk-wrap" style={{ position: "absolute", top: "-6vh", right: -30, width: 560, height: 580, zIndex: 4, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*20px), calc(var(--p,0)*-8vh + var(--emy,0)*12px), 0)", filter: "drop-shadow(0 30px 60px rgba(17,17,17,.10))" }}>
-              <div className="gchunk" style={{ width: "100%", height: "100%", clipPath: 'path("M115,0 H445 A115,115 0 0 1 560,115 V465 A115,115 0 0 1 445,580 H360 V300 A80,80 0 0 0 200,300 V580 H115 A115,115 0 0 1 0,465 V115 A115,115 0 0 1 115,0 Z")', background: "linear-gradient(140deg, rgba(255,255,255,.42), rgba(255,255,255,.10) 52%, rgba(255,255,255,.26))", backdropFilter: "blur(4px) brightness(1.03)", WebkitBackdropFilter: "blur(4px) brightness(1.03)", animation: "heroFloatA 30s ease-in-out infinite" }} />
+            {/* ⚠ 래퍼에 filter(drop-shadow 등) 절대 금지 — 조상 filter가 backdrop-root 경계를 만들어
+                backdrop-filter가 바깥 콘텐츠(타이포)를 샘플링하지 못하게 됨 = 유리 무효.
+                그림자는 유리 뒤 SVG 블러 패스로 대체 */}
+            <div aria-hidden="true" className="gchunk-wrap" style={{ position: "absolute", top: "6vh", right: "6vw", width: 560, height: 580, zIndex: 4, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*20px), calc(var(--p,0)*-8vh + var(--emy,0)*12px), 0) scale(.82)" }}>
+              <div style={{ position: "absolute", inset: 0, animation: "heroFloatA 30s ease-in-out infinite" }}>
+                <svg viewBox="0 0 560 580" width="100%" height="100%" style={{ position: "absolute", inset: 0, overflow: "visible" }}>
+                  <defs><filter id="chunkShA" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="16" /></filter></defs>
+                  <path d="M115,0 H445 A115,115 0 0 1 560,115 V465 A115,115 0 0 1 445,580 H360 V300 A80,80 0 0 0 200,300 V580 H115 A115,115 0 0 1 0,465 V115 A115,115 0 0 1 115,0 Z" fill="rgba(17,17,17,.15)" filter="url(#chunkShA)" transform="translate(8,30)" />
+                </svg>
+                <div className="gchunk" style={{ position: "absolute", inset: 0, clipPath: 'path("M115,0 H445 A115,115 0 0 1 560,115 V465 A115,115 0 0 1 445,580 H360 V300 A80,80 0 0 0 200,300 V580 H115 A115,115 0 0 1 0,465 V115 A115,115 0 0 1 115,0 Z")', background: "linear-gradient(140deg, rgba(255,255,255,.30), rgba(240,239,235,.07) 40%, rgba(17,17,17,.03) 62%, rgba(255,255,255,.18) 92%)", backdropFilter: "blur(4px) saturate(1.12) brightness(1.03)", WebkitBackdropFilter: "blur(4px) saturate(1.12) brightness(1.03)" }} />
+                <svg viewBox="0 0 560 580" width="100%" height="100%" style={{ position: "absolute", inset: 0, overflow: "visible" }}>
+                  <path d="M115,0 H445 A115,115 0 0 1 560,115 V465 A115,115 0 0 1 445,580 H360 V300 A80,80 0 0 0 200,300 V580 H115 A115,115 0 0 1 0,465 V115 A115,115 0 0 1 115,0 Z" fill="none" stroke="rgba(17,17,17,.13)" strokeWidth="1" transform="translate(1.5,2.5)" />
+                  <path d="M115,0 H445 A115,115 0 0 1 560,115 V465 A115,115 0 0 1 445,580 H360 V300 A80,80 0 0 0 200,300 V580 H115 A115,115 0 0 1 0,465 V115 A115,115 0 0 1 115,0 Z" fill="none" stroke="rgba(255,255,255,.85)" strokeWidth="1.5" />
+                </svg>
+              </div>
             </div>
-            <div aria-hidden="true" className="gchunk-wrap" style={{ position: "absolute", top: "4vh", left: "5vw", width: 260, height: 310, zIndex: 4, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*-26px), calc(var(--p,0)*-5vh + var(--emy,0)*-15px), 0)", filter: "drop-shadow(0 20px 44px rgba(17,17,17,.09))" }}>
-              <div className="gchunk" style={{ width: "100%", height: "100%", clipPath: 'path("M155,16 Q172,4 190,14 L248,40 Q264,50 256,70 L108,300 Q94,316 76,306 L14,280 Q-2,270 8,250 Z")', background: "linear-gradient(155deg, rgba(255,255,255,.40), rgba(255,255,255,.10) 55%, rgba(255,255,255,.24))", backdropFilter: "blur(3.5px) brightness(1.03)", WebkitBackdropFilter: "blur(3.5px) brightness(1.03)", animation: "heroFloatB 24s ease-in-out infinite" }} />
+            <div aria-hidden="true" className="gchunk-wrap" style={{ position: "absolute", top: "19vh", left: "13vw", width: 260, height: 310, zIndex: 4, pointerEvents: "none", transform: "translate3d(calc(var(--emx,0)*-26px), calc(var(--p,0)*-5vh + var(--emy,0)*-15px), 0)" }}>
+              <div style={{ position: "absolute", inset: 0, animation: "heroFloatB 24s ease-in-out infinite" }}>
+                <svg viewBox="0 0 260 310" width="100%" height="100%" style={{ position: "absolute", inset: 0, overflow: "visible" }}>
+                  <defs><filter id="chunkShB" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="12" /></filter></defs>
+                  <path d="M155,16 Q172,4 190,14 L248,40 Q264,50 256,70 L108,300 Q94,316 76,306 L14,280 Q-2,270 8,250 Z" fill="rgba(17,17,17,.14)" filter="url(#chunkShB)" transform="translate(6,22)" />
+                </svg>
+                <div className="gchunk" style={{ position: "absolute", inset: 0, clipPath: 'path("M155,16 Q172,4 190,14 L248,40 Q264,50 256,70 L108,300 Q94,316 76,306 L14,280 Q-2,270 8,250 Z")', background: "linear-gradient(155deg, rgba(255,255,255,.28), rgba(240,239,235,.07) 45%, rgba(17,17,17,.03) 65%, rgba(255,255,255,.16) 92%)", backdropFilter: "blur(3.5px) saturate(1.12) brightness(1.03)", WebkitBackdropFilter: "blur(3.5px) saturate(1.12) brightness(1.03)" }} />
+                <svg viewBox="0 0 260 310" width="100%" height="100%" style={{ position: "absolute", inset: 0, overflow: "visible" }}>
+                  <path d="M155,16 Q172,4 190,14 L248,40 Q264,50 256,70 L108,300 Q94,316 76,306 L14,280 Q-2,270 8,250 Z" fill="none" stroke="rgba(17,17,17,.13)" strokeWidth="1" transform="translate(1.2,2)" />
+                  <path d="M155,16 Q172,4 190,14 L248,40 Q264,50 256,70 L108,300 Q94,316 76,306 L14,280 Q-2,270 8,250 Z" fill="none" stroke="rgba(255,255,255,.85)" strokeWidth="1.5" />
+                </svg>
+              </div>
             </div>
           </div>
         </section>
