@@ -770,6 +770,18 @@ const Portfolio = () => {
         el.style.opacity = "1";
       });
 
+      // 케이스 번호 도장 — 진입 시 크게 시작해 눌리며 안착 (1회성)
+      root.querySelectorAll<HTMLElement & { _stDone?: boolean }>("[data-stamp]").forEach((el) => {
+        if (el._stDone) return;
+        const r = el.getBoundingClientRect();
+        if (r.top > vh * 0.85 || r.bottom < 0) return;
+        el._stDone = true;
+        const delay = parseInt(el.getAttribute("data-stamp") || "0", 10);
+        el.style.transition = `transform .5s cubic-bezier(.34,1.56,.64,1) ${delay}ms, opacity .25s ease ${delay}ms`;
+        el.style.transform = "scale(1)";
+        el.style.opacity = "1";
+      });
+
       // 커서 이동량 — 스포트라이트 "실제 사용" 판정용
       const mvd = Math.hypot(S.px - (S.prevPx ?? S.px), S.py - (S.prevPy ?? S.py));
       S.prevPx = S.px; S.prevPy = S.py;
@@ -1132,6 +1144,16 @@ const Portfolio = () => {
         .bface{backface-visibility:hidden;-webkit-backface-visibility:hidden}
 
         @media (prefers-reduced-motion:reduce){.w3spin,.lens,[data-op-hint],.paper-flutter{animation:none!important}[aria-hidden] > div{animation:none!important}.bflip{transition:none!important}}
+        /* 케이스 — 사건 파일 도장 어법 */
+        .case-row{position:relative}
+        .case-no{transition:color .25s ease,-webkit-text-stroke-color .25s ease}
+        .case-row:hover .case-no{color:${ACC}!important;-webkit-text-stroke-color:${ACC}!important}
+        .case-stamp{position:absolute;right:8vw;top:34%;padding:7px 16px;border:2.5px solid ${ACC};color:${ACC};font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.32em;text-indent:.32em;transform:rotate(-8deg) scale(1.6);opacity:0;transition:transform .16s cubic-bezier(.3,1.6,.5,1),opacity .12s ease;pointer-events:none}
+        .case-row:hover .case-stamp{transform:rotate(-8deg) scale(1);opacity:1}
+        /* 크레덴셜 — 라임 스윕 호버 */
+        .cred-row{position:relative;overflow:hidden}
+        .cred-row::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(200,255,22,.16),transparent 55%);transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+        .cred-row:hover::after{transform:scaleX(1)}
         .mono-btn{transition:border-color .25s,color .25s}
         .mono-btn:hover{border-color:${ACC}!important;color:${ACC}!important}
         .arc-row{transition:background .25s}
@@ -1374,8 +1396,8 @@ const Portfolio = () => {
           </div>
           <div style={{ display: "flex", flexDirection: "column", marginTop: "6vh", borderBottom: "1px solid #242424" }}>
             {CASES.map((c) => (
-              <div key={c.no} style={{ display: "flex", gap: "3vw", alignItems: "baseline", padding: "4vh 0", borderTop: "1px solid #242424", flexWrap: "wrap" }}>
-                <span style={{ fontFamily: ANTON, fontSize: "clamp(40px,5vw,84px)", lineHeight: 1, color: "transparent", WebkitTextStroke: "1px #3a3a3a", flex: "none" }}>{c.no}</span>
+              <div key={c.no} className="case-row" style={{ display: "flex", gap: "3vw", alignItems: "baseline", padding: "4vh 0", borderTop: "1px solid #242424", flexWrap: "wrap" }}>
+                <span data-stamp="0" className="case-no" style={{ fontFamily: ANTON, fontSize: "clamp(40px,5vw,84px)", lineHeight: 1, color: "transparent", WebkitTextStroke: "1px #3a3a3a", flex: "none", transform: "scale(1.6)", opacity: 0 }}>{c.no}</span>
                 <div style={{ flex: 1, minWidth: 260 }}>
                   <div style={{ fontFamily: ANTON, fontSize: "clamp(22px,2.4vw,42px)", lineHeight: 1.05, textTransform: "uppercase" }}>{c.title} <span style={{ color: ACC }}>{c.accent}</span></div>
                   <div style={{ overflow: "hidden" }}>
@@ -1383,6 +1405,7 @@ const Portfolio = () => {
                   </div>
                 </div>
                 <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".16em", color: "#5f5f5f", flex: "none" }}>{c.tag}</span>
+                <span className="case-stamp" aria-hidden="true">SOLVED</span>
               </div>
             ))}
           </div>
@@ -1393,13 +1416,15 @@ const Portfolio = () => {
           <div style={{ display: "flex", justifyContent: "space-between", ...label, color: "#666" }}>
             <span data-scramble>06 — HOW I WORK</span><span>FLOOR × PRODUCT × AI</span>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 1, background: "rgba(17,17,17,.2)", border: "1px solid rgba(17,17,17,.2)", marginTop: "6vh" }}>
+          {/* 유리 카드 뒤로 지나가는 초대형 아웃라인 타이포 — 히어로 "유리 뒤 콘텐츠" 모티프의 수미상관 */}
+          <div aria-hidden="true" style={{ position: "absolute", top: "13vh", left: 0, whiteSpace: "nowrap", fontFamily: ANTON, fontSize: "32vh", lineHeight: 1, color: "transparent", WebkitTextStroke: "1.5px rgba(17,17,17,.11)", textTransform: "uppercase", transform: "translateX(calc(-4vw + var(--p,0)*-30vw))", pointerEvents: "none" }}>FLOOR × PRODUCT × AI × FLOOR</div>
+          <div style={{ position: "relative", zIndex: 1, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 18, marginTop: "6vh" }}>
             {[
               { tag: "A — PRODUCT", title: "SPEC & SHIP", body: <>요구사항 정의 · IA · User Flow<br />CMS·예약 시스템 화면 기획<br />일정·이슈·우선순위 오너십</> },
               { tag: "B — AI / AUTOMATION", title: "BUILD WITH AI", body: <>n8n — 회의록·OCR·트렌드 자동화<br />Claude Code · ChatGPT · 바이브코딩<br />기획 → 구현 검증 사이클 운용</> },
               { tag: "C — FLOOR", title: "12Y OPERATIONS", body: <>매장 운영·손익 책임 12년<br />현장 감각으로 요구사항 검증<br />사람을 움직이는 리딩</> },
             ].map((s, i) => (
-              <div key={i} style={{ background: "#f4f3f0", padding: "4vh 2vw", minHeight: "34vh", display: "flex", flexDirection: "column" }}>
+              <div key={i} style={{ borderRadius: 18, padding: "4vh 2vw", minHeight: "34vh", display: "flex", flexDirection: "column", background: "linear-gradient(150deg, rgba(255,255,255,.42), rgba(255,255,255,.12) 55%, rgba(255,255,255,.26))", backdropFilter: "blur(9px) saturate(1.1)", WebkitBackdropFilter: "blur(9px) saturate(1.1)", border: "1px solid rgba(255,255,255,.7)", boxShadow: "0 24px 50px rgba(17,17,17,.10), inset 0 1px 0 rgba(255,255,255,.8)" }}>
                 <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".18em", color: "#111", background: ACC, alignSelf: "flex-start", padding: "4px 9px" }}>{s.tag}</div>
                 <div style={{ fontFamily: ANTON, fontSize: "clamp(26px,2.6vw,44px)", lineHeight: 1.05, textTransform: "uppercase", marginTop: 14 }}>{s.title}</div>
                 <div style={{ fontSize: 14, lineHeight: 1.85, color: "#555", marginTop: "auto", fontWeight: 500 }}>{s.body}</div>
@@ -1416,7 +1441,7 @@ const Portfolio = () => {
               { yr: "2018", name: "서비스 디자인 청사진 — 최우수상", meta: "경성대 우수과제공모전" },
               { yr: "2011", name: "KT&G 마케팅 캠프 — 팀워크상", meta: "롯데 에비뉴몰 전략 공모전" },
             ].map((c, i) => (
-              <div key={i} className="arc-row" style={{ display: "flex", alignItems: "baseline", gap: "2.5vw", padding: "1.8vh 0", borderTop: "1px solid rgba(17,17,17,.18)" }}>
+              <div key={i} className="arc-row cred-row" style={{ display: "flex", alignItems: "baseline", gap: "2.5vw", padding: "1.8vh 0", borderTop: "1px solid rgba(17,17,17,.18)" }}>
                 <span style={{ fontFamily: MONO, fontSize: 11, color: "#999", width: "9ch", flex: "none" }}>{c.yr}</span>
                 <span style={{ fontSize: "clamp(15px,1.4vw,19px)", fontWeight: 800, letterSpacing: "-.01em" }}>{c.name}</span>
                 <span style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 10, letterSpacing: ".14em", color: "#999" }}>{c.meta}</span>
