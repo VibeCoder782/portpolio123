@@ -313,7 +313,7 @@ const HeroGlass = () => {
     const small = new THREE.Mesh(new THREE.SphereGeometry(55, 48, 48), mat);
     scene.add(sphere, torus, small);
 
-    type Obj = { m: THREE.Mesh; base: THREE.Vector3; exit: THREE.Vector2; exitAt: number; entDelay: number; phase: number };
+    type Obj = { m: THREE.Mesh; base: THREE.Vector3; exit: THREE.Vector2; exitAt: number; entDelay: number; phase: number; ampX: number; ampY: number; f1: number; f2: number };
     let objs: Obj[] = [];
 
     const drawTexture = (w: number, h: number, cr: DOMRect) => {
@@ -371,10 +371,11 @@ const HeroGlass = () => {
         sx = Math.min(r.right - cr.left - 30, w * 0.88);
         sy = r.top - cr.top + r.height * 0.38;
       }
+      // ampX/ampY = 유영 반경, f1/f2 = 유영 주파수(느릴수록 몽환적) — 둥둥 떠다니다 그 자리에서 퇴장
       objs = [
-        { m: sphere, base: W(sx, sy), exit: new THREE.Vector2(0.6 * w, 0.8 * h), exitAt: 0.12, entDelay: 0, phase: 0 },
-        { m: torus, base: W(w * 0.60, h * 0.16), exit: new THREE.Vector2(-0.5 * w, 0.7 * h), exitAt: 0.17, entDelay: 120, phase: 2.1 },
-        { m: small, base: W(w * 0.72, h * 0.66), exit: new THREE.Vector2(0.06 * w, -1.0 * h), exitAt: 0.22, entDelay: 240, phase: 4.2 },
+        { m: sphere, base: W(sx, sy), exit: new THREE.Vector2(0.6 * w, 0.8 * h), exitAt: 0.12, entDelay: 0, phase: 0, ampX: w * 0.05, ampY: h * 0.09, f1: 0.11, f2: 0.07 },
+        { m: torus, base: W(w * 0.60, h * 0.16), exit: new THREE.Vector2(-0.5 * w, 0.7 * h), exitAt: 0.17, entDelay: 120, phase: 2.1, ampX: w * 0.08, ampY: h * 0.11, f1: 0.09, f2: 0.13 },
+        { m: small, base: W(w * 0.72, h * 0.66), exit: new THREE.Vector2(0.06 * w, -1.0 * h), exitAt: 0.22, entDelay: 240, phase: 4.2, ampX: w * 0.11, ampY: h * 0.15, f1: 0.14, f2: 0.1 },
       ];
       drawTexture(w, h, cr);
     };
@@ -404,11 +405,13 @@ const HeroGlass = () => {
             en = raw >= 1 ? 1 : easeOutBack(raw);
           }
         }
-        const ex = easeIn(Math.max(0, Math.min(1, (p - o.exitAt) / 0.38))); // 스크럽 연동 퇴장 — 각자 다른 방향
-        const fl = reduce ? 0 : Math.sin(t * 0.5 + o.phase) * 7;
+        const ex = easeIn(Math.max(0, Math.min(1, (p - o.exitAt) / 0.38))); // 스크럽 연동 퇴장 — 유영하던 그 자리에서 각자 방향으로
+        // 이중 사인 유영 — 리사주 궤적으로 화면을 느리게 떠다님
+        const wx = reduce ? 0 : Math.sin(t * o.f1 + o.phase) * o.ampX + Math.sin(t * o.f2 * 1.7 + o.phase * 2.3) * o.ampX * 0.35;
+        const wy = reduce ? 0 : Math.cos(t * o.f2 + o.phase * 1.3) * o.ampY + Math.sin(t * o.f1 * 0.8 + o.phase * 0.7) * o.ampY * 0.3;
         o.m.position.set(
-          o.base.x + o.exit.x * (ex + (1 - en) * 0.35) + emx * (14 + i * 8),
-          o.base.y + o.exit.y * (ex + (1 - en) * 0.35) + fl - emy * (10 + i * 6),
+          o.base.x + wx + o.exit.x * (ex + (1 - en) * 0.35) + emx * (14 + i * 8),
+          o.base.y + wy + o.exit.y * (ex + (1 - en) * 0.35) - emy * (10 + i * 6),
           0
         );
         if (i === 1) { // 토러스 — 상시 저속 텀블, 퇴장 시 가속 스핀
@@ -1135,7 +1138,7 @@ const Portfolio = () => {
 
             {/* 유리 선언문 카드 — DOM 유지 (backdrop-filter). 입장·퇴장은 메인 루프가 구동
                 ⚠ backdrop-filter 요소의 조상에 filter 금지 (backdrop-root 경계 → 유리 무효) */}
-            <div data-hero-card style={{ position: "absolute", top: "44vh", right: "4.5vw", width: 370, zIndex: 4, pointerEvents: "none", transform: "rotate(-5deg)" }}>
+            <div data-hero-card style={{ position: "absolute", top: "42vh", right: "15vw", width: 370, zIndex: 4, pointerEvents: "none", transform: "rotate(-5deg)" }}>
               <div style={{ borderRadius: 22, padding: "24px 28px", background: "linear-gradient(150deg, rgba(255,255,255,.38), rgba(255,255,255,.10) 55%, rgba(255,255,255,.24))", backdropFilter: "blur(9px) saturate(1.12) brightness(1.03)", WebkitBackdropFilter: "blur(9px) saturate(1.12) brightness(1.03)", border: "1px solid rgba(255,255,255,.65)", boxShadow: "0 34px 70px rgba(17,17,17,.14), inset 0 1px 0 rgba(255,255,255,.75)" }}>
                 <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#666", marginBottom: 13 }}>MANIFESTO</div>
                 <div style={{ fontSize: 15, lineHeight: 1.75, fontWeight: 500, color: "#2a2a28" }}>현장에서 12년, 프로덕트에서 3년.<br />이제는 직접 만들어 증명한다.</div>
