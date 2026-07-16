@@ -1158,6 +1158,8 @@ const Portfolio = () => {
         .mono-btn:hover{border-color:${ACC}!important;color:${ACC}!important}
         .arc-row{transition:background .25s}
         .arc-row:hover{background:rgba(17,17,17,.04)}
+        /* 한글 타이포 — 어절 단위 줄바꿈(단어 중간 끊김 방지) + 예쁜 랙(고아 단어 방지) */
+        #root{word-break:keep-all;overflow-wrap:break-word;text-wrap:pretty}
         ::-webkit-scrollbar{width:0;height:0}
       `}</style>
 
@@ -1227,7 +1229,7 @@ const Portfolio = () => {
                 <div style={{ paddingBottom: "3vh", maxWidth: "38ch" }}>
                   <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".14em", color: "#666" }}>2009 — 2021 · DOMINO'S PIZZA · STORE MANAGER</div>
                   <div style={{ overflow: "hidden" }}>
-                    <div data-reveal="0" style={{ fontSize: "clamp(20px,2vw,30px)", fontWeight: 800, lineHeight: 1.4, marginTop: 14, transform: "translateY(110%)", opacity: 0 }}>12년을 현장에서 보냈다.<br />매출, 사람, 새벽의 매장.</div>
+                    <div data-reveal="0" style={{ fontSize: "clamp(20px,2vw,30px)", fontWeight: 800, lineHeight: 1.4, marginTop: 14, transform: "translateY(110%)", opacity: 0 }}>12년을 현장에서 보냈다.<br />매장관리, 인간관계, 서비스업.</div>
                   </div>
                 </div>
               </div>
