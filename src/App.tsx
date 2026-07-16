@@ -247,6 +247,8 @@ const Sparks = () => {
 // 메인 rAF 루프가 glassTick을 호출 — 루프는 하나만 존재.
 // ─────────────────────────────────────────────────────────────
 let glassTick: ((emx: number, emy: number, introDone: boolean) => void) | null = null;
+// 눈금자 내비 점프 브리지 — 메인 이펙트가 등록 (S 클로저 접근용)
+let navJump: ((i: number) => void) | null = null;
 
 const GLASS_VERT = `
 varying vec3 vN; varying vec3 vV;
@@ -649,6 +651,8 @@ const Portfolio = () => {
       curRow: null as HTMLElement | null,
       introDone: false, raf: 0, dead: false, opInteracted: false,
       prevPx: undefined as number | undefined, prevPy: undefined as number | undefined, opAcc: 0,
+      navIdx: -1, // 눈금자 내비 활성 섹션 인덱스
+      scrollEl: null as HTMLElement | null, // 내비 점프 목표 섹션 — 매 프레임 offsetTop 재평가(자가보정)
       cardEntT0: 0, // 유리 카드 입장 애니메이션 시작 시각 (인트로 완료 시점)
       dash: null as null | { x: number; y: number; vx: number; vy: number; r: number },
     };
@@ -677,6 +681,13 @@ const Portfolio = () => {
 
     const heroCard = root.querySelector<HTMLElement>("[data-hero-card]");
     const heroScene = heroCard ? heroCard.closest<HTMLElement>("[data-scene]") : null;
+    const navBtns = Array.from(root.querySelectorAll<HTMLElement>("[data-nav-i]"));
+    const navDot = root.querySelector<HTMLElement>("[data-nav-dot]");
+    navJump = (i) => { S.scrollEl = root.querySelectorAll<HTMLElement>("[data-scene]")[i] ?? null; };
+    // 사용자가 직접 스크롤하면 점프 취소 (주도권 반납)
+    const cancelJump = () => { S.scrollEl = null; };
+    scroller?.addEventListener("wheel", cancelJump, { passive: true });
+    scroller?.addEventListener("touchstart", cancelJump, { passive: true });
 
     const loopBody = () => {
       const vh = window.innerHeight;
@@ -692,15 +703,30 @@ const Portfolio = () => {
       root.style.setProperty("--cxp", ((S.px / window.innerWidth) * 100).toFixed(2));
       root.style.setProperty("--cyp", ((S.py / window.innerHeight) * 100).toFixed(2));
 
-      // 씬 진행도
-      root.querySelectorAll<HTMLElement>("[data-scene]").forEach((el) => {
+      // 씬 진행도 + 눈금자 내비 활성 섹션 판정 (화면 세로 중앙이 속한 씬)
+      let navIdx = S.navIdx < 0 ? 0 : S.navIdx;
+      root.querySelectorAll<HTMLElement>("[data-scene]").forEach((el, si) => {
         const r = el.getBoundingClientRect();
+        if (r.top <= vh * 0.5 && r.bottom > vh * 0.5) navIdx = si;
         const total = r.height - vh;
         const p = el.getAttribute("data-scene") === "pin" && total > 4
           ? Math.min(1, Math.max(0, -r.top / total))
           : Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
         el.style.setProperty("--p", p.toFixed(4));
       });
+      if (navIdx !== S.navIdx) {
+        S.navIdx = navIdx;
+        navBtns.forEach((b, bi) => { if (bi === navIdx) b.setAttribute("data-on", "1"); else b.removeAttribute("data-on"); });
+        if (navDot) navDot.style.transform = `translateY(${(navIdx - 4) * 30 + 14}px)`;
+      }
+
+      // 내비 점프 — 목표 offsetTop을 매 프레임 재평가하며 지수 이징 추적
+      // (이동 중 영수증 인쇄 등으로 위쪽 콘텐츠가 자라도 목표가 항상 최신 = 자가보정)
+      if (S.scrollEl && scroller) {
+        const jd = S.scrollEl.offsetTop - scroller.scrollTop;
+        if (Math.abs(jd) < 2) { scroller.scrollTop = S.scrollEl.offsetTop; S.scrollEl = null; }
+        else scroller.scrollTop += jd * (reduceMotion ? 1 : 0.13);
+      }
 
       // 스크롤 속도 → 스큐
       if (scroller) {
@@ -1063,6 +1089,9 @@ const Portfolio = () => {
       S.dead = true;
       if (startedIntroHere && !introPlayed) introSeqStarted = false; // 미완주 시 가드 반납
       cancelAnimationFrame(S.raf);
+      navJump = null;
+      scroller?.removeEventListener("wheel", cancelJump);
+      scroller?.removeEventListener("touchstart", cancelJump);
       window.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseover", onOver);
     };
@@ -1158,6 +1187,14 @@ const Portfolio = () => {
         .mono-btn:hover{border-color:${ACC}!important;color:${ACC}!important}
         .arc-row{transition:background .25s}
         .arc-row:hover{background:rgba(17,17,17,.04)}
+        /* 우측 눈금자 내비 */
+        [data-nav-rail] button{display:flex;align-items:center;justify-content:flex-end;height:30px;padding:0 10px 0 8px;background:none;border:none;cursor:inherit}
+        .nav-tick{display:block;flex:none;width:12px;height:2px;background:#fff;transition:width .3s cubic-bezier(.2,.8,.2,1)}
+        [data-nav-rail] button:hover .nav-tick{width:22px}
+        [data-nav-rail] button[data-on] .nav-tick{width:18px}
+        .nav-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;color:#fff;white-space:nowrap;opacity:0;transform:translateX(6px);transition:opacity .25s ease,transform .25s ease;margin-right:9px}
+        [data-nav-rail] button:hover .nav-label{opacity:1;transform:translateX(0)}
+
         /* 한글 타이포 — 어절 단위 줄바꿈(단어 중간 끊김 방지) + 예쁜 랙(고아 단어 방지) */
         #root{word-break:keep-all;overflow-wrap:break-word;text-wrap:pretty}
         ::-webkit-scrollbar{width:0;height:0}
@@ -1501,6 +1538,24 @@ const Portfolio = () => {
         {/* 커튼 가장자리 유리 스캔라인 — 걷힐 때 화면을 한 번 쓸고 지나감 (피벗 씬과 같은 문법) */}
         <div style={{ position: "absolute", left: 0, right: 0, bottom: -30, height: 60, backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", background: "linear-gradient(to bottom,transparent,rgba(200,255,22,.13),transparent)", pointerEvents: "none" }} />
       </div>
+
+      {/* ── 우측 눈금자 내비 — 섹션 인덱스. difference 블렌드로 흑백 씬(전환 중간 포함) 자동 반전,
+          라임 활성 도트는 색 왜곡을 피해 비블렌드 별도 레이어. 인트로(z150)·챗봇(z195) 아래 ── */}
+      <nav data-nav-rail aria-label="섹션 이동" style={{ position: "fixed", right: 0, top: "50%", transform: "translateY(-50%)", zIndex: 120, mixBlendMode: "difference", display: "flex", flexDirection: "column" }}>
+        {["00 — HERO", "01 — THE PIVOT", "02 — BUILDS", "03 — THE OPERATOR", "04 — CAREER", "05 — CASES", "06 — HOW I WORK", "07 — CONTACT"].map((n, i) => (
+          <button
+            key={n}
+            data-nav-i
+            data-hover
+            aria-label={n}
+            onClick={() => { if (navJump) navJump(i); }}
+          >
+            <span className="nav-label">{n}</span>
+            <span className="nav-tick" />
+          </button>
+        ))}
+      </nav>
+      <div data-nav-dot aria-hidden="true" style={{ position: "fixed", right: 10, top: "50%", zIndex: 121, width: 18, height: 2, background: ACC, pointerEvents: "none", transform: "translateY(-106px)", transition: "transform .5s cubic-bezier(.3,.85,.25,1)" }} />
 
       {/* 라임 대시 컴패니언 + 커서 */}
       <div data-dash style={{ position: "fixed", left: 0, top: 0, zIndex: 198, pointerEvents: "none", width: 54, height: 11, background: ACC, transform: "translate3d(-300px,-300px,0)" }} />
