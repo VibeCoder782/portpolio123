@@ -270,7 +270,9 @@ const Chatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
 const Portfolio = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [imgOk, setImgOk] = useState(true);
-  const [openArc, setOpenArc] = useState<number | null>(null);
+  // 프로젝트 목록(sub)이 있는 행은 기본 펼침 — 스크롤만 해도 전체 이력이 보이게
+  const [openArcs, setOpenArcs] = useState<number[]>(() => ARCHIVE.flatMap((a, i) => (a.sub ? [i] : [])));
+  const toggleArc = (i: number) => setOpenArcs((p) => (p.includes(i) ? p.filter((x) => x !== i) : [...p, i]));
   const rootRef = useRef<HTMLDivElement>(null);
   const reduceMotion = typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -286,7 +288,7 @@ const Portfolio = () => {
       px: -200, py: -200, cx: -200, cy: -200, rx: -200, ry: -200,
       cs: 1, ecs: 1, lastSt: undefined as number | undefined, dashSt: 0, skew: 0,
       curRow: null as HTMLElement | null,
-      introDone: false, raf: 0, dead: false,
+      introDone: false, raf: 0, dead: false, opInteracted: false,
       dash: null as null | { x: number; y: number; vx: number; vy: number; r: number },
     };
 
@@ -485,12 +487,27 @@ const Portfolio = () => {
         }
       });
 
-      // 스포트라이트 씬
+      // 스포트라이트 씬 — 커서가 닿기 전엔 조명이 스스로 훑고 다님 (유도 + 모바일 대응)
       root.querySelectorAll<HTMLElement>("[data-light]").forEach((el) => {
         const r = el.getBoundingClientRect();
         if (r.bottom < 0 || r.top > vh) return;
-        el.style.setProperty("--lx", (S.px - r.left).toFixed(0) + "px");
-        el.style.setProperty("--ly", (S.py - r.top).toFixed(0) + "px");
+        const inside = S.px >= r.left && S.px <= r.right && S.py >= r.top && S.py <= r.bottom;
+        if (inside) S.opInteracted = true;
+        let lx: number, ly: number;
+        if (S.opInteracted) {
+          lx = S.px - r.left; ly = S.py - r.top;
+        } else {
+          const tt = performance.now() / 1000;
+          lx = r.width * (0.5 + 0.34 * Math.sin(tt * 0.6));
+          ly = r.height * (0.48 + 0.26 * Math.cos(tt * 0.43));
+        }
+        el.style.setProperty("--lx", lx.toFixed(0) + "px");
+        el.style.setProperty("--ly", ly.toFixed(0) + "px");
+        const hint = el.querySelector<HTMLElement>("[data-op-hint]");
+        if (hint && S.opInteracted && hint.style.opacity !== "0") {
+          hint.style.animation = "none"; // 펄스 정지 후 페이드아웃 (애니메이션이 opacity를 덮지 않게)
+          hint.style.opacity = "0";
+        }
       });
 
       // 마키
@@ -668,7 +685,8 @@ const Portfolio = () => {
         a{color:inherit;text-decoration:none}
         a:hover{color:${ACC}}
         ::selection{background:${ACC};color:#0a0a0a}
-        @media (pointer:coarse){[data-cursor],[data-cursor-ring]{display:none!important}[data-root]{cursor:auto!important}}
+        @media (pointer:coarse){[data-cursor],[data-cursor-ring],[data-op-hint]{display:none!important}[data-root]{cursor:auto!important}}
+        @keyframes opPulse{0%,100%{opacity:1}50%{opacity:.4}}
         [data-row]:hover{color:#0a0a0a!important}
         .mono-btn{transition:border-color .25s,color .25s}
         .mono-btn:hover{border-color:${ACC}!important;color:${ACC}!important}
@@ -781,14 +799,15 @@ const Portfolio = () => {
               <div style={{ overflow: "hidden", marginTop: "3.5vh" }}>
                 <div data-reveal="0" style={{ fontSize: 15, lineHeight: 1.8, fontWeight: 500, color: "#9a9a9a", transform: "translateY(110%)", opacity: 0, maxWidth: "44ch" }}>현장을 아는 프로덕트 오너.<br />부산에서 만들고, 결과로 증명한다.</div>
               </div>
+              <div data-op-hint style={{ marginTop: "3vh", display: "inline-flex", alignItems: "center", gap: 10, fontFamily: MONO, fontSize: 11, letterSpacing: ".14em", background: ACC, color: "#0a0a0a", padding: "8px 14px", transition: "opacity .6s ease", animation: "opPulse 1.8s ease-in-out infinite" }}>커서를 움직여 조명을 비춰보세요</div>
             </div>
             <div style={{ position: "relative", flex: "none", width: "clamp(240px,23vw,360px)" }}>
               <div style={{ position: "relative", aspectRatio: "4/5", overflow: "hidden", border: "1px solid #2c2c2c" }}>
                 {imgOk ? (
-                  <img src="/profile.png" alt="Yang Soonmin" onError={() => setImgOk(false)} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "grayscale(1) contrast(1.06)" }} />
+                  <img src="/profile.jpg" alt="Yang Soonmin" onError={() => setImgOk(false)} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "grayscale(1) contrast(1.06)" }} />
                 ) : (
                   <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(-45deg,#101010,#101010 9px,#1a1a1a 9px,#1a1a1a 19px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".14em", background: "#0a0a0a", color: ACC, padding: "4px 8px" }}>DROP — /public/profile.png</span>
+                    <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".14em", background: "#0a0a0a", color: ACC, padding: "4px 8px" }}>DROP — /public/profile.jpg</span>
                   </div>
                 )}
                 <div style={{ position: "absolute", inset: 0, background: "radial-gradient(300px circle at var(--lx,50%) var(--ly,50%),transparent 20%,rgba(5,5,5,.82) 78%)", pointerEvents: "none" }} />
@@ -811,7 +830,7 @@ const Portfolio = () => {
                   <div
                     className="arc-row"
                     data-hover={expandable ? true : undefined}
-                    onClick={expandable ? () => setOpenArc(openArc === i ? null : i) : undefined}
+                    onClick={expandable ? () => toggleArc(i) : undefined}
                     style={{ display: "flex", alignItems: "baseline", gap: "2.5vw", padding: "2.2vh 0", borderTop: "1px solid rgba(17,17,17,.18)", cursor: expandable ? "pointer" : undefined }}
                   >
                     <span style={{ fontFamily: MONO, fontSize: 11, color: "#999", width: "9ch", flex: "none" }}>{a.yr}</span>
@@ -820,13 +839,13 @@ const Portfolio = () => {
                       {a.meta}
                       {expandable && (
                         <span style={{ marginLeft: 14, color: "#111", background: ACC, padding: "3px 8px", letterSpacing: ".1em" }}>
-                          {openArc === i ? "− CLOSE" : a.sub ? `+ ${a.sub.length} PROJECTS` : "+ ROLE"}
+                          {openArcs.includes(i) ? "− CLOSE" : a.sub ? `+ ${a.sub.length} PROJECTS` : "+ ROLE"}
                         </span>
                       )}
                     </span>
                   </div>
                   {expandable && (
-                    <div style={{ display: "grid", gridTemplateRows: openArc === i ? "1fr" : "0fr", transition: "grid-template-rows .5s cubic-bezier(.2,.7,.2,1)" }}>
+                    <div style={{ display: "grid", gridTemplateRows: openArcs.includes(i) ? "1fr" : "0fr", transition: "grid-template-rows .5s cubic-bezier(.2,.7,.2,1)" }}>
                       <div style={{ overflow: "hidden" }}>
                         <div style={{ padding: "0.6vh 0 2.6vh calc(9ch + 2.5vw)" }}>
                           {a.desc && (
