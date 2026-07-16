@@ -507,6 +507,7 @@ const Chatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
 - 이메일: swatsoonmin@gmail.com
 - 학력: 경성대학교 경영학과 졸업(편입)
 - 자격증: 웹디자인개발기능사(2024.09)
+- 교육 이수: SW사업 수주 제안전략 수립 실무(2024.11, 한국소프트웨어산업협회) / 인공지능 서비스기획 실무(2024.10, 한국소프트웨어산업협회) / 애자일 소프트웨어 개발방법론(2024.09, 한국소프트웨어산업협회) / 반응형 웹디자인&웹퍼블리셔(2022.04~09, 부산IT교육센터)
 - PM/PO 경력: 약 3년 (도미노 서비스업 포함 전체 사회경력 14년+)
 
 [경력]
@@ -1475,9 +1476,13 @@ const Portfolio = () => {
           </div>
           <div style={{ marginTop: "2vh", borderBottom: "1px solid rgba(17,17,17,.18)" }}>
             {[
-              { yr: "2011–19", name: "경성대학교 경영학과", meta: "편입 / 졸업" },
+              { yr: "2024.11", name: "SW사업 수주 제안전략 수립 실무", meta: "한국소프트웨어산업협회" },
+              { yr: "2024.10", name: "인공지능 서비스기획 실무", meta: "한국소프트웨어산업협회" },
               { yr: "2024.09", name: "웹디자인개발기능사", meta: "한국산업인력공단" },
+              { yr: "2024.09", name: "애자일 소프트웨어 개발방법론", meta: "한국소프트웨어산업협회" },
+              { yr: "2022", name: "반응형 웹디자인 & 웹퍼블리셔", meta: "부산IT교육센터" },
               { yr: "2018", name: "서비스 디자인 청사진 — 최우수상", meta: "경성대 우수과제공모전" },
+              { yr: "2011–19", name: "경성대학교 경영학과", meta: "편입 / 졸업" },
               { yr: "2011", name: "KT&G 마케팅 캠프 — 팀워크상", meta: "롯데 에비뉴몰 전략 공모전" },
             ].map((c, i) => (
               <div key={i} className="arc-row cred-row" style={{ display: "flex", alignItems: "baseline", gap: "2.5vw", padding: "1.8vh 0", borderTop: "1px solid rgba(17,17,17,.18)" }}>
