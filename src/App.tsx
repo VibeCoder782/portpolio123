@@ -40,7 +40,7 @@ const BUILDS: Build[] = [
   { no: "10", name: "CITIZEN'S TURN", meta: "UNITY 2D · IN DEV", drop: "DROP — GAME SHOT", shot: "/shots/citizensturn.png" },
 ];
 
-type ArchiveRow = { yr: string; name: string; meta: string; sub?: { n: string; p: string }[] };
+type ArchiveRow = { yr: string; name: string; meta: string; desc?: string; sub?: { n: string; p: string }[] };
 const ARCHIVE: ArchiveRow[] = [
   { yr: "2026 —", name: "AI AUTOMATION (N8N)", meta: "IN USE — 회의록·OCR·트렌드" },
   { yr: "2026 —", name: "AI INSIGHT OS", meta: "35 SPECS · PRE-MVP" },
@@ -52,6 +52,7 @@ const ARCHIVE: ArchiveRow[] = [
   { yr: "2026", name: "BOOGION — TEAM OF 4", meta: "TOP CONTRIBUTOR" },
   {
     yr: "2024–25", name: "HANDY — 이사 · PO/팀장", meta: "CMS · 아르피나 예약 전환",
+    desc: "개발 1팀 이사 · PO/팀장 — 애자일 스크럼 도입, JIRA 기반 일정·이슈 관리, Figma UI/UX 설계, AI 업무 자동화 주도. 자체 CMS와 선착순 예약 시스템 구축을 총괄하고 착수·완료 보고를 책임졌다.",
     sub: [
       { n: "홈페이지 관리 CMS 기획·UI/UX 디자인", p: "2024.08 – 2025.05 · 자체 서비스" },
       { n: "부산경상대 창업가꿈 홈페이지 구축", p: "2024 · 신규" },
@@ -63,6 +64,7 @@ const ARCHIVE: ArchiveRow[] = [
   },
   {
     yr: "2022–24", name: "ARIMOA — PM/PL", meta: "사원→대리→과장 · 70+ SITES",
+    desc: "기획팀 PM/PL — 입사 1년 반 만에 사원에서 대리를 거쳐 과장까지. 요구사항 정의·IA·프로그램 스토리보드·제안서 작성, 착수·완료 보고회 발표 다수. 총 15개 계약 건, 대학 통합 홈페이지 70개+를 지켰다.",
     sub: [
       { n: "경성대 LINC 3.0 사업단 구축 (11개 프로그램)", p: "2022 – 23 · 신규" },
       { n: "한국기술교육대 산학협력단 고도화", p: "2023 · 고도화" },
@@ -78,7 +80,10 @@ const ARCHIVE: ArchiveRow[] = [
       { n: "울산과학대 진로진학지원센터 외 부속", p: "2023 – 24 · 다수" },
     ],
   },
-  { yr: "2009–21", name: "DOMINO'S — STORE MANAGER", meta: "12 YEARS" },
+  {
+    yr: "2009–21", name: "DOMINO'S — STORE MANAGER", meta: "12 YEARS",
+    desc: "매장 매니저 12년 — 매출과 손익, 사람, 새벽의 현장. 고객 중심 사고와 현장 커뮤니케이션이 여기서 만들어졌다. 모든 기획의 뿌리.",
+  },
 ];
 
 const CASES = [
@@ -281,7 +286,7 @@ const Portfolio = () => {
       px: -200, py: -200, cx: -200, cy: -200, rx: -200, ry: -200,
       cs: 1, ecs: 1, lastSt: undefined as number | undefined, dashSt: 0, skew: 0,
       curRow: null as HTMLElement | null,
-      introDone: false, raf: 0,
+      introDone: false, raf: 0, dead: false,
       dash: null as null | { x: number; y: number; vx: number; vy: number; r: number },
     };
 
@@ -544,6 +549,7 @@ const Portfolio = () => {
     S.raf = requestAnimationFrame(loop);
 
     // ── 인트로: 카운트업 → 글자 낙하 → 제자리 복귀 ──
+    // 재생 완료 시점에만 가드를 세운다 (StrictMode 이중 마운트가 인트로를 건너뛰지 않게)
     const runIntro = () => {
       const ov = root.querySelector<HTMLElement>("[data-intro]");
       const num = root.querySelector<HTMLElement>("[data-intro-num]");
@@ -552,9 +558,9 @@ const Portfolio = () => {
         S.introDone = true;
         return;
       }
-      introPlayed = true;
       const t0 = performance.now(), DUR = 1400;
       const tick = (t: number) => {
+        if (S.dead) return; // 언마운트된 인스턴스의 잔여 틱 정지
         const p = Math.min(1, (t - t0) / DUR);
         const e = 1 - Math.pow(1 - p, 3);
         root.style.setProperty("--ip", e.toFixed(4));
@@ -569,18 +575,18 @@ const Portfolio = () => {
     let dropParts: DropPart[] = [];
 
     const prepDrop = () => {
+      // 글자들이 각자 자기 자리 근처에서 화면 바닥으로 자유낙하 → 잠시 흩어져 있다 제자리로
       const letters = Array.from(root.querySelectorAll<HTMLElement>("[data-split] [data-ltr]"));
-      const vw = window.innerWidth, vh = window.innerHeight;
-      const pileX = vw * 0.5, pileY = vh * 0.64;
+      const vh = window.innerHeight;
       dropParts = letters.map((el, i) => {
         const r = el.getBoundingClientRect();
-        const dx = pileX - (r.left + r.width / 2) + (Math.random() * 2 - 1) * 90;
-        const floorY = pileY - (r.top + r.height) + (Math.random() * 2 - 1) * 22;
+        const dx = (Math.random() * 2 - 1) * 70; // 좌우로 살짝만 흩어짐 (자기 자리 유지)
+        const floorY = vh * (0.88 + Math.random() * 0.09) - (r.top + r.height); // 바닥 라인, 자유 분포
         const y0 = floorY - (vh * 0.75 + Math.random() * vh * 0.55);
         const rot0 = (Math.random() * 2 - 1) * 40;
         el.style.transition = "none";
         el.style.transform = `translate3d(${dx.toFixed(0)}px,${y0.toFixed(0)}px,0) rotate(${rot0.toFixed(0)}deg)`;
-        return { el, dx, y: y0, vy: 0, floorY, rot: rot0, vr: (Math.random() * 2 - 1) * 320, rest: 0.34 + Math.random() * 0.2, delay: i * 34 + Math.random() * 150, homeDelay: 380 + Math.random() * 620, squash: 0, done: false };
+        return { el, dx, y: y0, vy: 0, floorY, rot: rot0, vr: (Math.random() * 2 - 1) * 320, rest: 0.34 + Math.random() * 0.2, delay: i * 22 + Math.random() * 180, homeDelay: 380 + Math.random() * 620, squash: 0, done: false };
       });
     };
 
@@ -591,6 +597,7 @@ const Portfolio = () => {
       const t0 = performance.now();
       let last = t0;
       const step = (t: number) => {
+        if (S.dead) return;
         const dt = Math.min(32, t - last) / 1000;
         last = t;
         let alive = false;
@@ -629,6 +636,7 @@ const Portfolio = () => {
     };
 
     const finishIntro = (ov: HTMLElement) => {
+      introPlayed = true; // 완주한 경우에만 재생 가드
       prepDrop();
       setTimeout(() => { ov.style.transform = "translate3d(0,-101%,0)"; }, 140);
       setTimeout(() => { startDrop(); }, 480);
@@ -638,6 +646,7 @@ const Portfolio = () => {
     runIntro();
 
     return () => {
+      S.dead = true;
       cancelAnimationFrame(S.raf);
       window.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseover", onOver);
@@ -795,44 +804,50 @@ const Portfolio = () => {
             <span data-scramble>04 — ARCHIVE</span><span>2009 → 2026</span>
           </div>
           <div style={{ marginTop: "6vh", borderBottom: "1px solid rgba(17,17,17,.18)" }}>
-            {ARCHIVE.map((a, i) => (
-              <div key={i}>
-                <div
-                  className="arc-row"
-                  data-hover={a.sub ? true : undefined}
-                  onClick={a.sub ? () => setOpenArc(openArc === i ? null : i) : undefined}
-                  style={{ display: "flex", alignItems: "baseline", gap: "2.5vw", padding: "2.2vh 0", borderTop: "1px solid rgba(17,17,17,.18)", cursor: a.sub ? "pointer" : undefined }}
-                >
-                  <span style={{ fontFamily: MONO, fontSize: 11, color: "#999", width: "9ch", flex: "none" }}>{a.yr}</span>
-                  <span style={{ fontFamily: ANTON, fontSize: "clamp(20px,2.2vw,38px)", lineHeight: 1, textTransform: "uppercase" }}>{a.name}</span>
-                  <span style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 10, letterSpacing: ".14em", color: "#999" }}>
-                    {a.meta}
-                    {a.sub && (
-                      <span style={{ marginLeft: 14, color: "#111", background: ACC, padding: "3px 8px", letterSpacing: ".1em" }}>
-                        {openArc === i ? "− CLOSE" : `+ ${a.sub.length} PROJECTS`}
-                      </span>
-                    )}
-                  </span>
-                </div>
-                {a.sub && (
-                  <div style={{ display: "grid", gridTemplateRows: openArc === i ? "1fr" : "0fr", transition: "grid-template-rows .5s cubic-bezier(.2,.7,.2,1)" }}>
-                    <div style={{ overflow: "hidden" }}>
-                      <div style={{ padding: "0.6vh 0 2.6vh calc(9ch + 2.5vw)" }}>
-                        {a.sub.map((s, j) => (
-                          <div key={j} style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "baseline", padding: "7px 0", borderTop: j === 0 ? "none" : "1px dashed rgba(17,17,17,.12)" }}>
-                            <span style={{ fontSize: 13.5, fontWeight: 600, color: "#333" }}>
-                              <span style={{ fontFamily: MONO, fontSize: 10, color: "#999", marginRight: 12 }}>{String(j + 1).padStart(2, "0")}</span>
-                              {s.n}
-                            </span>
-                            <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".08em", color: "#999", whiteSpace: "nowrap" }}>{s.p}</span>
-                          </div>
-                        ))}
+            {ARCHIVE.map((a, i) => {
+              const expandable = !!(a.sub || a.desc);
+              return (
+                <div key={i}>
+                  <div
+                    className="arc-row"
+                    data-hover={expandable ? true : undefined}
+                    onClick={expandable ? () => setOpenArc(openArc === i ? null : i) : undefined}
+                    style={{ display: "flex", alignItems: "baseline", gap: "2.5vw", padding: "2.2vh 0", borderTop: "1px solid rgba(17,17,17,.18)", cursor: expandable ? "pointer" : undefined }}
+                  >
+                    <span style={{ fontFamily: MONO, fontSize: 11, color: "#999", width: "9ch", flex: "none" }}>{a.yr}</span>
+                    <span style={{ fontFamily: ANTON, fontSize: "clamp(20px,2.2vw,38px)", lineHeight: 1, textTransform: "uppercase" }}>{a.name}</span>
+                    <span style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 10, letterSpacing: ".14em", color: "#999" }}>
+                      {a.meta}
+                      {expandable && (
+                        <span style={{ marginLeft: 14, color: "#111", background: ACC, padding: "3px 8px", letterSpacing: ".1em" }}>
+                          {openArc === i ? "− CLOSE" : a.sub ? `+ ${a.sub.length} PROJECTS` : "+ ROLE"}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                  {expandable && (
+                    <div style={{ display: "grid", gridTemplateRows: openArc === i ? "1fr" : "0fr", transition: "grid-template-rows .5s cubic-bezier(.2,.7,.2,1)" }}>
+                      <div style={{ overflow: "hidden" }}>
+                        <div style={{ padding: "0.6vh 0 2.6vh calc(9ch + 2.5vw)" }}>
+                          {a.desc && (
+                            <div style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.8, color: "#3a3a3a", maxWidth: "72ch", padding: "6px 0 10px" }}>{a.desc}</div>
+                          )}
+                          {a.sub && a.sub.map((s, j) => (
+                            <div key={j} style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "baseline", padding: "7px 0", borderTop: j === 0 && !a.desc ? "none" : "1px dashed rgba(17,17,17,.12)" }}>
+                              <span style={{ fontSize: 13.5, fontWeight: 600, color: "#333" }}>
+                                <span style={{ fontFamily: MONO, fontSize: 10, color: "#999", marginRight: 12 }}>{String(j + 1).padStart(2, "0")}</span>
+                                {s.n}
+                              </span>
+                              <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".08em", color: "#999", whiteSpace: "nowrap" }}>{s.p}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              );
+            })}
           </div>
         </section>
 
