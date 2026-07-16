@@ -344,6 +344,7 @@ const Chatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
 const Portfolio = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [imgOk, setImgOk] = useState(true);
+  const [qrOk, setQrOk] = useState(true);
   // 프로젝트 목록(sub)이 있는 행은 기본 펼침 — 스크롤만 해도 전체 이력이 보이게
   const [openArcs, setOpenArcs] = useState<number[]>(() => ARCHIVE.flatMap((a, i) => (a.sub ? [i] : [])));
   const toggleArc = (i: number) => setOpenArcs((p) => (p.includes(i) ? p.filter((x) => x !== i) : [...p, i]));
@@ -1061,8 +1062,18 @@ const Portfolio = () => {
                 <span style={{ position: "absolute", left: 0, bottom: -12, height: 9, width: "100%", background: "#f4f3f0", transform: "scaleX(clamp(0, calc(var(--p,0)*4 - 1), 1))", transformOrigin: "left" }} />
               </span>
             </div>
-            <div style={{ display: "flex", gap: 14, marginTop: "5vh", flexWrap: "wrap" }}>
-              <a href="mailto:swatsoonmin@gmail.com" data-magnetic data-hover data-glass-track className="glass-d glassy liquid-btn" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: ".18em", padding: "18px 34px", display: "inline-block", borderRadius: 12 }}><span>SWATSOONMIN@GMAIL.COM</span></a>
+            <div style={{ display: "flex", gap: 14, marginTop: "5vh", flexWrap: "wrap", alignItems: "stretch" }}>
+              <a href="mailto:swatsoonmin@gmail.com" data-magnetic data-hover data-glass-track className="glass-d glassy liquid-btn" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: ".18em", padding: "18px 34px", display: "inline-flex", alignItems: "center", borderRadius: 12 }}><span>SWATSOONMIN@GMAIL.COM</span></a>
+              <div data-hover data-glass-track className="glass-d glassy" style={{ padding: 14, borderRadius: 12, display: "inline-flex", flexDirection: "column", gap: 10, alignItems: "center" }}>
+                <div style={{ background: "#fff", padding: 8, borderRadius: 6, position: "relative", zIndex: 2 }}>
+                  {qrOk ? (
+                    <img src="/kakao-qr.png" width={108} height={108} alt="카카오톡 오픈채팅 QR" onError={() => setQrOk(false)} style={{ display: "block" }} />
+                  ) : (
+                    <div style={{ width: 108, height: 108, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", fontFamily: MONO, fontSize: 9, letterSpacing: ".08em", color: "#999", border: "1px dashed #ccc" }}>DROP<br />kakao-qr.png</div>
+                  )}
+                </div>
+                <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: ".16em", color: "#9a9a9a", position: "relative", zIndex: 2 }}>KAKAO OPEN CHAT — SCAN</span>
+              </div>
             </div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12, fontFamily: MONO, fontSize: 10, letterSpacing: ".16em", color: "#4d4d4d", borderTop: "1px solid #1e1e1e", padding: "3vh 3.5vw", position: "relative", zIndex: 2 }}>
