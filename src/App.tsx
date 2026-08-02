@@ -31,99 +31,92 @@ const split = (txt: string) =>
 // shot: /public/shots/ 에 스크린샷이 생기면 자동으로 도형 대신 표시
 type Build = { no: string; name: string; meta: string; shape: string; cap: string; shot: string | null; ko: string; koDesc: string };
 const BUILDS: Build[] = [
-  { no: "01", name: "AI AUTOMATION", meta: "N8N · IN USE", shape: "rings", cap: "AUTOMATION LOOP", shot: "/shots/n8n.png", ko: "AI 업무자동화", koDesc: "회의록·OCR·트렌드 자동화 — 지금도 매일 쓴다" },
-  { no: "02", name: "BOOGION", meta: "TEAM OF 4 · TOP CONTRIBUTOR", shape: "cube4", cap: "TEAM OF FOUR", shot: "/shots/boogion.png", ko: "부기온", koDesc: "정서 케어 앱 · 4인 팀 · 기여 최다" },
-  { no: "03", name: "MOUNTAINON", meta: "APP BUILD", shape: "peak", cap: "THE PEAK", shot: "/shots/mountainon.png", ko: "마운틴온", koDesc: "GPS 등산 기록 앱 · 1인 개발" },
-  { no: "04", name: "BOOKITDA", meta: "STORE-READY", shape: "pages", cap: "PAGES", shot: "/shots/bookitda.png", ko: "북잇다", koDesc: "독서 한줄평 소셜 · 출시 직전" },
-  { no: "05", name: "CASETALK", meta: "AI SELF-CHECK", shape: "dialogue", cap: "DIALOGUE", shot: "/shots/casetalk.png", ko: "모의톡", koDesc: "AI 셀프 점검 웹 · 안전장치 설계" },
-  { no: "06", name: "AI INSIGHT OS", meta: "35 SPECS · PRE-MVP", shape: "stack", cap: "STACK OF 35", shot: "/shots/insightos.png", ko: "AI 인사이트 OS", koDesc: "35개 스펙 문서로 설계한 개인용 지식 OS" },
-  { no: "07", name: "CONTENT PLATFORM ※", meta: "IN SERVICE · ANONYMOUS", shape: "sealed", cap: "SEALED", shot: null, ko: "콘텐츠 플랫폼", koDesc: "운영 중 · 서비스명은 비공개" },
-  { no: "08", name: "WEBOPS BUILDER", meta: "OPS CONSOLE · IN DESIGN", shape: "console", cap: "CONSOLE", shot: "/shots/webops.png", ko: "웹옵스 빌더", koDesc: "멀티 프로덕트 운영 콘솔 · 설계 중" },
-  { no: "09", name: "FLOWON", meta: "3D WEB · SHIPPED", shape: "wave", cap: "THE WAVE", shot: "/shots/flowon.png", ko: "플로우온", koDesc: "3D 인터랙티브 웹 · 완성" },
-  { no: "10", name: "CITIZEN'S TURN", meta: "UNITY 2D · IN DEV", shape: "die", cap: "THE DIE", shot: "/shots/citizensturn.png", ko: "시민의 턴", koDesc: "Unity 2D 의사결정 게임 · 개발 중" },
+  { no: "01", name: "BOOGION", meta: "PRODUCT PLANNING · BUILD · QA", shape: "cube4", cap: "TEAM OF FOUR", shot: null, ko: "부기온", koDesc: "정서 케어 앱 · 기획·구현·QA" },
+  { no: "02", name: "MOUNTAINON", meta: "GPS PRODUCT · IN VALIDATION", shape: "peak", cap: "THE PEAK", shot: null, ko: "마운틴온", koDesc: "GPS 등산 기록 앱 · 검증 중" },
+  { no: "03", name: "BOOKITDA", meta: "PRODUCT DESIGN · PROTOTYPE", shape: "pages", cap: "PAGES", shot: null, ko: "북잇다", koDesc: "독서 한줄평 소셜 · 프로토타입" },
+  { no: "04", name: "CASETALK", meta: "POLICY DESIGN · PROTOTYPE", shape: "dialogue", cap: "DIALOGUE", shot: null, ko: "모의톡", koDesc: "AI 셀프 점검 · 정책·안전장치 설계" },
+  { no: "05", name: "AI AUTOMATION", meta: "N8N · OCR · IN USE", shape: "rings", cap: "AUTOMATION LOOP", shot: null, ko: "AI 업무자동화", koDesc: "OCR·정보수집·회의록 자동화 — 실사용" },
+  { no: "06", name: "AI INSIGHT OS", meta: "KNOWLEDGE OS · PRIVATE BUILD", shape: "stack", cap: "STACK OF 35", shot: null, ko: "AI 인사이트 OS", koDesc: "개인용 지식 OS · 비공개 빌드" },
+  { no: "07", name: "FLOWON", meta: "3D WEB · DEPLOYED", shape: "wave", cap: "THE WAVE", shot: null, ko: "플로우온", koDesc: "3D 인터랙티브 웹 · 배포" },
 ];
 
-// 04는 경력 전용 — 개인 프로젝트는 02 Builds가 단독 담당 (중복 제거)
+// 04는 경력 전용 — 개인 프로젝트는 02 Product Lab이 단독 담당 (중복 제거)
 type ArchiveRow = { yr: string; name: string; meta: string; desc?: string; sub?: { n: string; p: string }[] };
 const ARCHIVE: ArchiveRow[] = [
   {
-    yr: "2024–25", name: "HANDY — 이사 · PO/팀장", meta: "CMS · 아르피나 예약 전환",
-    desc: "개발 1팀 이사 · PO/팀장 — 애자일 스크럼 도입, JIRA 기반 일정·이슈 관리, Figma UI/UX 설계, AI 업무 자동화 주도. 자체 CMS와 선착순 예약 시스템 구축을 총괄하고 착수·완료 보고를 책임졌다.",
+    yr: "2024–25", name: "HANDY — PO · PROJECT LEAD", meta: "DEV TEAM 1 · DIRECTOR",
+    desc: "소규모 개발팀의 PO·프로젝트 팀장으로 CMS와 온라인 신청 시스템을 기획했다. 데일리 스크럼과 Jira·Slack으로 일정·우선순위·이슈를 관리하고, 고객 협의부터 서비스 정책·Figma UI·QA·오픈까지 연결했다.",
     sub: [
-      { n: "홈페이지 관리 CMS 기획·UI/UX 디자인", p: "2024.08 – 2025.05 · 자체 서비스" },
-      { n: "부산경상대 창업가꿈 홈페이지 구축", p: "2024 · 신규" },
-      { n: "아르피나 수영장 선착순 예약 시스템 + 리뉴얼", p: "2024 – 25 · 예약" },
-      { n: "허치슨 홈페이지 리뉴얼", p: "2024 – 25 · 리뉴얼" },
-      { n: "부산경상대 메이커스페이스 신규 구축", p: "2024 – 25 · 신규" },
-      { n: "울산과학대 EPL 신규 구축 (선착순 예약)", p: "2025 · 예약" },
+      { n: "통합형 홈페이지 관리 CMS 기획·UI/UX 디자인", p: "2024.08 – 2025.05" },
+      { n: "부산경상대학교 창업가꿈 홈페이지 구축", p: "2024.09 – 2024.10" },
+      { n: "아르피나 온라인 수영장 시스템 구축·홈페이지 리뉴얼", p: "2024.10 – 2025.01" },
+      { n: "허치슨 홈페이지 리뉴얼", p: "2024.11 – 2025.01" },
+      { n: "부산경상대학교 메이커스페이스 홈페이지 구축", p: "2024.12 – 2025.02" },
+      { n: "울산과학대학교 EPL 홈페이지 구축", p: "2025.03 – 2025.04" },
     ],
   },
   {
-    yr: "2022–24", name: "ARIMOA — PM/PL", meta: "사원→대리→과장 · 70+ SITES",
-    desc: "기획팀 PM/PL — 입사 1년 반 만에 사원에서 대리를 거쳐 과장까지. 요구사항 정의·IA·프로그램 스토리보드·제안서 작성, 착수·완료 보고회 발표 다수. 총 15개 계약 건, 대학 통합 홈페이지 70개+를 지켰다.",
+    yr: "2022–24", name: "ARIMOA — PM / PL", meta: "사원 → 대리 → 과장 · REQ → LAUNCH",
+    desc: "회사가 수주한 대학·기업 홈페이지 프로젝트를 실무 단계에서 인계받아, 현행 분석과 고객 미팅을 통해 요구사항과 구축범위를 구체화했다. IA·화면설계·콘텐츠 이관·검수·오픈까지 PM·PL로 연결했다.",
     sub: [
-      { n: "경성대 LINC 3.0 사업단 구축 (11개 프로그램)", p: "2022 – 23 · 신규" },
-      { n: "한국기술교육대 산학협력단 고도화", p: "2023 · 고도화" },
-      { n: "상지건축 50주년 리뉴얼", p: "2023 · 리뉴얼" },
-      { n: "동아대 교내 홈페이지 고도화", p: "2023 · 고도화" },
-      { n: "울산과학대 통합 구축 (40개+, PHP→JAVA)", p: "2023 – 24 · 대규모" },
-      { n: "경성대 LINC 3.0 공유형 콘텐츠 다중활용", p: "2023 – 24 · 신규" },
-      { n: "전국 기술사교육원 구축", p: "2023 – 24 · 신규" },
-      { n: "철강산업 인적양성 부트캠프", p: "2023 – 24 · 신규" },
-      { n: "한진 공식 홈페이지 메인 리뉴얼", p: "2024 · 리뉴얼" },
-      { n: "대동대 통합 구축 (30개)", p: "2024 · 대규모" },
-      { n: "영렘브란트 신규 구축", p: "2024 · 신규" },
-      { n: "울산과학대 진로진학지원센터 외 부속", p: "2023 – 24 · 다수" },
+      { n: "경성대학교 LINC 3.0 사업단 홈페이지 구축", p: "2022.12 – 2023.03 · 11개 프로그램" },
+      { n: "한국기술교육대학교 산학협력단 홈페이지 고도화", p: "2023.02 – 2023.04" },
+      { n: "상지건축 홈페이지 리뉴얼", p: "2023.04 – 2023.09" },
+      { n: "동아대학교 교내 홈페이지 고도화", p: "2023.05 – 2023.11 · 약 200개 규모" },
+      { n: "울산과학대학교 통합 홈페이지 구축", p: "2023.10 – 2024.03 · 약 40개 · PHP→Java" },
+      { n: "대동대학교 통합 홈페이지 구축", p: "2024.02 – 2024.06 · 약 30개" },
+      { n: "영렘브란트 홈페이지 구축", p: "2024.03 – 2024.04" },
+      { n: "한진 공식 홈페이지 개편", p: "2024 · 메인 리뉴얼" },
     ],
   },
   {
-    yr: "2009–21", name: "DOMINO'S — STORE MANAGER", meta: "12 YEARS",
-    desc: "매장 매니저 12년 — 매출과 손익, 사람, 새벽의 현장. 고객 중심 사고와 현장 커뮤니케이션이 여기서 만들어졌다. 모든 기획의 뿌리.",
+    yr: "2009–21", name: "DOMINO'S — STORE OPERATIONS", meta: "12 YEARS",
+    desc: "12년 동안 고객 응대, 직원 관리와 매장 운영을 경험했다. 제한된 인력과 시간 안에서 현장의 우선순위를 판단했고, 사용자뿐 아니라 운영자의 관점을 배웠다.",
   },
 ];
 
 const CASES = [
   {
     no: "01",
-    title: "새벽 줄서기를 온라인으로",
-    accent: "— 아르피나 예약",
-    body: "새벽부터 현장에 줄 서던 수영장 선착순 접수를 온라인 예약으로 전환. 레퍼런스 조사와 실무자 개별 미팅으로 요구사항을 수렴하고, 선착순·인원 제한 정책을 설계해 홈페이지 리뉴얼과 통합 오픈.",
-    tag: "HANDY · 예약 시스템",
+    title: "새벽 줄서기를 온라인 신청으로",
+    accent: "— 아르피나 수영장 시스템",
+    body: "현장 선착순으로 운영되던 수영장 강습 접수를 회원가입·신청·결제·취소·환불과 관리자 업무까지 온라인으로 전환했다.\n\n기존 장기회원의 연장 요구를 반영해 기존회원은 관리자 사전등록 후 우선신청, 신규회원은 이후 선착순 신청하도록 정책을 분리했다.\n\n오픈 전에는 사용자 신청부터 관리자 확인, 결제·취소·환불까지 전체 흐름을 기준으로 QA를 진행했다.",
+    tag: "HANDY · PO / PM",
   },
   {
     no: "02",
-    title: "재학생 의견이 실제 개편이 되다",
-    accent: "— 대동대 30",
-    body: "착수보고회에서 수렴한 재학생 의견을 실제 개편 방향에 반영해 본대·입학·학과 약 30개 사이트를 통합 구축. 지금도 가장 애착이 가는 프로젝트.",
-    tag: "ARIMOA · PM",
+    title: "약 200개 사이트의 흐름을 연결하다",
+    accent: "— 동아대학교",
+    body: "작업이 완료되지 않아 검수를 시작할 수 없는 병목을 해결하기 위해 담당자별 미완료·진행·검수·수정 상태를 구조화했다.\n\n완료되는 페이지부터 즉시 검수하고 오류 전달·수정·재확인을 반복해 약 100여 개 사이트의 1차 오픈을 관리했다.",
+    tag: "ARIMOA · PL",
   },
   {
     no: "03",
-    title: "혼자 60여 개 사이트, 연기 0건",
-    accent: "— 문서화의 힘",
-    body: "울산과학대·대동대 통합 구축에서 60여 개 사이트를 전 작업 문서화로 누락 없이 관리. 팀원 상황을 살피며 WBS로 일정을 조율해 단 한 건의 연기 없이 오픈.",
-    tag: "ARIMOA · 70+ SITES",
+    title: "사람의 기억보다 공유되는 업무 구조",
+    accent: "— SCRUM × JIRA × SLACK",
+    body: "데일리 스크럼과 Jira 업무구조를 도입하고, 담당자·일정·우선순위·상태·완료기준을 관리했다.\n\nJira 이슈 등록과 상태 변경을 Slack에 연결해 업무가 개인의 기억에만 남지 않고 팀이 같은 기준으로 진행상황을 확인하도록 했다.",
+    tag: "HANDY · TEAM OPERATIONS",
   },
   {
     no: "04",
-    title: "도입보다 설득이 어렵다",
-    accent: "— 스크럼 × AI",
-    body: "핸디 스크럼 조직에 Gemini·Claude·Gamma를 도입해 제안서·기획 문서 작성 시간을 단축. 새 도구를 팀에 정착시키는 일은 도입보다 설득이 어렵다는 걸 배운 프로젝트.",
-    tag: "HANDY · AI 정착",
+    title: "공통 제품과 고객별 요구를 하나의 구조로",
+    accent: "— 통합형 CMS",
+    body: "핸디 내부 공통 관리 플랫폼과 고객사 납품형 CMS를 연결했다.\n\n메뉴·콘텐츠·이미지·게시판·배너·팝업·권한을 설계하고, 공통 기능과 고객사별 추가 기능의 범위와 우선순위를 구분했다.",
+    tag: "HANDY · PO / UI",
   },
   {
     no: "05",
-    title: "2개월 안에 11개 프로그램",
-    accent: "— 경성대 LINC 3.0",
-    body: "11개 신청·관리 프로그램을 2개월 안에 오픈해야 하는 일정. 공통 프로세스 설계로 개발 부담을 줄이고 핵심 프로그램에 집중해 일정 내 안정 오픈 — 유지보수를 거쳐 지금도 다수 사용자가 이용 중.",
-    tag: "ARIMOA · 11 PROGRAMS",
+    title: "재학생 의견이 실제 개편방향이 되다",
+    accent: "— 대동대학교",
+    body: "착수보고회에서 수렴한 재학생 의견을 정보구조와 주요 화면의 개편방향에 반영했다.\n\n대표·입학·부서·학과 등 약 30개 사이트의 구축과 오픈을 관리했다.",
+    tag: "ARIMOA · PM / PL",
   },
   {
     no: "06",
-    title: "레퍼런스 없이 CMS를 제로부터",
-    accent: "— 자체 CMS 설계",
-    body: "기존에 없던 홈페이지 관리 CMS를 IA 구조도 → 스토리보드 → 플로우차트 → UI/UX까지 약 9개월간 Figma로 전 과정 설계. 이후 모든 웹 프로젝트의 관리 기반이 됐다.",
-    tag: "HANDY · 9 MONTHS",
+    title: "문서 보조에서 구현과 자동화까지",
+    accent: "— BUILD × VALIDATE",
+    body: "재직 중에는 Gemini·ChatGPT·Gamma·Midjourney를 기획 문서·발표자료·시각자료 제작에 활용했다.\n\n퇴사 후에는 Claude·Claude Code·Codex·ChatGPT·Gemini와 n8n으로 앱·웹 구현, 기술구조 검토, QA, OCR·정보수집·분류·저장 자동화까지 활용범위를 확장했다.",
+    tag: "PERSONAL LAB · BUILD / VALIDATE",
   },
 ];
 
@@ -197,7 +190,7 @@ const WireShape = ({ type }: { type: string }) => {
   );
 };
 
-// 콘택트 파티클 — "LET'S BUILD" 위로 피어오르는 작업장의 불씨
+// 콘택트 파티클 — "LET'S MAKE WORKFLOWS WORK" 위로 피어오르는 작업장의 불씨
 const Sparks = () => {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
@@ -347,9 +340,8 @@ const HeroGlass = () => {
       };
       line(ds[0], "12 YEARS ON THE FLOOR,");
       line(ds[1], "3 IN PRODUCT.");
-      line(ds[2], "NOW");
-      line(ds[3], " I BUILD.");
-      line(cell.querySelector<HTMLElement>("[data-hero-dash]") ?? undefined, "—", ACC);
+      line(ds[2], "I MAKE WORKFLOWS ");
+      line(cell.querySelector<HTMLElement>("[data-hero-dash]") ?? undefined, "WORK.", ACC);
       tex.needsUpdate = true;
     };
 
@@ -505,35 +497,45 @@ const Chatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
   const PROFILE = `양순민 프로필:
 - 이름: 양순민, 남성, 39세, 부산
 - 이메일: swatsoonmin@gmail.com
-- 학력: 경성대학교 경영학과 졸업(편입)
-- 자격증: 웹디자인개발기능사(2024.09)
-- 교육 이수: SW사업 수주 제안전략 수립 실무(2024.11, 한국소프트웨어산업협회) / 인공지능 서비스기획 실무(2024.10, 한국소프트웨어산업협회) / 애자일 소프트웨어 개발방법론(2024.09, 한국소프트웨어산업협회) / 반응형 웹디자인&웹퍼블리셔(2022.04~09, 부산IT교육센터)
-- PM/PO 경력: 약 3년 (도미노 서비스업 포함 전체 사회경력 14년+)
+- 포지셔닝: 현장의 업무를 실행 가능한 서비스로 만드는 PM·PO
+- 학력: 경성대학교 경영학과 졸업(편입, 2011–2019)
+- 자격증: 웹디자인개발기능사(2024.09, 한국산업인력공단)
+- 교육 이수: SW사업 수주를 위한 제안전략 수립 실무과정(2024.11) / 인공지능서비스기획 실무과정(2024.10) / 애자일 소프트웨어 개발방법론 과정(2024.09) — 한국소프트웨어산업협회 / (스마트혼합)반응형웹디자인&웹퍼블리셔(A)(2022.04~09, 부산IT교육센터)
+- 웹 서비스 기획 경력: 약 3년 (도미노 매장 운영 포함 전체 사회경력 약 14년 6개월)
 
 [경력]
-1. ㈜핸디 (2024.08~2025.08) 개발1팀 이사/팀장, PO
-   - 애자일 스크럼 도입, JIRA 관리, Figma UI/UX, AI 자동화
-   - 프로젝트: 자체 CMS 기획 및 UI/UX디자인, 부산경상대 창업가꿈, 아르피나 수영장 선착순예약시스템(새벽 오프라인 줄서기의 온라인 전환), 허치슨 리뉴얼, 부산경상대 메이커스페이스, 울산과학대 EPL
-2. ㈜아리모아 (2022.12~2024.07) 기획팀 과장 PM/PL
-   - 1년반만에 사원→대리→과장 진급, 15개 계약건 수행
-   - 프로젝트: 경성대LINC3.0(11개프로그램), 한국기술교육대 산학협력단, 상지건축 리뉴얼, 울산과학대 통합(40개+), 동아대 고도화, 대동대 통합(30개, 착수보고회 재학생 의견 반영), 영렘브란트, 한진 리뉴얼
-3. 도미노피자 (2009.09~2021.05) 매장매니저 12년 - 고객중심사고 체득
+1. ㈜핸디 (2024.08~2025.08) 개발1팀 · 이사(공식 직급) / 실무 역할: PO · PROJECT LEAD
+   - 데일리 스크럼·Jira·Slack으로 일정·우선순위·이슈·완료기준 관리
+   - 고객 협의부터 서비스 정책·예외 흐름·Figma UI·QA·오픈까지 연결
+   - 재직 중 AI 도구: Gemini · ChatGPT · Gamma · Midjourney (기획 문서·발표·시각자료). 핸디에서 Claude/Claude Code/Codex/n8n을 본격 사용한 적 없음
+   - 프로젝트: 통합형 CMS, 부산경상대 창업가꿈, 아르피나 온라인 수영장 시스템(기존회원 사전등록·우선신청 / 신규회원 선착순), 허치슨 리뉴얼, 메이커스페이스, 울산과학대 EPL
+2. ㈜아리모아 (2022.12~2024.07) 기획팀 PM/PL · 사원→대리→과장
+   - 수주 프로젝트를 인계받아 현행 분석·고객 미팅으로 요구사항·구축범위 구체화, IA·화면설계·콘텐츠 이관·검수·오픈 연결
+   - 프로젝트: 경성대 LINC 3.0(11개 프로그램), 한국기술교육대 산학협력단, 상지건축, 동아대 교내 고도화(전체 약 200개 규모·1차 오픈 약 100여 개·내부 PL), 울산과학대 통합(약 40개·PHP→Java), 대동대 통합(약 30개·재학생 의견 반영), 영렘브란트, 한진 개편
+3. 도미노피자/청오디피케이 (2009.09~2021.05) STORE OPERATIONS 약 12년 — 고객·직원·매장 운영, 운영자 관점 학습
 
-[핵심역량] 합리적판단, 리스크관리, 문서화&소통, AI·업무자동화
-[문제해결사례]
-1. 문서화시스템구축: 워터폴환경 개선
-2. 2개월내 11개프로그램: 공통프로세스 설계
-3. 스코프크리프 대응: 회의록 문서화
-4. 1인PM 60개사이트: WBS·체계적 문서화·팀원 케어로 연기0건
-5. 자체CMS 설계: 처음부터 IA/스토리보드/플로우차트/UI설계까지 전과정 주도
-6. 아르피나 선착순 예약: 새벽 오프라인 줄서기→온라인 전환, 동시접속 대응 설계
+[핵심역량]
+- 사용자와 운영자의 실제 업무 이해
+- 현행 업무·고객 요청을 요구사항으로 구체화
+- 기능·화면·정책·예외 흐름 설계
+- 일정·우선순위·이슈·QA·오픈까지 PM·PL·PO 연결
+- 기획 의도 검증을 위한 디자인·기술·AI 활용 (개발자 대체 목적이 아님)
 
-[스킬] 기획,JIRA,Notion,Figma,HTML/CSS/JS,Claude Code,ChatGPT,n8n,Flutter,Supabase,Agile/Scrum,WBS
-[AI·업무자동화] n8n으로 회의록→할일추출→Notion정리→Discord알림, 스크린샷 OCR→인사이트DB 등 반복업무 자동화 워크플로우 설계·구현
-[수상] 경성대 최우수상(2018), KT&G 팀워크상(2011)
-[성격] "성격좋은꼰대" - 원칙+유연함, 34세에 웹기획 전향, 바이브코딩으로 앱개발중
+[대표 사례]
+1. 아르피나: 새벽 현장 선착순 → 온라인 신청·결제·취소·환불·관리자 CMS. 기존회원 관리자 사전등록 후 우선신청 / 신규회원 선착순. E2E QA
+2. 동아대: 약 200개 규모, 팀 10명, 내부 PL. Google Sheets로 미완료·검수 상태 구조화. 약 100여 개 1차 오픈
+3. 애자일 운영: 스크럼 × Jira × Slack. 팀 공통 기준의 중요성 학습
+4. 통합형 CMS: 내부 공통 플랫폼 + 고객사 납품형 CMS, 공통/추가 기능 범위 구분
+5. 대동대: 착수보고회 재학생 의견 → IA·화면 개편, 약 30개 사이트
+6. AI: 재직 중 문서 보조(Gemini·ChatGPT·Gamma·Midjourney) → 퇴사 후 Claude·Claude Code·Codex·n8n으로 구현·자동화 검증
 
-[개인 개발 프로젝트-바이브코딩] 기획에 머무르지 않고 직접 설계·개발한 앱/서비스 10개+: AI 업무자동화(n8n 워크플로우), AI Insight OS(개인용 AI Knowledge OS 설계·35개 스펙문서), MountainOn(등산 기록 앱,Flutter), WebOps Builder(여러 서비스 운영·배포 관리 플랫폼,Next.js), 콘텐츠 서비스 플랫폼(웹+관리자CMS,운영중), 부기온(정서케어 앱,4인팀 기여 최다), 모의톡(AI 셀프점검 웹), 북잇다(독서 소셜앱,출시 직전), Flowon 홈페이지(3D 인터랙티브 웹), 시민의 턴(Unity 2D 의사결정 게임). "기획하고 직접 만들어 검증까지 하는 실행형 PO"`;
+[스킬] 기획, IA, Figma, Jira, Slack, Notion, Agile/Scrum, QA, HTML/CSS/JS 이해
+[퇴사 후 AI·자동화] Claude, Claude Code, Codex, ChatGPT, Gemini, n8n (OCR·정보수집·분류·회의록 자동화)
+[수상] 서비스 디자인 청사진 최우수상(2018, 경성대), 청소년 멘토링 최우수 자원봉사자상(2013, 반여종합사회복지관), KT&G 팀워크상(2011)
+
+[Product Lab — 선택된 실험, 전부 출시 아님]
+부기온(기획·구현·QA), 마운틴온(GPS·검증 중), 북잇다(프로토타입), 모의톡(정책 설계·프로토타입), AI 업무자동화(n8n·실사용), AI Insight OS(비공개 빌드), Flowon(3D 웹·배포)
+비공개 WEBOPS BUILDER는 답변하지 않음.`;
 
   const send = async () => {
     const q = input.trim(); if (!q || loading) return;
@@ -544,7 +546,17 @@ const Chatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           max_tokens: 1000,
-          system: `당신은 양순민의 포트폴리오 AI 어시스턴트입니다. 아래 프로필 정보를 바탕으로 친절하고 간결하게 한국어로 답변하세요. 3~5문장 이내. 프로필에 없는 내용은 "해당 정보는 포트폴리오에 포함되어 있지 않습니다"라고 안내.\n\n${PROFILE}`,
+          system: `당신은 양순민의 포트폴리오 AI 어시스턴트입니다. 아래 프로필만 근거로 친절하고 간결하게 한국어로 답하세요. 3~5문장 이내. 프로필에 없으면 "해당 정보는 포트폴리오에 포함되어 있지 않습니다"라고 안내.
+
+절대 금지:
+- 핸디 재직 중 Claude/Claude Code/Codex/n8n을 썼다고 답하지 말 것 (재직 중은 Gemini·ChatGPT·Gamma·Midjourney)
+- 혼자 60여 개 사이트, 연기 0건, 70+ SITES처럼 과장 수치를 단정하지 말 것 (동아대는 "약 200개 규모·1차 오픈 약 100여 개", 팀 작업)
+- 개인 프로젝트가 모두 출시됐다고 답하지 말 것
+- 개발자라고 답하지 말 것 (PM·PO·서비스 기획자)
+- WEBOPS BUILDER 등 비공개 상세를 답하지 말 것
+- "안 되는 건 없다", "성격좋은꼰대", "바이브코딩" 표현 사용 금지
+
+\n\n${PROFILE}`,
           messages: newMsgs.map((m) => ({ role: m.role, content: m.content })),
         }),
       });
@@ -1016,6 +1028,8 @@ const Portfolio = () => {
     const runIntro = () => {
       const ov = root.querySelector<HTMLElement>("[data-intro]");
       const num = root.querySelector<HTMLElement>("[data-intro-num]");
+      const statusEl = root.querySelector<HTMLElement>("[data-intro-status]");
+      const STATUS_WORDS = ["ANALYZING WORKFLOWS", "STRUCTURING REQUIREMENTS", "VALIDATING THE FLOW", "READY"];
       if (!ov || introPlayed || introSeqStarted || reduceMotion) {
         if (ov) ov.style.display = "none";
         // 스킵 시 글자 원위치 강제 복원 — HMR/재마운트로 흩어진 상태(prepAssemble)가 박제되는 것 방지
@@ -1034,6 +1048,10 @@ const Portfolio = () => {
         const e = 1 - Math.pow(1 - p, 3);
         root.style.setProperty("--ip", e.toFixed(4));
         if (num) num.textContent = String(Math.round(e * 100));
+        if (statusEl) {
+          const si = Math.min(STATUS_WORDS.length - 1, Math.floor(e * STATUS_WORDS.length));
+          if (statusEl.textContent !== STATUS_WORDS[si]) statusEl.textContent = STATUS_WORDS[si];
+        }
         if (p < 1) requestAnimationFrame(tick);
         else finishIntro(ov);
       };
@@ -1042,7 +1060,7 @@ const Portfolio = () => {
 
     let startedIntroHere = false; // StrictMode: 미완주 인스턴스가 정리될 때 실행 가드 반납
 
-    // 인트로 "조립" — 흩어져 있던 글자 조각들이 날아와 헤드라인으로 지어짐 (I BUILD)
+    // 인트로 "조립" — 흩어져 있던 글자 조각들이 날아와 헤드라인으로 지어짐
     const prepAssemble = () => {
       const letters = Array.from(root.querySelectorAll<HTMLElement>("[data-split] [data-ltr]"));
       const vw = window.innerWidth, vh = window.innerHeight;
@@ -1215,7 +1233,7 @@ const Portfolio = () => {
             </div>
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, display: "flex", justifyContent: "space-between", padding: "26px 3.5vw", ...label, zIndex: 5 }}>
               <span>YANG SOONMIN — PORTFOLIO</span>
-              <span style={{ color: "#666" }}>PM/PO · BUSAN · <span data-clock>LOCAL --:--:-- KST</span></span>
+              <span style={{ color: "#666" }}>현장의 업무를 실행 가능한 서비스로 만드는 PM·PO · <span data-clock>LOCAL --:--:-- KST</span></span>
             </div>
             <div style={{ position: "absolute", top: 27, left: "50%", transform: "translateX(-50%)", fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#999", zIndex: 5 }}>TYPE IS PHYSICAL</div>
             <div data-hero-num style={{ position: "absolute", top: "4vh", right: "1.5vw", fontFamily: ANTON, fontSize: "46vh", lineHeight: 1, color: "transparent", WebkitTextStroke: "1.5px rgba(17,17,17,.13)", zIndex: 1, transform: "translateY(calc(var(--p,0)*-24vh))" }}>12/3</div>
@@ -1224,9 +1242,8 @@ const Portfolio = () => {
               <div data-split style={{ ...heroLine, transform: "translateX(calc(var(--p,0)*3.5vw))" }}>{split("3 IN PRODUCT.")}</div>
               <div style={{ transform: "translateX(calc(var(--p,0)*-2vw))" }}>
                 <span style={{ position: "relative", display: "inline-block", ...heroLine }}>
-                  <span data-split style={{ whiteSpace: "pre" }}>{split("NOW ")}</span>
-                  <span data-hero-dash style={{ color: ACC }}>—</span>
-                  <span data-split style={{ whiteSpace: "pre" }}>{split(" I BUILD.")}</span>
+                  <span data-split style={{ whiteSpace: "pre" }}>{split("I MAKE WORKFLOWS ")}</span>
+                  <span data-hero-dash style={{ color: ACC }}>{split("WORK.")}</span>
                 </span>
               </div>
             </div>
@@ -1241,8 +1258,8 @@ const Portfolio = () => {
             <div data-hero-card style={{ position: "absolute", top: "42vh", right: "15vw", width: 370, zIndex: 4, pointerEvents: "none", transform: "rotate(-5deg)" }}>
               <div style={{ borderRadius: 22, padding: "24px 28px", background: "linear-gradient(150deg, rgba(255,255,255,.38), rgba(255,255,255,.10) 55%, rgba(255,255,255,.24))", backdropFilter: "blur(9px) saturate(1.12) brightness(1.03)", WebkitBackdropFilter: "blur(9px) saturate(1.12) brightness(1.03)", border: "1px solid rgba(255,255,255,.65)", boxShadow: "0 34px 70px rgba(17,17,17,.14), inset 0 1px 0 rgba(255,255,255,.75)" }}>
                 <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#666", marginBottom: 13 }}>MANIFESTO</div>
-                <div style={{ fontSize: 15, lineHeight: 1.75, fontWeight: 500, color: "#2a2a28" }}>현장에서 12년, 프로덕트에서 3년.<br />이제는 직접 만들어 증명한다.</div>
-                <b style={{ display: "block", marginTop: 10, fontSize: 15.5, color: "#111", fontWeight: 800 }}>"안 되는 건 없다, 방법이 다를 뿐."</b>
+                <div style={{ fontSize: 15, lineHeight: 1.75, fontWeight: 500, color: "#2a2a28" }}>사용자와 운영자, 개발팀 사이의 요구를<br />기능·정책·예외 흐름으로 정리합니다.</div>
+                <b style={{ display: "block", marginTop: 10, fontSize: 15.5, color: "#111", fontWeight: 800 }}>현장의 업무를 실행 가능한 서비스로 만드는 PM·PO</b>
               </div>
             </div>
           </div>
@@ -1265,9 +1282,9 @@ const Portfolio = () => {
               <div style={{ position: "absolute", left: "3.5vw", right: "3.5vw", bottom: "10vh", display: "flex", alignItems: "flex-end", gap: "4vw", flexWrap: "wrap" }}>
                 <div data-count="12" style={{ fontFamily: ANTON, fontSize: "36vh", lineHeight: 0.82, transform: "scale(calc(.94 + var(--p,0)*.12))", transformOrigin: "bottom left" }}>12</div>
                 <div style={{ paddingBottom: "3vh", maxWidth: "38ch" }}>
-                  <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".14em", color: "#666" }}>2009 — 2021 · DOMINO'S PIZZA · STORE MANAGER</div>
+                  <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".14em", color: "#666" }}>2009 — 2021 · DOMINO'S PIZZA · STORE OPERATIONS</div>
                   <div style={{ overflow: "hidden" }}>
-                    <div data-reveal="0" style={{ fontSize: "clamp(20px,2vw,30px)", fontWeight: 800, lineHeight: 1.4, marginTop: 14, transform: "translateY(110%)", opacity: 0 }}>12년을 현장에서 보냈다.<br />매장관리, 인간관계, 서비스업.</div>
+                    <div data-reveal="0" style={{ fontSize: "clamp(20px,2vw,30px)", fontWeight: 800, lineHeight: 1.4, marginTop: 14, transform: "translateY(110%)", opacity: 0 }}>12년을 현장에서 보냈다.<br />고객과 직원, 운영을 함께 배웠다.</div>
                   </div>
                 </div>
               </div>
@@ -1286,9 +1303,9 @@ const Portfolio = () => {
               <div style={{ position: "absolute", left: "3.5vw", right: "3.5vw", bottom: "10vh", display: "flex", alignItems: "flex-end", gap: "4vw", flexWrap: "wrap" }}>
                 <div style={{ fontFamily: ANTON, fontSize: "36vh", lineHeight: 0.82, transform: "scale(calc(.94 + var(--p,0)*.12))", transformOrigin: "bottom left" }}>34</div>
                 <div style={{ paddingBottom: "3vh", maxWidth: "40ch" }}>
-                  <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".14em", color: ACC }}>2022 — 2025 · ARIMOA PM/PL → HANDY PO·이사</div>
+                  <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".14em", color: ACC }}>2022 — 2025 · ARIMOA PM/PL → HANDY PO / PROJECT LEAD</div>
                   <div style={{ overflow: "hidden" }}>
-                    <div data-reveal="80" style={{ fontSize: "clamp(20px,2vw,30px)", fontWeight: 800, lineHeight: 1.4, marginTop: 14, transform: "translateY(110%)", opacity: 0 }}>34세, 방법을 바꿨다.<br /><span style={{ color: ACC }}>—</span> 3년 만에 프로덕트를 책임지는 사람이 됐다.</div>
+                    <div data-reveal="80" style={{ fontSize: "clamp(20px,2vw,30px)", fontWeight: 800, lineHeight: 1.4, marginTop: 14, transform: "translateY(110%)", opacity: 0 }}>34세, 방법을 바꿨다.<br /><span style={{ color: ACC }}>—</span> 요구사항부터 오픈까지<br />연결하는 사람이 됐다.</div>
                   </div>
                 </div>
               </div>
@@ -1302,23 +1319,31 @@ const Portfolio = () => {
           <div data-marquee style={{ display: "flex", whiteSpace: "nowrap", willChange: "transform", padding: "2.2vh 0" }}>
             {[0, 1].map((k) => (
               <span key={k} style={{ fontFamily: ANTON, fontSize: "clamp(28px,3.4vw,58px)", lineHeight: 1, color: ACC, paddingRight: "3vw", flex: "none" }}>
-                12 YEARS ON THE FLOOR <span style={{ color: "#3a3a3a", padding: "0 1.2vw" }}>—</span> 3 IN PRODUCT <span style={{ color: "#3a3a3a", padding: "0 1.2vw" }}>—</span> 10+ BUILDS <span style={{ color: "#3a3a3a", padding: "0 1.2vw" }}>—</span> NO EXCUSES, ONLY METHODS <span style={{ color: "#3a3a3a", padding: "0 1.2vw" }}>—</span>
+                12 YEARS ON THE FLOOR <span style={{ color: "#3a3a3a", padding: "0 1.2vw" }}>—</span> 3 YEARS IN PRODUCT <span style={{ color: "#3a3a3a", padding: "0 1.2vw" }}>—</span> REQUIREMENTS TO RELEASE <span style={{ color: "#3a3a3a", padding: "0 1.2vw" }}>—</span> CLARITY OVER ASSUMPTIONS <span style={{ color: "#3a3a3a", padding: "0 1.2vw" }}>—</span> BUILD · VALIDATE · IMPROVE <span style={{ color: "#3a3a3a", padding: "0 1.2vw" }}>—</span> WORKFLOWS THAT WORK <span style={{ color: "#3a3a3a", padding: "0 1.2vw" }}>—</span>
               </span>
             ))}
           </div>
         </div>
 
-        {/* ============ 02 BUILDS ============ */}
+        {/* ============ 02 PRODUCT LAB ============ */}
         <section data-scene="flow" style={{ position: "relative", background: "#0a0a0a", color: "#f4f3f0", padding: "16vh 0 10vh", overflow: "hidden" }}>
           <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none", backgroundImage: "linear-gradient(rgba(244,243,240,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(244,243,240,.05) 1px,transparent 1px)", backgroundSize: "72px 72px" }} />
           <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none", backgroundImage: "linear-gradient(rgba(244,243,240,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(244,243,240,.22) 1px,transparent 1px)", backgroundSize: "72px 72px", WebkitMaskImage: "radial-gradient(320px circle at calc(var(--cxp,50)*1%) calc(var(--cyp,50)*1%),#000,transparent 74%)", maskImage: "radial-gradient(320px circle at calc(var(--cxp,50)*1%) calc(var(--cyp,50)*1%),#000,transparent 74%)" }} />
           <div style={{ display: "flex", justifyContent: "space-between", ...label, color: "#777", padding: "0 3.5vw", position: "relative", zIndex: 2 }}>
-            <span data-scramble>02 — BUILDS (10+)</span><span>COLOR ON HOVER ONLY</span>
+            <span data-scramble>02 — PRODUCT LAB</span><span>SELECTED PRODUCT EXPERIMENTS · COLOR ON HOVER ONLY</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", marginTop: "7vh", borderBottom: "1px solid #242424", perspective: 1100 }}>
             {BUILDS.map((b, i) => (
               <BuildRow key={b.no} b={b} i={i} />
             ))}
+          </div>
+          <div style={{ padding: "4vh 3.5vw 0", position: "relative", zIndex: 2, maxWidth: "62ch" }}>
+            <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".14em", color: ACC, marginBottom: 10 }}>BUILD TO UNDERSTAND. VALIDATE TO COMMUNICATE.</div>
+            <div style={{ fontSize: 14, lineHeight: 1.8, color: "#9a9a9a", fontWeight: 500 }}>
+              개발자를 대체하려는 것이 아니라,<br />
+              기획 의도를 직접 검증하고 개발팀과 더 정확하게<br />
+              소통하기 위해 구현 구조를 학습하고 있습니다.
+            </div>
           </div>
         </section>
 
@@ -1332,7 +1357,7 @@ const Portfolio = () => {
               <div style={{ fontFamily: ANTON, fontSize: "clamp(56px,9vw,160px)", lineHeight: 0.95, textTransform: "uppercase", color: "transparent", WebkitTextStroke: "1px rgba(244,243,240,.13)" }}>YANG<br />SOONMIN<br />PM/PO</div>
               <div style={{ position: "absolute", inset: 0, fontFamily: ANTON, fontSize: "clamp(56px,9vw,160px)", lineHeight: 0.95, textTransform: "uppercase", color: "#f4f3f0", WebkitMaskImage: "radial-gradient(300px circle at var(--lx,-500px) var(--ly,-500px),#000 35%,transparent 72%)", maskImage: "radial-gradient(300px circle at var(--lx,-500px) var(--ly,-500px),#000 35%,transparent 72%)" }}>YANG<br />SOONMIN<br /><span style={{ color: ACC }}>PM/PO</span></div>
               <div style={{ overflow: "hidden", marginTop: "3.5vh" }}>
-                <div data-reveal="0" style={{ fontSize: 15, lineHeight: 1.8, fontWeight: 500, color: "#9a9a9a", transform: "translateY(110%)", opacity: 0, maxWidth: "44ch" }}>현장을 아는 프로덕트 오너.<br />부산에서 만들고, 결과로 증명한다.</div>
+                <div data-reveal="0" style={{ fontSize: 15, lineHeight: 1.8, fontWeight: 500, color: "#9a9a9a", transform: "translateY(110%)", opacity: 0, maxWidth: "44ch" }}>현장의 업무를 실행 가능한 서비스로 만든다.<br />요구사항부터 정책·QA·오픈까지 연결한다.</div>
               </div>
               <div data-op-hint style={{ marginTop: "3.5vh", display: "inline-flex", alignItems: "center", gap: 12, fontFamily: MONO, fontSize: 13, fontWeight: 500, letterSpacing: ".14em", background: ACC, color: "#0a0a0a", padding: "13px 22px", transition: "opacity .6s ease", animation: "opPulse 1.6s ease-in-out infinite, opBob 2.8s ease-in-out infinite", boxShadow: "0 0 34px rgba(200,255,22,.35)" }}>✦ 커서를 움직여 조명을 비춰보세요</div>
             </div>
@@ -1441,7 +1466,7 @@ const Portfolio = () => {
                 <div style={{ flex: 1, minWidth: 260 }}>
                   <div style={{ fontFamily: ANTON, fontSize: "clamp(22px,2.4vw,42px)", lineHeight: 1.05, textTransform: "uppercase" }}>{c.title} <span style={{ color: ACC }}>{c.accent}</span></div>
                   <div style={{ overflow: "hidden" }}>
-                    <div data-reveal="0" style={{ fontSize: 14, lineHeight: 1.8, color: "#9a9a9a", fontWeight: 500, marginTop: 12, maxWidth: "60ch", transform: "translateY(110%)", opacity: 0 }}>{c.body}</div>
+                    <div data-reveal="0" style={{ fontSize: 14, lineHeight: 1.8, color: "#9a9a9a", fontWeight: 500, marginTop: 12, maxWidth: "60ch", whiteSpace: "pre-line", transform: "translateY(110%)", opacity: 0 }}>{c.body}</div>
                   </div>
                 </div>
                 <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".16em", color: "#5f5f5f", flex: "none" }}>{c.tag}</span>
@@ -1460,9 +1485,9 @@ const Portfolio = () => {
           <div aria-hidden="true" style={{ position: "absolute", top: "13vh", left: 0, whiteSpace: "nowrap", fontFamily: ANTON, fontSize: "32vh", lineHeight: 1, color: "transparent", WebkitTextStroke: "1.5px rgba(17,17,17,.11)", textTransform: "uppercase", transform: "translateX(calc(-4vw + var(--p,0)*-30vw))", pointerEvents: "none" }}>FLOOR × PRODUCT × AI × FLOOR</div>
           <div style={{ position: "relative", zIndex: 1, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 18, marginTop: "6vh" }}>
             {[
-              { tag: "A — PRODUCT", title: "SPEC & SHIP", body: <>요구사항 정의 · IA · User Flow<br />CMS·예약 시스템 화면 기획<br />일정·이슈·우선순위 오너십</> },
-              { tag: "B — AI / AUTOMATION", title: "BUILD WITH AI", body: <>n8n — 회의록·OCR·트렌드 자동화<br />Claude Code · ChatGPT · 바이브코딩<br />기획 → 구현 검증 사이클 운용</> },
-              { tag: "C — FLOOR", title: "12Y OPERATIONS", body: <>매장 운영·손익 책임 12년<br />현장 감각으로 요구사항 검증<br />사람을 움직이는 리딩</> },
+              { tag: "A — PRODUCT", title: "SPEC & SHIP", body: <>현행 분석 · 요구사항 정의<br />IA · 화면 · 정책 · 예외 흐름<br />일정 · 우선순위 · QA · 오픈</> },
+              { tag: "B — AI / AUTOMATION", title: "BUILD WITH AI", body: <>Claude Code · Codex · ChatGPT<br />n8n · OCR · 정보수집 자동화<br />기획 → 구현 → QA 검증</> },
+              { tag: "C — FLOOR", title: "12Y OPERATIONS", body: <>고객 · 직원 · 매장 운영 12년<br />현장 감각으로 요구사항 검증<br />사용자와 운영자 관점의 균형</> },
             ].map((s, i) => (
               <div key={i} style={{ borderRadius: 18, padding: "4vh 2vw", minHeight: "34vh", display: "flex", flexDirection: "column", background: "linear-gradient(150deg, rgba(255,255,255,.42), rgba(255,255,255,.12) 55%, rgba(255,255,255,.26))", backdropFilter: "blur(9px) saturate(1.1)", WebkitBackdropFilter: "blur(9px) saturate(1.1)", border: "1px solid rgba(255,255,255,.7)", boxShadow: "0 24px 50px rgba(17,17,17,.10), inset 0 1px 0 rgba(255,255,255,.8)" }}>
                 <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".18em", color: "#111", background: ACC, alignSelf: "flex-start", padding: "4px 9px" }}>{s.tag}</div>
@@ -1476,14 +1501,15 @@ const Portfolio = () => {
           </div>
           <div style={{ marginTop: "2vh", borderBottom: "1px solid rgba(17,17,17,.18)" }}>
             {[
-              { yr: "2024.11", name: "SW사업 수주 제안전략 수립 실무", meta: "한국소프트웨어산업협회" },
-              { yr: "2024.10", name: "인공지능 서비스기획 실무", meta: "한국소프트웨어산업협회" },
+              { yr: "2024.11", name: "SW사업 수주를 위한 제안전략 수립 실무과정", meta: "한국소프트웨어산업협회" },
+              { yr: "2024.10", name: "인공지능서비스기획 실무과정", meta: "한국소프트웨어산업협회" },
               { yr: "2024.09", name: "웹디자인개발기능사", meta: "한국산업인력공단" },
-              { yr: "2024.09", name: "애자일 소프트웨어 개발방법론", meta: "한국소프트웨어산업협회" },
-              { yr: "2022", name: "반응형 웹디자인 & 웹퍼블리셔", meta: "부산IT교육센터" },
-              { yr: "2018", name: "서비스 디자인 청사진 — 최우수상", meta: "경성대 우수과제공모전" },
+              { yr: "2024.09", name: "애자일 소프트웨어 개발방법론 과정", meta: "한국소프트웨어산업협회" },
+              { yr: "2022", name: "(스마트혼합)반응형웹디자인&웹퍼블리셔(A)", meta: "부산IT교육센터" },
+              { yr: "2018", name: "서비스 디자인 청사진 — 최우수상", meta: "경성대학교 우수과제공모전" },
+              { yr: "2013", name: "청소년 멘토링 — 최우수 자원봉사자상", meta: "반여종합사회복지관" },
               { yr: "2011–19", name: "경성대학교 경영학과", meta: "편입 / 졸업" },
-              { yr: "2011", name: "KT&G 마케팅 캠프 — 팀워크상", meta: "롯데 에비뉴몰 전략 공모전" },
+              { yr: "2011", name: "KT&G 전국 마케팅캠프 — 팀워크상", meta: "롯데 에비뉴몰 활성화 전략 공모전" },
             ].map((c, i) => (
               <div key={i} className="arc-row cred-row" style={{ display: "flex", alignItems: "baseline", gap: "2.5vw", padding: "1.8vh 0", borderTop: "1px solid rgba(17,17,17,.18)" }}>
                 <span style={{ fontFamily: MONO, fontSize: 11, color: "#999", width: "9ch", flex: "none" }}>{c.yr}</span>
@@ -1499,13 +1525,13 @@ const Portfolio = () => {
           <div style={{ position: "absolute", inset: 0, pointerEvents: "none", backgroundImage: "linear-gradient(rgba(244,243,240,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(244,243,240,.055) 1px,transparent 1px)", backgroundSize: "72px 72px" }} />
           <Sparks />
           <div style={{ display: "flex", justifyContent: "space-between", ...label, color: "#777", padding: "26px 3.5vw", position: "relative", zIndex: 2 }}>
-            <span data-scramble>07 — CONTACT</span><span>BUSAN · OPEN TO BUILD</span>
+            <span data-scramble>07 — CONTACT</span><span>BUSAN · OPEN TO WORK</span>
           </div>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 3.5vw", position: "relative", zIndex: 2 }}>
             <div style={{ fontFamily: ANTON, fontSize: "clamp(60px,11vw,190px)", lineHeight: 0.95, textTransform: "uppercase", color: "#f4f3f0" }}>
-              LET'S BUILD<br />
+              LET'S MAKE<br />
               <span style={{ position: "relative", display: "inline-block", color: ACC }}>
-                SOMETHING.
+                WORKFLOWS WORK.
                 <span style={{ position: "absolute", left: 0, bottom: -12, height: 9, width: "100%", background: "#f4f3f0", transform: "scaleX(clamp(0, calc(var(--p,0)*4 - 1), 1))", transformOrigin: "left" }} />
               </span>
             </div>
@@ -1524,8 +1550,8 @@ const Portfolio = () => {
             </div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12, fontFamily: MONO, fontSize: 10, letterSpacing: ".16em", color: "#4d4d4d", borderTop: "1px solid #1e1e1e", padding: "3vh 3.5vw", position: "relative", zIndex: 2 }}>
-            <span>© 2026 YANG SOONMIN — 12Y FLOOR · 3Y PRODUCT · 10+ BUILDS</span>
-            <span>MADE WITH METHOD, NOT EXCUSES</span>
+            <span>© 2026 YANG SOONMIN — 12Y FLOOR · 3Y PRODUCT</span>
+            <span>WORKFLOWS THAT WORK</span>
           </div>
         </section>
       </div>
@@ -1533,11 +1559,11 @@ const Portfolio = () => {
       {/* 인트로 오버레이 */}
       <div data-intro style={{ position: "fixed", inset: 0, zIndex: 150, background: "#0a0a0a", color: "#f4f3f0", display: "flex", flexDirection: "column", padding: "26px 3.5vw 3.5vh", transform: "translate3d(0,0,0)", transition: "transform .78s cubic-bezier(.76,0,.24,1)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", ...label, color: "#777" }}>
-          <span>YANG SOONMIN — PORTFOLIO</span><span>LOADING</span>
+          <span>YANG SOONMIN — PORTFOLIO</span><span data-intro-status>ANALYZING WORKFLOWS</span>
         </div>
         <div style={{ marginTop: "auto", display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "4vw", marginBottom: "4vh" }}>
           <div style={{ fontFamily: ANTON, fontSize: "clamp(80px,15vw,240px)", lineHeight: 0.85 }}><span data-intro-num>0</span><span style={{ color: ACC }}>%</span></div>
-          <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#666", paddingBottom: "2vh", textAlign: "right", lineHeight: 1.9 }}>12 YEARS — 3 YEARS — 10+ BUILDS<br />BUSAN · PM/PO</div>
+          <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".2em", color: "#666", paddingBottom: "2vh", textAlign: "right", lineHeight: 1.9 }}>12 YEARS IN OPERATIONS<br />3 YEARS IN PRODUCT<br />BUSAN · PM/PO</div>
         </div>
         <div style={{ height: 6, background: "#1c1c1c", position: "relative" }}><span style={{ position: "absolute", inset: 0, background: ACC, transform: "scaleX(var(--ip,0))", transformOrigin: "left" }} /></div>
         {/* 커튼 가장자리 유리 스캔라인 — 걷힐 때 화면을 한 번 쓸고 지나감 (피벗 씬과 같은 문법) */}
@@ -1547,7 +1573,7 @@ const Portfolio = () => {
       {/* ── 우측 눈금자 내비 — 섹션 인덱스. difference 블렌드로 흑백 씬(전환 중간 포함) 자동 반전,
           라임 활성 도트는 색 왜곡을 피해 비블렌드 별도 레이어. 인트로(z150)·챗봇(z195) 아래 ── */}
       <nav data-nav-rail aria-label="섹션 이동" style={{ position: "fixed", right: 0, top: "50%", transform: "translateY(-50%)", zIndex: 120, mixBlendMode: "difference", display: "flex", flexDirection: "column" }}>
-        {["00 — HERO", "01 — THE PIVOT", "02 — BUILDS", "03 — THE OPERATOR", "04 — CAREER", "05 — CASES", "06 — HOW I WORK", "07 — CONTACT"].map((n, i) => (
+        {["00 — HERO", "01 — THE PIVOT", "02 — PRODUCT LAB", "03 — THE OPERATOR", "04 — CAREER", "05 — CASES", "06 — HOW I WORK", "07 — CONTACT"].map((n, i) => (
           <button
             key={n}
             data-nav-i
@@ -1571,7 +1597,7 @@ const Portfolio = () => {
 
       {/* AI 챗봇 */}
       <button onClick={() => setChatOpen((o) => !o)} data-hover data-glass-track className="glass-d glassy liquid-btn" style={{ position: "fixed", bottom: 24, right: 24, zIndex: 190, fontFamily: MONO, fontSize: 11, letterSpacing: ".18em", color: "#f4f3f0", padding: "14px 22px", cursor: "pointer", borderRadius: 11 }}>
-        <span>{chatOpen ? "CLOSE ✕" : "ASK AI ▮"}</span>
+        <span>{chatOpen ? "CLOSE ✕" : "ASK ABOUT MY WORK ▮"}</span>
       </button>
       <Chatbot isOpen={chatOpen} onClose={() => setChatOpen(false)} />
     </div>
