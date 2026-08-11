@@ -1,0 +1,611 @@
+{
+  "passed": 121,
+  "failed": 0,
+  "results": [
+    {
+      "id": "S01",
+      "ok": true,
+      "msg": "App hero/manifesto has: I MAKE WORKFLOWS "
+    },
+    {
+      "id": "S01",
+      "ok": true,
+      "msg": "App hero/manifesto has: WORK."
+    },
+    {
+      "id": "S01",
+      "ok": true,
+      "msg": "App hero/manifesto has: 현장의 업무를 실행 가능한 서비스로 만드는 PM·PO"
+    },
+    {
+      "id": "S01",
+      "ok": true,
+      "msg": "App hero/manifesto has: 사용자와 운영자, 개발팀 사이의 요구를"
+    },
+    {
+      "id": "S02",
+      "ok": true,
+      "msg": "App loader has: ANALYZING WORKFLOWS"
+    },
+    {
+      "id": "S02",
+      "ok": true,
+      "msg": "App loader has: STRUCTURING REQUIREMENTS"
+    },
+    {
+      "id": "S02",
+      "ok": true,
+      "msg": "App loader has: VALIDATING THE FLOW"
+    },
+    {
+      "id": "S02",
+      "ok": true,
+      "msg": "App loader has: READY"
+    },
+    {
+      "id": "S02",
+      "ok": true,
+      "msg": "App loader has: 12 YEARS IN OPERATIONS"
+    },
+    {
+      "id": "S02",
+      "ok": true,
+      "msg": "App loader has: 3 YEARS IN PRODUCT"
+    },
+    {
+      "id": "S03",
+      "ok": true,
+      "msg": "App pivot has: STORE OPERATIONS"
+    },
+    {
+      "id": "S03",
+      "ok": true,
+      "msg": "App pivot has: 고객과 직원, 운영을 함께 배웠다"
+    },
+    {
+      "id": "S03",
+      "ok": true,
+      "msg": "App pivot has: HANDY PO / PROJECT LEAD"
+    },
+    {
+      "id": "S03",
+      "ok": true,
+      "msg": "App pivot has: 요구사항부터 오픈까지"
+    },
+    {
+      "id": "S04",
+      "ok": true,
+      "msg": "App marquee has: REQUIREMENTS TO RELEASE"
+    },
+    {
+      "id": "S04",
+      "ok": true,
+      "msg": "App marquee has: CLARITY OVER ASSUMPTIONS"
+    },
+    {
+      "id": "S04",
+      "ok": true,
+      "msg": "App marquee has: BUILD · VALIDATE · IMPROVE"
+    },
+    {
+      "id": "S04",
+      "ok": true,
+      "msg": "App marquee has: WORKFLOWS THAT WORK"
+    },
+    {
+      "id": "S05",
+      "ok": true,
+      "msg": "App product lab has: 02 — PRODUCT LAB"
+    },
+    {
+      "id": "S05",
+      "ok": true,
+      "msg": "App product lab has: SELECTED PRODUCT EXPERIMENTS"
+    },
+    {
+      "id": "S05",
+      "ok": true,
+      "msg": "App product lab has: BUILD TO UNDERSTAND"
+    },
+    {
+      "id": "S05",
+      "ok": true,
+      "msg": "App product lab has: 개발자를 대체하려는 것이 아니라"
+    },
+    {
+      "id": "S05",
+      "ok": true,
+      "msg": "App product lab has: name: \"BOOGION\""
+    },
+    {
+      "id": "S05",
+      "ok": true,
+      "msg": "App product lab has: name: \"MOUNTAINON\""
+    },
+    {
+      "id": "S05",
+      "ok": true,
+      "msg": "App product lab has: name: \"BOOKITDA\""
+    },
+    {
+      "id": "S05",
+      "ok": true,
+      "msg": "App product lab has: name: \"CASETALK\""
+    },
+    {
+      "id": "S05",
+      "ok": true,
+      "msg": "App product lab has: name: \"AI AUTOMATION\""
+    },
+    {
+      "id": "S05",
+      "ok": true,
+      "msg": "App product lab has: name: \"AI INSIGHT OS\""
+    },
+    {
+      "id": "S05",
+      "ok": true,
+      "msg": "App product lab has: name: \"FLOWON\""
+    },
+    {
+      "id": "S05b",
+      "ok": true,
+      "msg": "App product lab removed clean of: name: \"WEBOPS BUILDER\""
+    },
+    {
+      "id": "S05b",
+      "ok": true,
+      "msg": "App product lab removed clean of: name: \"CONTENT PLATFORM"
+    },
+    {
+      "id": "S05b",
+      "ok": true,
+      "msg": "App product lab removed clean of: CITIZEN'S TURN"
+    },
+    {
+      "id": "S05b",
+      "ok": true,
+      "msg": "App product lab removed clean of: TOP CONTRIBUTOR"
+    },
+    {
+      "id": "S05b",
+      "ok": true,
+      "msg": "App product lab removed clean of: STORE-READY"
+    },
+    {
+      "id": "S05b",
+      "ok": true,
+      "msg": "App product lab removed clean of: 3D WEB · SHIPPED"
+    },
+    {
+      "id": "S06",
+      "ok": true,
+      "msg": "App operator has: 현장의 업무를 실행 가능한 서비스로 만든다"
+    },
+    {
+      "id": "S06",
+      "ok": true,
+      "msg": "App operator has: 요구사항부터 정책·QA·오픈까지 연결한다"
+    },
+    {
+      "id": "S07",
+      "ok": true,
+      "msg": "App career has: HANDY — PO · PROJECT LEAD"
+    },
+    {
+      "id": "S07",
+      "ok": true,
+      "msg": "App career has: DEV TEAM 1 · DIRECTOR"
+    },
+    {
+      "id": "S07",
+      "ok": true,
+      "msg": "App career has: ARIMOA — PM / PL"
+    },
+    {
+      "id": "S07",
+      "ok": true,
+      "msg": "App career has: DOMINO'S — STORE OPERATIONS"
+    },
+    {
+      "id": "S07",
+      "ok": true,
+      "msg": "App career has: 통합형 홈페이지 관리 CMS"
+    },
+    {
+      "id": "S07",
+      "ok": true,
+      "msg": "App career has: 아르피나 온라인 수영장"
+    },
+    {
+      "id": "S07",
+      "ok": true,
+      "msg": "App career has: 동아대학교 교내 홈페이지 고도화"
+    },
+    {
+      "id": "S08",
+      "ok": true,
+      "msg": "App cases has: 새벽 줄서기를 온라인 신청으로"
+    },
+    {
+      "id": "S08",
+      "ok": true,
+      "msg": "App cases has: 약 200개 사이트의 흐름을 연결하다"
+    },
+    {
+      "id": "S08",
+      "ok": true,
+      "msg": "App cases has: 사람의 기억보다 공유되는 업무 구조"
+    },
+    {
+      "id": "S08",
+      "ok": true,
+      "msg": "App cases has: 공통 제품과 고객별 요구를 하나의 구조로"
+    },
+    {
+      "id": "S08",
+      "ok": true,
+      "msg": "App cases has: 재학생 의견이 실제 개편방향이 되다"
+    },
+    {
+      "id": "S08",
+      "ok": true,
+      "msg": "App cases has: 문서 보조에서 구현과 자동화까지"
+    },
+    {
+      "id": "S08",
+      "ok": true,
+      "msg": "App cases has: whiteSpace: \"pre-line\""
+    },
+    {
+      "id": "S09",
+      "ok": true,
+      "msg": "App how/credentials has: 현행 분석 · 요구사항 정의"
+    },
+    {
+      "id": "S09",
+      "ok": true,
+      "msg": "App how/credentials has: Claude Code · Codex · ChatGPT"
+    },
+    {
+      "id": "S09",
+      "ok": true,
+      "msg": "App how/credentials has: 사용자와 운영자 관점의 균형"
+    },
+    {
+      "id": "S09",
+      "ok": true,
+      "msg": "App how/credentials has: 청소년 멘토링 — 최우수 자원봉사자상"
+    },
+    {
+      "id": "S09",
+      "ok": true,
+      "msg": "App how/credentials has: SW사업 수주를 위한 제안전략 수립 실무과정"
+    },
+    {
+      "id": "S09",
+      "ok": true,
+      "msg": "App how/credentials has: (스마트혼합)반응형웹디자인&웹퍼블리셔(A)"
+    },
+    {
+      "id": "S10",
+      "ok": true,
+      "msg": "App contact/chat FAB has: LET'S MAKE"
+    },
+    {
+      "id": "S10",
+      "ok": true,
+      "msg": "App contact/chat FAB has: WORKFLOWS WORK."
+    },
+    {
+      "id": "S10",
+      "ok": true,
+      "msg": "App contact/chat FAB has: ASK ABOUT MY WORK"
+    },
+    {
+      "id": "S11",
+      "ok": true,
+      "msg": "index.html meta has: 양순민 | 서비스 기획자·PM·PO 포트폴리오"
+    },
+    {
+      "id": "S11",
+      "ok": true,
+      "msg": "index.html meta has: 현장의 업무와 고객 요구를 실행 가능한 기능·정책·서비스로 만드는"
+    },
+    {
+      "id": "S11",
+      "ok": true,
+      "msg": "index.html meta has: og:title"
+    },
+    {
+      "id": "S11",
+      "ok": true,
+      "msg": "index.html meta has: og:description"
+    },
+    {
+      "id": "S12",
+      "ok": true,
+      "msg": "App forbidden copy clean of: NOW — I BUILD"
+    },
+    {
+      "id": "S12",
+      "ok": true,
+      "msg": "App forbidden copy clean of: NO EXCUSES, ONLY METHODS"
+    },
+    {
+      "id": "S12",
+      "ok": true,
+      "msg": "App forbidden copy clean of: 10+ BUILDS"
+    },
+    {
+      "id": "S12",
+      "ok": true,
+      "msg": "App forbidden copy clean of: 바이브코딩"
+    },
+    {
+      "id": "S12",
+      "ok": true,
+      "msg": "App forbidden copy clean of: 안 되는 건 없다"
+    },
+    {
+      "id": "S12",
+      "ok": true,
+      "msg": "App forbidden copy clean of: 혼자 60여 개 사이트"
+    },
+    {
+      "id": "S12",
+      "ok": true,
+      "msg": "App forbidden copy clean of: 연기 0건"
+    },
+    {
+      "id": "S12",
+      "ok": true,
+      "msg": "App forbidden copy clean of: 70+ SITES"
+    },
+    {
+      "id": "S12",
+      "ok": true,
+      "msg": "App forbidden copy clean of: 3년 만에 프로덕트를 책임지는"
+    },
+    {
+      "id": "S12",
+      "ok": true,
+      "msg": "App forbidden copy clean of: 사람을 움직이는 리딩"
+    },
+    {
+      "id": "S12",
+      "ok": true,
+      "msg": "App forbidden copy clean of: 결과로 증명한다"
+    },
+    {
+      "id": "S12",
+      "ok": true,
+      "msg": "App forbidden copy clean of: ASK AI ▮"
+    },
+    {
+      "id": "S12",
+      "ok": true,
+      "msg": "App forbidden copy clean of: MADE WITH METHOD, NOT EXCUSES"
+    },
+    {
+      "id": "S12",
+      "ok": true,
+      "msg": "App forbidden copy clean of: LET'S BUILD"
+    },
+    {
+      "id": "S13",
+      "ok": true,
+      "msg": "html forbidden clean of: 이제는 직접 만든다"
+    },
+    {
+      "id": "S13",
+      "ok": true,
+      "msg": "html forbidden clean of: 양순민 — Portfolio"
+    },
+    {
+      "id": "S14",
+      "ok": true,
+      "msg": "BUILDS count === 7"
+    },
+    {
+      "id": "S15",
+      "ok": true,
+      "msg": "2013 credential present"
+    },
+    {
+      "id": "S16",
+      "ok": true,
+      "msg": "No resume download"
+    },
+    {
+      "id": "B02",
+      "ok": true,
+      "msg": "title: 양순민 | 서비스 기획자·PM·PO 포트폴리오"
+    },
+    {
+      "id": "B03",
+      "ok": true,
+      "msg": "DOM has: I MAKE WORKFLOWS"
+    },
+    {
+      "id": "B03",
+      "ok": true,
+      "msg": "DOM has: PRODUCT LAB"
+    },
+    {
+      "id": "B03",
+      "ok": true,
+      "msg": "DOM has: ASK ABOUT MY WORK"
+    },
+    {
+      "id": "B03",
+      "ok": true,
+      "msg": "DOM has: 현장의 업무를 실행 가능한 서비스로"
+    },
+    {
+      "id": "B03",
+      "ok": true,
+      "msg": "DOM has: BOOGION"
+    },
+    {
+      "id": "B03",
+      "ok": true,
+      "msg": "DOM has: FLOWON"
+    },
+    {
+      "id": "B03",
+      "ok": true,
+      "msg": "DOM has: STORE OPERATIONS"
+    },
+    {
+      "id": "B03",
+      "ok": true,
+      "msg": "DOM has: 아르피나"
+    },
+    {
+      "id": "B03",
+      "ok": true,
+      "msg": "DOM has: 동아대학교"
+    },
+    {
+      "id": "B03",
+      "ok": true,
+      "msg": "DOM has: 청소년 멘토링"
+    },
+    {
+      "id": "B03",
+      "ok": true,
+      "msg": "DOM has: LET'S MAKE"
+    },
+    {
+      "id": "B03",
+      "ok": true,
+      "msg": "DOM has: WORKFLOWS WORK"
+    },
+    {
+      "id": "B04",
+      "ok": true,
+      "msg": "DOM clean: NOW — I BUILD"
+    },
+    {
+      "id": "B04",
+      "ok": true,
+      "msg": "DOM clean: NO EXCUSES, ONLY METHODS"
+    },
+    {
+      "id": "B04",
+      "ok": true,
+      "msg": "DOM clean: 10+ BUILDS"
+    },
+    {
+      "id": "B04",
+      "ok": true,
+      "msg": "DOM clean: TOP CONTRIBUTOR"
+    },
+    {
+      "id": "B04",
+      "ok": true,
+      "msg": "DOM clean: WEBOPS BUILDER"
+    },
+    {
+      "id": "B04",
+      "ok": true,
+      "msg": "DOM clean: CITIZEN'S TURN"
+    },
+    {
+      "id": "B04",
+      "ok": true,
+      "msg": "DOM clean: 바이브코딩"
+    },
+    {
+      "id": "B04",
+      "ok": true,
+      "msg": "DOM clean: 안 되는 건 없다"
+    },
+    {
+      "id": "B04",
+      "ok": true,
+      "msg": "DOM clean: 혼자 60여 개"
+    },
+    {
+      "id": "B04",
+      "ok": true,
+      "msg": "DOM clean: 연기 0건"
+    },
+    {
+      "id": "B04",
+      "ok": true,
+      "msg": "DOM clean: 70+ SITES"
+    },
+    {
+      "id": "B04",
+      "ok": true,
+      "msg": "DOM clean: ASK AI ▮"
+    },
+    {
+      "id": "B05",
+      "ok": true,
+      "msg": "Nav has PRODUCT LAB"
+    },
+    {
+      "id": "B05b",
+      "ok": true,
+      "msg": "Nav not stuck on BUILDS"
+    },
+    {
+      "id": "B06",
+      "ok": true,
+      "msg": "Nav jump to PRODUCT LAB works"
+    },
+    {
+      "id": "B07",
+      "ok": true,
+      "msg": "Build rows === 7 (7)"
+    },
+    {
+      "id": "B08",
+      "ok": true,
+      "msg": "Cases 01–02 present"
+    },
+    {
+      "id": "B09",
+      "ok": true,
+      "msg": "2013 mentoring credential visible"
+    },
+    {
+      "id": "B10",
+      "ok": true,
+      "msg": "Contact headline + email"
+    },
+    {
+      "id": "B11",
+      "ok": true,
+      "msg": "FAB renamed"
+    },
+    {
+      "id": "B12",
+      "ok": true,
+      "msg": "Chat panel opens"
+    },
+    {
+      "id": "B13",
+      "ok": true,
+      "msg": "Chat responded without affirming Handy Claude"
+    },
+    {
+      "id": "B14",
+      "ok": true,
+      "msg": "Mobile has hero workflows copy"
+    },
+    {
+      "id": "B15",
+      "ok": true,
+      "msg": "Mobile clean of old hero"
+    },
+    {
+      "id": "B16",
+      "ok": true,
+      "msg": "No pageerrors on reload"
+    }
+  ]
+}

@@ -8,3 +8,6 @@ dist
 
 # 개인 PII 문서 — 로컬 보관용, 저장소에 올리지 않음
 docs/이력서_*.md
+
+# context-governor 로컬 세션 상태 (기기별 상태 — 커밋 금지)
+**/.claude/context-governor/
