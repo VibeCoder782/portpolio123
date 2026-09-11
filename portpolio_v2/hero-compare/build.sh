@@ -21,6 +21,6 @@ gen sans  '양순민 — 흩어진 요구와 일을 정리해' 'B · 고딕판 (
 gen serif '히어로 비교 — 명조판' 'A · 명조판' '<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Noto+Serif+KR:wght@300;500;700&display=swap" rel="stylesheet">' serif.html
 # 생성 파일과 상세 페이지의 css/js 링크에 ?v= 버전 부여 (템플릿은 그대로)
 for f in sans.html serif.html case-*.html; do
-  sed -i '' -E "s#(shared/(compare|case|gallery|gallery-paper|lower|cms-panel)\.(css|js))(\?v=[0-9]+)?#\1?v=$V#g" "$f"
+  sed -i '' -E "s#(shared/(compare|case|gallery|gallery-paper|lower|cms-panel|chat)\.(css|js))(\?v=[0-9]+)?#\1?v=$V#g" "$f"
 done
 echo "assets versioned v=$V"
