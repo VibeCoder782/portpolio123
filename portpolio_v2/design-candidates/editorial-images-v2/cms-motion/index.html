@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>04 SYSTEM · 움직임 시안</title>
+  <link rel="stylesheet" href="motion.css?v=2">
+  <script src="motion.js?v=2" defer></script>
+</head>
+<body>
+  <header class="review-header">
+    <a href="../../../hero-compare/sans.html#work">YANG SOONMIN <span>포트폴리오로</span> ↗</a>
+    <span class="edition">MOTION STUDY / 04</span>
+  </header>
+  <main>
+    <div class="intro">
+      <div><p class="eyebrow">04 / 통합 CMS</p><h1>이미지 안의 작은 움직임.</h1></div>
+      <div class="controls" aria-label="이미지 비교">
+        <button id="motion-toggle" type="button" aria-pressed="false" disabled>움직임 재생</button>
+        <button id="original-toggle" type="button" aria-pressed="false" disabled>원본 이미지</button>
+      </div>
+    </div>
+    <figure>
+      <div id="artwork" class="artwork" data-running="false" data-original="false">
+        <svg class="composition" viewBox="0 0 1536 1024" role="img" aria-labelledby="art-title art-description">
+          <title id="art-title">SYSTEM — 공통 기능과 고객별 기능을 연결한 CMS 개념 그래픽</title>
+          <desc id="art-description">고정된 큰 제목과 관리자 화면 위에 편집 화면 두 개와 예약 달력이 겹쳐 있습니다. 세 패널과 파란 연결선만 조금씩 움직입니다. 실제 서비스 캡처가 아닌 설명용 그래픽입니다.</desc>
+          <defs>
+            <clipPath id="editor-clip" clipPathUnits="userSpaceOnUse">
+              <path d="M946 196 L1417 217 Q1429 217 1429 231 L1429 529 Q1429 540 1417 539 L942 508 Q931 507 931 495 L932 210 Q932 196 946 196Z"/>
+            </clipPath>
+            <clipPath id="form-clip" clipPathUnits="userSpaceOnUse">
+              <path d="M847 560 L1199 574 Q1211 574 1211 587 L1211 849 Q1211 861 1200 859 L846 824 Q835 823 835 812 L835 572 Q835 560 847 560Z"/>
+            </clipPath>
+            <clipPath id="calendar-clip" clipPathUnits="userSpaceOnUse">
+              <path d="M1245 551 L1418 558 Q1429 558 1429 572 L1429 815 Q1429 825 1419 824 L1244 804 Q1234 803 1234 791 L1234 563 Q1234 551 1245 551Z"/>
+            </clipPath>
+            <filter id="panel-shadow" x="-30%" y="-30%" width="180%" height="180%" color-interpolation-filters="sRGB">
+              <feDropShadow dx="8" dy="19" stdDeviation="15" flood-color="#252727" flood-opacity=".17"/>
+            </filter>
+            <filter id="small-shadow" x="-40%" y="-30%" width="190%" height="180%" color-interpolation-filters="sRGB">
+              <feDropShadow dx="5" dy="15" stdDeviation="12" flood-color="#252727" flood-opacity=".15"/>
+            </filter>
+          </defs>
+          <image href="cms-background-v1.png" width="1536" height="1024"/>
+          <g class="connections" fill="none" stroke="#2d59c8" stroke-width="1.5">
+            <path d="M386 448 H435 Q460 448 460 420 V283 Q460 258 484 258 H674"/>
+            <path d="M1407 491 H1458 Q1481 491 1481 514 V587"/>
+            <g fill="#2d59c8" stroke="none"><circle cx="674" cy="258" r="5"/><circle cx="1481" cy="587" r="5"/></g>
+            <path class="signal signal-common" pathLength="100" d="M386 448 H435 Q460 448 460 420 V283 Q460 258 484 258 H674"/>
+            <path class="signal signal-custom" pathLength="100" d="M1407 491 H1458 Q1481 491 1481 514 V587"/>
+          </g>
+          <g class="panel panel-editor">
+            <g filter="url(#panel-shadow)"><image href="../cms-system.png" width="1536" height="1024" clip-path="url(#editor-clip)"/></g>
+          </g>
+          <g class="panel panel-form">
+            <g filter="url(#panel-shadow)"><image href="../cms-system.png" width="1536" height="1024" clip-path="url(#form-clip)"/></g>
+          </g>
+          <g class="panel panel-calendar">
+            <g filter="url(#small-shadow)"><image href="../cms-system.png" width="1536" height="1024" clip-path="url(#calendar-clip)"/></g>
+          </g>
+        </svg>
+        <img class="original" src="../cms-system.png" width="1536" height="1024" alt="움직임을 넣기 전 SYSTEM 원본 이미지" hidden>
+      </div>
+      <figcaption><span>설명용 그래픽 · 실제 서비스 화면 아님</span><span id="status" role="status" aria-live="polite">이미지를 준비하고 있습니다.</span></figcaption>
+    </figure>
+    <p class="review-note">제목과 배경은 고정하고, 세 개의 화면과 연결선에만 움직임을 더했습니다.</p>
+    <noscript><p>움직임 비교 기능을 사용하려면 JavaScript를 켜 주세요.</p></noscript>
+  </main>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko" data-variant="sans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>기획한 흐름을, 직접 구현하고 검증했습니다. · 양순민</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="shared/compare.css?v=1789043680">
+<link rel="stylesheet" href="shared/case.css?v=1789043680">
+</head>
+<body class="portfolio-detail">
+<header class="nav">
+  <a class="nav__name" href="sans.html">양순민<span class="latin">Yang Soonmin</span></a>
+  <nav class="nav__links"><a class="nav__back" href="sans.html#feature">← Work</a><a href="sans.html#about">About</a><a href="sans.html#contact">Contact</a></nav>
+</header>
+
+<main class="case">
+<section class="chead" id="top">
+    <p class="eyebrow rv"><em class="latin">Case 06</em> 이음 + WebOps Builder · 개인 프로젝트 · 2025.08 –</p>
+    <h1 class="chead__title chead__title--long rv"><span class="light">기획한 흐름을,</span><span class="bold">직접 구현하고 검증했습니다.</span></h1>
+    <p class="chead__lede rv">팀과 설계했던 사용자·운영자 흐름을, 개인 프로젝트에서는 양쪽 화면 모두 직접 구현했습니다. 이음은 저장한 것을 필요한 시간과 장소에서 다시 떠올리게 하는 앱이고, 그 앱의 문의·신고를 처리하는 콘솔은 직접 만든 WebOps Builder입니다. 두 화면은 다른 제품이지만 한 사람의 같은 판단에서 나왔습니다.</p>
+    <dl class="facts rv">
+      <div><dt>기간</dt><dd>2025.08 – 진행 중</dd></div>
+      <div><dt>팀</dt><dd>혼자 — AI 코딩 도구와 함께</dd></div>
+      <div><dt>내 역할</dt><dd>기획 · 화면 · 구현 · 검증 — 사용자 앱과 운영 콘솔 양쪽</dd></div>
+      <div><dt>범위</dt><dd>이음 — 저장 · 분류 · 백업 · 리마인드 앱(Flutter, Android 우선) / WebOps Builder — 이음 문의·신고를 처리하는 개인 운영 콘솔</dd></div>
+      <div><dt>지금</dt><dd>이음 — MVP 구현 · 릴리스 빌드 검증 · 스토어 출시 전 / WebOps Builder — 비공개 개인 운영 도구</dd></div>
+    </dl>
+  </section>
+<section class="chapter" aria-labelledby="chapter-1"><header class="chapter__head"><p class="eyebrow"><em class="latin">01</em></p><h2 id="chapter-1">양쪽 화면이 다 필요했다</h2></header><div class="chapter__content"><div class="chapter__copy">
+      <p>회사에서는 사용자 흐름과 운영자 흐름을 나눠 설계하고, 구현은 팀이 맡았습니다. 개인 프로젝트에서는 둘 다 제 몫입니다. 이음은 저장한 것을 필요한 시간과 장소에서 다시 떠올리게 하는 앱이고, 앱을 내놓으면 곧바로 문의와 신고가 들어옵니다. <strong>사용자 화면만 만들고 끝낼 수는 없었습니다.</strong></p>
+      <p>그래서 두 화면을 한 프로젝트로 봤습니다. 사용자가 쓰는 앱과, 그 앱을 운영하는 콘솔.</p>
+    </div></div></section>
+<section class="chapter" aria-labelledby="chapter-2"><header class="chapter__head"><p class="eyebrow"><em class="latin">02</em></p><h2 id="chapter-2">흐름을 다섯 단계로</h2></header><div class="chapter__content"><div class="chapter__copy">
+      <p>저장은 쉽고, 다시 꺼내는 건 어렵습니다. 그래서 <strong>저장 → 분류 → 백업 → 리마인드 → 완료</strong>를 한 줄로 두고, 각 단계에서 사용자가 해야 할 입력을 줄였습니다. 외부 공유로 바로 저장하고, 시간은 템플릿으로, 장소는 지오펜스로 다시 알립니다.</p>
+      <p>홈 화면의 “함께 만드는 이음”은 사용자가 보낸 의견이 반영되는 과정을 보여주는 자리입니다. <strong>의견을 받는 화면이 있으면, 처리하는 화면도 있어야 합니다.</strong> 그 화면이 다음 장입니다.</p>
+    </div><div class="chapter__proof chapter__proof--flow"><figure class="phone" style="aspect-ratio: 597 / 1200"><img src="shared/assets/eum-home.png" alt="이음 앱 홈 화면"></figure>
+    <div class="flow">
+      <p class="eyebrow"><em class="latin">User</em> 이음 — 저장에서 완료까지 한 줄</p>
+      <ol class="flow__steps">
+        <li><span>01</span><span>저장<small>메모 · 링크 · 이미지 · 쇼핑리스트 — 외부 공유로 바로 저장</small></span></li>
+        <li><span>02</span><span>분류<small>기본 카테고리 + 사용자 카테고리 · 수신함 필터</small></span></li>
+        <li><span>03</span><span>백업<small>로컬 우선 저장 · 재로그인 시 복원</small></span></li>
+        <li><span>04</span><span>리마인드<small>시간(템플릿 · 직접 선택) · 장소(지오펜스) · 외출 모드</small></span></li>
+        <li><span>05</span><span>완료<small>떠올린 것을 처리하면 끝</small></span></li>
+      </ol>
+      <p class="flow__note"><b>·</b>홈의 “함께 만드는 이음” — 사용자가 보낸 의견이 반영되는 과정을 보여주는 자리입니다.</p>
+    </div></div></div></section>
+<section class="chapter" aria-labelledby="chapter-3"><header class="chapter__head"><p class="eyebrow"><em class="latin">03</em></p><h2 id="chapter-3">운영 화면을 직접 설계하다</h2></header><div class="chapter__content"><div class="chapter__copy">
+      <p>회사에서 CMS를 기획하며 공통 기능과 고객별 기능을 나눴던 경험을 바탕으로, 개인 앱을 위한 운영 콘솔을 새로 설계하고 AI와 함께 구현했습니다. <strong>회사의 소스를 옮긴 것이 아니라 경험을 옮긴 것</strong>입니다.</p>
+      <p>문의·신고 화면은 목록 · 원문 · 답변 · 상태 변경으로 구성했고, 작성자 식별정보는 콘솔에서 가립니다. 동작은 <strong>답변 보내기 · 상태 변경 · 확인</strong> 세 가지뿐이며, 각 동작이 무엇을 하는지 화면 위에 먼저 적어 두었습니다. 운영자가 저 혼자여도, 규칙은 화면에 있어야 한다고 봤습니다.</p>
+    </div><div class="chapter__proof"><p class="eyebrow"><em class="latin">Operator</em> 직접 만든 WebOps Builder — 이음 문의·신고 화면</p>
+    <figure class="cshot cshot--fit"><img src="shared/assets/webops-builder.png" alt="WebOps Builder — 이음 문의·신고 운영 화면 (문의 본문과 식별자는 가림)">
+      <span class="cshot__u" data-n="1" style="left:19.4%;top:52.8%;width:29%"></span>
+      <span class="cshot__u" data-n="2" style="left:20.4%;top:63.2%;width:24.6%"></span>
+      <span class="cshot__u" data-n="3" style="left:81.5%;top:82%;width:12%"></span>
+    </figure>
+    <p class="cshot-notes"><span><b>1</b>작성자 식별정보는 콘솔에서 가림</span><span><b>2</b>동작마다 무엇을 하는지 화면 위에 먼저 정의</span><span><b>3</b>답변 보내기 · 상태 변경 · 확인 — 세 동작뿐</span><span class="src">비공개 개인 운영 도구 · 문의 본문과 식별자는 이미지에서 가림 · 파란 밑줄은 포트폴리오 표시</span></p></div></div></section>
+<section class="result">
+    <p class="eyebrow rv"><em class="latin">Result</em> 결과와 배운 점</p>
+    <ol class="result__list rv">
+      <li><span>이음</span><div><strong>MVP 기능 구현 · 릴리스 빌드 검증.</strong><p>스토어 출시를 준비하고 있습니다.</p></div></li>
+      <li><span>WebOps Builder</span><div><strong>비공개 개인 운영 도구로 이음 문의·신고 관리에 사용.</strong><p>콘솔에는 다른 메뉴도 있지만, 이 사례는 실제로 쓰고 있는 문의·신고 화면만 다룹니다.</p></div></li>
+      <li><span>배운 것</span><div><strong>기획한 것을 직접 구현·검증하면, 개발팀과 나누는 말이 정확해진다.</strong><p>개발자를 대체하려는 것이 아니라, 기획 의도를 검증하고 더 정확하게 소통하기 위해 배우는 것입니다.</p></div></li>
+    </ol>
+    
+  </section>
+<section class="cnext" aria-label="사례 이동">
+    <a href="sans.html#row-eum"><p class="eyebrow"><em class="latin">Back</em> 메인으로</p><strong>프로젝트 목록 ←</strong></a>
+    <a class="cnext__next" href="case-arpina.html"><p class="eyebrow"><em class="latin">Case 01</em> 처음 사례로</p><strong>아르피나 →</strong></a>
+    <footer class="footer"><span>© 2026 Yang Soonmin</span><span>PM · 서비스기획</span></footer>
+  </section>
+</main>
+<script src="shared/case.js?v=1789043680"></script>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>양순민 — 흩어진 요구를 한 줄의 정책으로</title>
+<meta name="description" content="현장의 요구를 운영 가능한 정책으로 정리하고, 팀이 구현·검수·오픈까지 갈 수 있도록 이끄는 서비스기획자·PM 양순민의 포트폴리오 (비교용 시안).">
+<meta name="color-scheme" content="light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Noto+Serif+KR:wght@300;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="cursor" id="cursor" aria-hidden="true"><i class="cursor__dot"></i><i class="cursor__ring"></i></div>
+
+<header class="nav" id="nav">
+  <a class="nav__name" href="#top" data-hover>양순민<span class="nav__latin">Yang Soonmin</span></a>
+  <nav class="nav__links" aria-label="주요 섹션">
+    <a href="#work" data-hover>Work</a>
+    <a href="#about" data-hover>About</a>
+    <a href="#contact" data-hover>Contact</a>
+  </nav>
+</header>
+
+<main class="page" id="main">
+
+  <!-- ─────────────────────────────────────────────
+       01  OPENING SCENE — hero + 정렬 (한 장면, sticky)
+       ───────────────────────────────────────────── -->
+  <section class="scene" id="top" aria-label="소개">
+    <div class="scene__sticky">
+      <div class="stage" id="stage">
+
+        <div class="frags" id="frags" aria-hidden="true"></div>
+
+        <div class="hero" id="hero">
+          <p class="hero__eyebrow"><em class="latin">Yang Soonmin</em><span class="hero__eyebrow-sep"></span>서비스기획자 · PM</p>
+
+          <h1 class="hero__title">
+            <span class="hero__l1">흩어진 요구를</span>
+            <span class="hero__l2">한 줄의 정책으로.</span>
+          </h1>
+
+          <p class="hero__deck">현장의 요구가 부딪히는 자리에서 운영할 수 있는 정책을 쓰고, 팀이 구현·검수·오픈까지 갈 수 있는 구조를 만듭니다. 개인 프로젝트는 AI와 함께 직접 구현하고 검증합니다.</p>
+
+          <ul class="hero__facts">
+            <li><em class="latin">Store operations</em><strong>매장 운영 약 12년</strong><span>2009 – 2021 · 사용자와 운영자의 관점</span></li>
+            <li><em class="latin">Service planning</em><strong>IT 서비스기획 2년 9개월</strong><span>아리모아 · 핸디 · 2022 – 2025</span></li>
+            <li><em class="latin">Personal builds</em><strong>AI와 직접 구현·검증</strong><span>2025.08 — 앱 · 웹 · 업무자동화</span></li>
+          </ul>
+
+          <a class="hero__scroll" href="#work" data-hover><span class="hero__scroll-line"></span><span>스크롤 — 일하는 순서</span></a>
+        </div>
+
+        <div class="process" id="process">
+          <svg class="process__line" id="processLine" aria-hidden="true" preserveAspectRatio="none"><line id="processPath" x1="0" y1="0" x2="0" y2="0" pathLength="1"></line></svg>
+          <div class="process__head" id="processHead">
+            <p class="eyebrow"><em class="latin">How I work</em> 일하는 순서</p>
+            <h2>현장의 말은,<br>이 순서로 정책이 됩니다.</h2>
+            <p class="process__body">듣는 데서 시작해 정책과 화면으로 정리하고, 팀이 구현·검수해 오픈할 때까지 같은 순서를 지킵니다.</p>
+          </div>
+          <a class="process__cue" id="processCue" href="#work" data-hover><span class="latin">↓</span><span>이 순서가 반복된 프로젝트</span></a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────
+       02  SELECTED WORK
+       ───────────────────────────────────────────── -->
+  <section class="work" id="work" aria-labelledby="workTitle">
+    <div class="work__head">
+      <p class="eyebrow"><em class="latin">Selected work</em> 대표 프로젝트 · 2023 – 2026</p>
+      <h2 class="display" id="workTitle"><span>회사에서는 팀과 함께,</span><span class="indent">개인 프로젝트는 AI와 함께.</span></h2>
+      <p class="work__note">프로젝트마다 역할과 해결한 문제를 구분해 적었습니다. 확인되지 않은 수치는 싣지 않습니다.</p>
+    </div>
+
+    <div class="group">
+      <h3 class="group__title"><span class="latin">A</span>회사에서 · 팀과 함께</h3>
+      <ol class="rows">
+        <li class="row" data-case="arpina" data-hover tabindex="0" role="link">
+          <span class="row__no latin">01</span>
+          <div class="row__main">
+            <h4 class="row__title">아르피나</h4>
+            <p class="row__sub">회원 접수 정책과 온라인 업무 전환</p>
+            <p class="row__problem"><em class="latin">Problem</em>기존 회원과 신규 회원의 접수 요구가 달랐고, 회원 등록은 수기로 처리되고 있었다.</p>
+          </div>
+          <p class="row__role"><em class="latin">Role</em>서비스기획 · 프로젝트 리드</p>
+          <p class="row__meta"><span>핸디</span><span>2024.10 – 2025.01</span></p>
+        </li>
+        <li class="row" data-case="donga" data-hover tabindex="0" role="link">
+          <span class="row__no latin">02</span>
+          <div class="row__main">
+            <h4 class="row__title">동아대학교</h4>
+            <p class="row__sub">약 200개 사이트의 작업·검수 관리</p>
+            <p class="row__problem"><em class="latin">Problem</em>누가 어디까지 했는지 보이지 않아 검수를 시작할 기준이 흐려졌다.</p>
+          </div>
+          <p class="row__role"><em class="latin">Role</em>내부 PL · 서비스기획 · 검수</p>
+          <p class="row__meta"><span>아리모아</span><span>2023.05 – 2023.11</span></p>
+        </li>
+        <li class="row" data-case="cms" data-hover tabindex="0" role="link">
+          <span class="row__no latin">03</span>
+          <div class="row__main">
+            <h4 class="row__title">핸디 통합 CMS</h4>
+            <p class="row__sub">공통 기능과 고객별 요구 구분</p>
+            <p class="row__problem"><em class="latin">Problem</em>고객마다 요구가 달라, 반복되는 기능까지 매번 처음부터 정의하고 있었다.</p>
+          </div>
+          <p class="row__role"><em class="latin">Role</em>서비스기획 · 관리자 IA · 검수</p>
+          <p class="row__meta"><span>핸디</span><span>2024.08 – 2025.05</span></p>
+        </li>
+        <li class="row" data-case="sangji" data-hover tabindex="0" role="link">
+          <span class="row__no latin">04</span>
+          <div class="row__main">
+            <h4 class="row__title">상지건축</h4>
+            <p class="row__sub">임직원 프로필의 활용 목적을 기능으로</p>
+            <p class="row__problem"><em class="latin">Problem</em>"프로필 관리" 요청만으로는 어떤 기능이 필요한지 정해지지 않았다.</p>
+          </div>
+          <p class="row__role"><em class="latin">Role</em>PM / PL</p>
+          <p class="row__meta"><span>아리모아</span><span>2023.04 – 2023.09</span></p>
+        </li>
+      </ol>
+    </div>
+
+    <div class="group">
+      <h3 class="group__title"><span class="latin">B</span>개인 프로젝트 · AI와 함께 <span class="group__since">2025.08 —</span></h3>
+      <ol class="rows" start="5">
+        <li class="row" data-case="eum" data-hover tabindex="0" role="link">
+          <span class="row__no latin">05</span>
+          <div class="row__main">
+            <h4 class="row__title">이음</h4>
+            <p class="row__sub">시간·위치 기반 저장·리마인드 앱</p>
+            <p class="row__problem"><em class="latin">Question</em>저장해 둔 것을 필요한 시간과 장소에 다시 떠올리게 하려면, 흐름을 어디까지 줄여야 하는가.</p>
+          </div>
+          <p class="row__role"><em class="latin">Role</em>기획 · 구현 · 검증 (Flutter)</p>
+          <p class="row__meta"><span>개인</span><span>MVP 구현 · 출시 준비</span></p>
+        </li>
+        <li class="row" data-case="flowon" data-hover tabindex="0" role="link">
+          <span class="row__no latin">06</span>
+          <div class="row__main">
+            <h4 class="row__title">FLOWON</h4>
+            <p class="row__sub">고객별 웹서비스와 운영 구조</p>
+            <p class="row__problem"><em class="latin">Question</em>고객마다 다른 웹서비스를 한 사람이 같은 운영 구조로 제공할 수 있는가.</p>
+          </div>
+          <p class="row__role"><em class="latin">Role</em>기획 · 설계 · 구현</p>
+          <p class="row__meta"><span>개인</span><span>설계·구축 진행 중</span></p>
+        </li>
+        <li class="row" data-case="insight" data-hover tabindex="0" role="link">
+          <span class="row__no latin">07</span>
+          <div class="row__main">
+            <h4 class="row__title">AI Insight OS</h4>
+            <p class="row__sub">정보 수집 · 근거 · 승인 · 재사용 흐름</p>
+            <p class="row__problem"><em class="latin">Question</em>AI가 모은 정보를 근거와 승인 없이 쓰지 않으려면, 어떤 흐름이 필요한가.</p>
+          </div>
+          <p class="row__role"><em class="latin">Role</em>기획 · 구현 · 검증</p>
+          <p class="row__meta"><span>개인</span><span>비공개 빌드</span></p>
+        </li>
+      </ol>
+      <p class="group__more">그 외 저장소에서 확인 가능한 실험: 부기온 · 마운틴온 · 북잇다 · 모의톡 · AI 업무자동화 — 전부 출시된 것은 아닙니다.</p>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────
+       03  ABOUT
+       ───────────────────────────────────────────── -->
+  <section class="about" id="about" aria-labelledby="aboutTitle">
+    <div class="about__grid">
+      <figure class="about__photo" id="aboutPhoto">
+        <img src="assets/profile.jpg" alt="양순민 프로필 사진" width="800" height="1000" loading="lazy">
+        <figcaption class="latin">Yang Soonmin, Busan</figcaption>
+      </figure>
+      <div class="about__text">
+        <p class="eyebrow"><em class="latin">About</em> 사람</p>
+        <h2 class="display" id="aboutTitle"><span>12년은 매장에서,</span><span class="indent">2년 9개월은 서비스기획에서.</span></h2>
+        <p class="about__body">12년 동안 매장을 운영하며 고객과 직원, 제한된 시간 안의 우선순위를 다뤘습니다. 사용자와 운영자의 관점을 동시에 갖게 된 배경입니다. 이후 아리모아와 핸디에서 서비스기획·PM/PL로 일했고, 지금은 개인 프로젝트를 AI와 함께 직접 구현하고 검증합니다.</p>
+        <ol class="timeline">
+          <li><span class="timeline__year latin">2009 – 2021</span><div><strong>매장 운영</strong><span>약 12년 · 고객 응대 · 직원 관리 · 현장 우선순위</span></div></li>
+          <li><span class="timeline__year latin">2022.12 – 2024.07</span><div><strong>아리모아 · 서비스기획 · PM/PL</strong><span>대학·기업 홈페이지 구축 — 요구사항 · IA · 화면설계 · 검수 · 오픈</span></div></li>
+          <li><span class="timeline__year latin">2024.08 – 2025.08</span><div><strong>핸디 · 개발1팀 이사 · 팀장</strong><span>실무 역할은 서비스기획 · 프로젝트 리드 — CMS · 온라인 접수 시스템</span></div></li>
+          <li><span class="timeline__year latin">2025.08 —</span><div><strong>개인 프로젝트 · AI와 구현·검증</strong><span>앱 · 웹 · 업무자동화 — 기획부터 구현·검증까지 직접</span></div></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────
+       04  CONTACT
+       ───────────────────────────────────────────── -->
+  <section class="contact" id="contact" aria-labelledby="contactTitle">
+    <p class="eyebrow"><em class="latin">Contact</em> 연락</p>
+    <h2 class="display contact__title" id="contactTitle">정리할 요구가 있다면,<br>이야기해요.</h2>
+    <a class="contact__mail latin" href="mailto:swatsoonmin@gmail.com" data-hover>swatsoonmin@gmail.com</a>
+    <div class="contact__aside">
+      <img src="assets/kakao-qr.png" alt="카카오톡 오픈채팅 QR" width="237" height="243" loading="lazy">
+      <p><em class="latin">Kakao open chat</em>QR을 찍으면 오픈채팅으로 연결됩니다.</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>© 2026 Yang Soonmin</p>
+    <p>비교용 시안 · Claude Code 제안 — 확인되지 않은 수치·후기·로고는 싣지 않았습니다.</p>
+  </footer>
+</main>
+
+<!-- 커서를 따라오는 프로젝트 프리뷰 (데스크톱) -->
+<div class="preview" id="preview" aria-hidden="true">
+  <div class="preview__card">
+    <div class="preview__fig" id="previewFig"></div>
+    <p class="preview__cap" id="previewCap"></p>
+  </div>
+</div>
+
+<!-- 상세 사례 오버레이 (목록 → 상세 → 목록) -->
+<div class="case" id="case" hidden aria-modal="true" role="dialog" aria-labelledby="caseTitle">
+  <div class="case__inner" id="caseInner"></div>
+</div>
+
+<!-- ── 아르피나 상세 (공통 비교 사례) ── -->
+<template id="tpl-arpina">
+  <header class="case__head">
+    <button class="case__back" type="button" data-close data-hover><span class="case__back-arrow">←</span> 목록으로</button>
+    <p class="eyebrow"><em class="latin">Case 01</em> 아르피나 · 핸디 · 2024.10 – 2025.01</p>
+    <h1 class="case__title" id="caseTitle"><span class="light">새벽 줄서기를,</span><span>온라인 접수 정책으로.</span></h1>
+    <dl class="case__meta">
+      <div><dt>소속 · 역할</dt><dd>핸디 · 서비스기획 · 프로젝트 리드</dd></div>
+      <div><dt>범위</dt><dd>회원가입 · 강습 신청 · 결제 · 취소·환불 · 관리자 업무</dd></div>
+      <div><dt>한 줄 요약</dt><dd>충돌하는 접수 요구를 운영 가능한 정책으로 정리하고, QA와 오픈까지 연결</dd></div>
+    </dl>
+  </header>
+
+  <section class="case__sec">
+    <aside class="case__label"><span class="latin">01</span>문제</aside>
+    <div class="case__content">
+      <h2>두 개의 요구, 하나의 접수 창구.</h2>
+      <p>수영장 강습 신청은 현장 선착순으로 받고 있었다. 이 업무를 회원가입부터 신청·결제·취소·환불, 관리자 처리까지 온라인으로 옮기는 프로젝트였다. 그런데 접수 창구는 하나인데, 받아야 할 요구는 둘이었다.</p>
+      <div class="voices" aria-label="요구 정리 (재구성)">
+        <blockquote class="voice"><span class="voice__who">기존 회원</span><p>계속 다니던 사람이 먼저 신청할 수 있어야 한다.</p></blockquote>
+        <blockquote class="voice"><span class="voice__who">신규 회원</span><p>누구나 공평하게 신청할 수 있어야 한다.</p></blockquote>
+        <blockquote class="voice voice--ops"><span class="voice__who">운영자</span><p>회원 등록과 접수 관리를 아직 수기로 하고 있다.</p></blockquote>
+      </div>
+      <p class="fig-note">요구를 정리한 문장은 설명용으로 재구성한 것입니다.</p>
+    </div>
+  </section>
+
+  <section class="case__sec">
+    <aside class="case__label"><span class="latin">02</span>정책 선택</aside>
+    <div class="case__content">
+      <h2>순서를 나눴다. 기존 회원은 먼저, 신규 회원은 선착순으로.</h2>
+      <p>한 창구에서 두 요구를 동시에 받을 수는 없었다. 대신 <strong>시간을 나눴다.</strong> 기존 회원은 관리자가 사전등록한 뒤 우선신청 기간에 신청하고, 그 기간이 끝나면 신규 회원이 선착순으로 신청한다. 결제·취소·환불과 관리자 확인은 두 흐름이 합쳐진 뒤 공통으로 처리한다.</p>
+
+      <figure class="diagram">
+        <svg viewBox="0 0 960 300" class="diagram__svg" role="img" aria-label="접수 정책 흐름도: 기존 회원은 관리자 사전등록 후 우선신청, 신규 회원은 이후 선착순 신청, 이후 결제·취소·환불·관리자 확인 공통">
+          <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+          <g class="dg-muted" font-size="13">
+            <text x="40" y="34">기존 회원</text>
+            <text x="40" y="232">신규 회원</text>
+            <text x="640" y="34">공통</text>
+          </g>
+          <!-- 우선신청 기간 밴드 -->
+          <rect x="300" y="52" width="230" height="196" class="dg-band"/>
+          <text x="415" y="284" text-anchor="middle" class="dg-muted" font-size="12">우선신청 기간 · 종료 후 선착순 시작</text>
+          <!-- 기존 회원 트랙 -->
+          <g class="dg-node">
+            <rect x="40" y="70" width="180" height="56" rx="2"/><text x="130" y="103" text-anchor="middle">관리자 사전등록</text>
+            <rect x="320" y="70" width="190" height="56" rx="2" class="dg-node--accent"/><text x="415" y="103" text-anchor="middle">우선신청</text>
+          </g>
+          <!-- 신규 회원 트랙 -->
+          <g class="dg-node">
+            <rect x="40" y="176" width="180" height="56" rx="2"/><text x="130" y="209" text-anchor="middle">온라인 회원가입</text>
+            <rect x="560" y="176" width="150" height="56" rx="2" class="dg-node--accent"/><text x="635" y="209" text-anchor="middle">선착순 신청</text>
+          </g>
+          <!-- 공통 -->
+          <g class="dg-node">
+            <rect x="740" y="70" width="90" height="56" rx="2"/><text x="785" y="103" text-anchor="middle">결제</text>
+            <rect x="740" y="176" width="90" height="56" rx="2"/><text x="785" y="209" text-anchor="middle">취소·환불</text>
+            <rect x="860" y="123" width="80" height="56" rx="2"/><text x="900" y="146" text-anchor="middle">관리자<tspan x="900" dy="18">확인</tspan></text>
+          </g>
+          <!-- 화살표 -->
+          <g class="dg-edge" marker-end="url(#arr)">
+            <path d="M220 98 H320"/>
+            <path d="M510 98 H740"/>
+            <path d="M220 204 H560"/>
+            <path d="M710 204 H740"/>
+            <path d="M830 98 C845 98 850 123 860 140"/>
+            <path d="M830 204 C845 204 850 179 860 165"/>
+          </g>
+          <g class="dg-muted" font-size="12"><text x="415" y="152" text-anchor="middle">기존 회원만 신청 가능</text></g>
+        </svg>
+        <figcaption>접수 정책 흐름 — 확인된 정책을 바탕으로 만든 설명용 도식이며, 당시 원본 산출물이 아닙니다.</figcaption>
+      </figure>
+
+      <div class="table-wrap">
+        <table class="policy">
+          <caption>접수 정책 정리 (설명용 재구성)</caption>
+          <thead><tr><th>구분</th><th>기존 회원</th><th>신규 회원</th></tr></thead>
+          <tbody>
+            <tr><th>회원 등록</th><td>관리자 사전등록</td><td>온라인 회원가입</td></tr>
+            <tr><th>신청 시점</th><td class="policy__accent">우선신청 기간</td><td>우선신청 종료 후 선착순</td></tr>
+            <tr><th>결제 · 취소 · 환불</th><td colspan="2">온라인 공통 처리</td></tr>
+            <tr><th>관리자</th><td>사전등록 · 접수 확인</td><td>접수 확인</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="case__sec">
+    <aside class="case__label"><span class="latin">03</span>오픈 전</aside>
+    <div class="case__content">
+      <h2>관리자 기능이 늦어졌을 때, 기준은 전체 흐름이었다.</h2>
+      <p>오픈 전 관리자 기능 개발이 늦어졌다. 남은 기능과 오류를 하나씩 보는 대신, <strong>사용자 신청부터 관리자 처리까지 전체 업무 흐름</strong>을 기준으로 놓고 무엇이 없으면 흐름이 끊기는지 따져 우선순위를 조율했다. 그 기준으로 반복 검수했다.</p>
+      <figure class="diagram">
+        <svg viewBox="0 0 960 250" class="diagram__svg" role="img" aria-label="오픈 전 우선순위: 사용자 흐름과 관리자 흐름을 한 줄로 놓고 흐름이 끊기는 지점을 먼저 처리">
+          <g class="dg-muted" font-size="13"><text x="40" y="34">사용자</text><text x="40" y="164">관리자</text></g>
+          <g class="dg-node">
+            <rect x="40" y="52" width="150" height="52" rx="2"/><text x="115" y="83" text-anchor="middle">회원가입</text>
+            <rect x="240" y="52" width="150" height="52" rx="2"/><text x="315" y="83" text-anchor="middle">강습 신청</text>
+            <rect x="440" y="52" width="150" height="52" rx="2"/><text x="515" y="83" text-anchor="middle">결제</text>
+            <rect x="640" y="52" width="150" height="52" rx="2"/><text x="715" y="83" text-anchor="middle">취소·환불 요청</text>
+          </g>
+          <g class="dg-node">
+            <rect x="140" y="182" width="150" height="52" rx="2" class="dg-node--accent"/><text x="215" y="213" text-anchor="middle">사전등록</text>
+            <rect x="340" y="182" width="150" height="52" rx="2" class="dg-node--accent"/><text x="415" y="213" text-anchor="middle">접수 확인</text>
+            <rect x="640" y="182" width="150" height="52" rx="2" class="dg-node--accent"/><text x="715" y="213" text-anchor="middle">환불 처리</text>
+          </g>
+          <g class="dg-edge" marker-end="url(#arr)">
+            <path d="M190 78 H240"/><path d="M390 78 H440"/><path d="M590 78 H640"/>
+            <path d="M215 182 V130 C215 118 230 110 240 104"/>
+            <path d="M415 182 V130 C415 118 430 110 440 104"/>
+            <path d="M715 104 V182"/>
+          </g>
+          <g class="dg-muted" font-size="12">
+            <text x="860" y="78">→ 흐름이 끊기는 곳부터</text>
+            <text x="860" y="213">→ 반복 검수</text>
+          </g>
+        </svg>
+        <figcaption>우선순위 기준 — 사용자 흐름과 관리자 흐름을 한 줄로 놓고, 연결이 끊기는 기능·오류를 먼저 처리했습니다. 설명용 도식.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="case__sec">
+    <aside class="case__label"><span class="latin">04</span>결과</aside>
+    <div class="case__content">
+      <h2>정책은 실제 오픈 서비스에 반영됐다.</h2>
+      <p>사전등록·우선신청·선착순으로 나눈 접수 정책은 실제 오픈한 서비스에 그대로 반영됐다. 운영 담당자로부터 수기로 처리하던 회원 등록 등의 업무가 편해졌다는 확인을 받았다.</p>
+      <p class="case__honest"><em class="latin">Note</em>민원 감소율, 시간 절감률, 사용자 수 같은 수치는 확인된 것이 없어 싣지 않았습니다. 확인된 사실만 씁니다.</p>
+      <ul class="takeaways">
+        <li><strong>요구 충돌 → 운영 가능한 정책</strong><span>동시에 받을 수 없는 요구는 시간을 나누는 정책으로 정리했다.</span></li>
+        <li><strong>정책 → QA → 오픈</strong><span>전체 흐름을 기준으로 남은 기능과 오류의 우선순위를 조율하고 반복 검수했다.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer class="case__foot">
+    <button class="case__back" type="button" data-close data-hover><span class="case__back-arrow">←</span> 목록으로</button>
+    <a class="case__next" href="#/work/donga" data-hover><span class="eyebrow"><em class="latin">Next</em> 다음 사례</span><span class="case__next-title">동아대학교 — 약 200개 사이트의 작업·검수 관리</span></a>
+  </footer>
+</template>
+
+<!-- ── 일반 상세 템플릿 (데이터는 js/app.js CASES) ── -->
+<template id="tpl-generic">
+  <header class="case__head">
+    <button class="case__back" type="button" data-close data-hover><span class="case__back-arrow">←</span> 목록으로</button>
+    <p class="eyebrow"><em class="latin" data-f="no"></em> <span data-f="org"></span></p>
+    <h1 class="case__title" id="caseTitle"><span class="light" data-f="t1"></span><span data-f="t2"></span></h1>
+    <dl class="case__meta">
+      <div><dt>소속 · 역할</dt><dd data-f="role"></dd></div>
+      <div><dt>범위</dt><dd data-f="scope"></dd></div>
+      <div><dt>한 줄 요약</dt><dd data-f="summary"></dd></div>
+    </dl>
+  </header>
+  <section class="case__sec">
+    <aside class="case__label"><span class="latin">01</span>문제</aside>
+    <div class="case__content"><h2 data-f="problemTitle"></h2><p data-f="problem"></p></div>
+  </section>
+  <section class="case__sec">
+    <aside class="case__label"><span class="latin">02</span>한 일</aside>
+    <div class="case__content">
+      <h2 data-f="didTitle"></h2>
+      <ol class="steps" data-f="did"></ol>
+      <figure class="diagram"><div class="diagram__svgwrap" data-f="diagram"></div><figcaption data-f="diagramCap"></figcaption></figure>
+    </div>
+  </section>
+  <section class="case__sec">
+    <aside class="case__label"><span class="latin">03</span>결과</aside>
+    <div class="case__content"><h2 data-f="resultTitle"></h2><p data-f="result"></p><p class="case__honest"><em class="latin">Note</em><span data-f="note"></span></p></div>
+  </section>
+  <footer class="case__foot">
+    <button class="case__back" type="button" data-close data-hover><span class="case__back-arrow">←</span> 목록으로</button>
+    <a class="case__next" data-f="nextLink" data-hover><span class="eyebrow"><em class="latin">Next</em> 다음 사례</span><span class="case__next-title" data-f="nextTitle"></span></a>
+  </footer>
+</template>
+
+<script src="js/app.js"></script>
+</body>
+</html>

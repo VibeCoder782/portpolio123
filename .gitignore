@@ -11,3 +11,11 @@ docs/이력서_*.md
 
 # context-governor 로컬 세션 상태 (기기별 상태 — 커밋 금지)
 **/.claude/context-governor/
+.gstack/
+
+# V2 캡처 원본(가리기 전) — 공개 금지
+portpolio_v2/hero-compare/shared/_raw/
+
+# V2 배포 묶음(재생성 가능) · 판정 기록용 캡처 — 용량 커서 제외
+portpolio_v2/releases/
+portpolio_v2/hero-compare/stills/
