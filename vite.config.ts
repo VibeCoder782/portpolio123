@@ -65,7 +65,7 @@ export default defineConfig(({ mode }) => {
                         Authorization: `Bearer ${apiKey}`,
                       },
                       body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
+                        model: env.CHAT_MODEL || "openai/gpt-oss-120b",   // Groq이 llama-3.3-70b-versatile을 폐기 → 환경변수로도 교체 가능하게
                         messages: groqMessages,
                         max_tokens,
                       }),
